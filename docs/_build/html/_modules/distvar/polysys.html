@@ -1,0 +1,887 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>distvar.polysys &mdash; distvar v1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5cb08e4e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            distvar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">distvar</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">distvar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">distvar.polysys</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for distvar.polysys</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39; This module implements various polynomial systems used in polynomial chaos expansions.</span>
+
+<span class="sd">    Classes</span>
+<span class="sd">    -------</span>
+<span class="sd">    PolynomialSystem</span>
+<span class="sd">        Abstract base class for polynomial systems.</span>
+
+<span class="sd">    NormalizedPolynomials</span>
+<span class="sd">        Wrapper class for normalized polynomial systems.</span>
+<span class="sd">        </span>
+<span class="sd">    LegendrePolynomials</span>
+<span class="sd">        Implementation of Legendre polynomial system.</span>
+<span class="sd">        </span>
+<span class="sd">    HermitePolynomials</span>
+<span class="sd">        Implementation of Hermite polynomial system.</span>
+<span class="sd">        </span>
+<span class="sd">    JacobiPolynomials</span>
+<span class="sd">        Implementation of Jacobi polynomial system.</span>
+<span class="sd">        </span>
+<span class="sd">    ChebyshevTPolynomials</span>
+<span class="sd">        Implementation of Chebyshev polynomials of the first kind.</span>
+<span class="sd">        </span>
+<span class="sd">    ChebyshevUPolynomials</span>
+<span class="sd">        Implementation of Chebyshev polynomials of the second kind.</span>
+<span class="sd">        </span>
+<span class="sd">    LaguerrePolynomials</span>
+<span class="sd">        Implementation of Laguerre polynomial system.</span>
+<span class="sd">                </span>
+<span class="sd">    Functions</span>
+<span class="sd">    ---------</span>
+<span class="sd">    syschar_to_polysys(syschar)</span>
+<span class="sd">        Convert a system characteristic string to the corresponding polynomial system.&#39;&#39;&#39;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<div class="viewcode-block" id="PolynomialSystem">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.PolynomialSystem">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolynomialSystem</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39; Abstract base class for polynomial systems.</span>
+<span class="sd">    </span>
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        evaluate(deg, xi)</span>
+<span class="sd">            Evaluate the polynomial system up to degree deg at points xi.</span>
+
+<span class="sd">        sqnorm(n)</span>
+<span class="sd">            Return the squared norm of the polynomials of degree n.</span>
+
+<span class="sd">        sqnorm_by_rc(rc)</span>
+<span class="sd">            Return the squared norm using recurrence coefficients rc.</span>
+
+<span class="sd">        normalized()</span>
+<span class="sd">            Return the normalized version of the polynomial system.&#39;&#39;&#39;</span>
+    
+<div class="viewcode-block" id="PolynomialSystem.evaluate">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.PolynomialSystem.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">xi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Evaluate polynomial system up to degree `deg` at points `xi`.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            deg: int</span>
+<span class="sd">                Highest polynomial degree to evaluate.</span>
+<span class="sd">            xi: array_like</span>
+<span class="sd">                Points at which the polynomials are evaluated.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            y_alpha_j: numpy.ndarray</span>
+<span class="sd">                Matrix of shape (len(xi), deg+1) containing evaluated polynomials.&#39;&#39;&#39;</span>
+
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">k</span><span class="p">,</span> <span class="n">deg</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">p</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">p</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">deg</span><span class="p">):</span>
+           <span class="n">p</span><span class="p">[:,</span> <span class="n">d</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">d</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xi</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">d</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">p</span><span class="p">[:,</span> <span class="n">d</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="n">d</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span><span class="p">[:,</span><span class="n">d</span><span class="p">]</span>
+        <span class="n">y_alpha_j</span> <span class="o">=</span> <span class="n">p</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">y_alpha_j</span></div>
+
+
+<div class="viewcode-block" id="PolynomialSystem.sqnorm">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.PolynomialSystem.sqnorm">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the squared norm of the polynomials of degree `n`.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            n : array_like</span>
+<span class="sd">                Degrees for which the squared norms are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            nrm2 : numpy.ndarray</span>
+<span class="sd">                Array of squared norms corresponding to degrees in `n`.&quot;&quot;&quot;</span>
+        
+        <span class="n">deg</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sqnorm_by_rc</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nrm2</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="PolynomialSystem.sqnorm_by_rc">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.PolynomialSystem.sqnorm_by_rc">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm_by_rc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the squared norm using recurrence coefficients `rc`.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            rc : array_like</span>
+<span class="sd">                Recurrence coefficients of shape (deg, 3).</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            nrm2 : numpy.ndarray</span>
+<span class="sd">                Array of squared norms for polynomials up to degree `deg`.&quot;&quot;&quot;</span>
+        
+        <span class="n">b</span> <span class="o">=</span> <span class="n">rc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">rc</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">1</span><span class="p">]),</span>  <span class="n">h</span><span class="o">.</span><span class="n">flatten</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cumprod</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="PolynomialSystem.normalized">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.PolynomialSystem.normalized">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Return normalized version of this polynomial system.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        polysys: NormalizedPolynomials</span>
+<span class="sd">            Wrapped normalized polynomial system.&#39;&#39;&#39;</span>
+
+        <span class="n">polysys</span> <span class="o">=</span> <span class="n">NormalizedPolynomials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<div class="viewcode-block" id="PolynomialSystem.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.PolynomialSystem.weighting_dist">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the weighting distribution of the polynomial system.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="PolynomialSystem.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.PolynomialSystem.recur_coeff">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the recurrence coefficients of the polynomial system.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+</div>
+
+
+<div class="viewcode-block" id="NormalizedPolynomials">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.NormalizedPolynomials">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NormalizedPolynomials</span><span class="p">(</span><span class="n">PolynomialSystem</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper class for normalized polynomial systems.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        base_polysys : PolynomialSystem</span>
+<span class="sd">            The base polynomial system to be normalized.</span>
+
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        __init__(base_polysys)</span>
+<span class="sd">            Initialize the normalized polynomial system with a base polynomial system.</span>
+
+<span class="sd">        recur_coeff(deg)</span>
+<span class="sd">            Return the recurrence coefficients for the normalized polynomial system.</span>
+
+<span class="sd">        weighting_dist()</span>
+<span class="sd">            Return the weighting distribution of the base polynomial system.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="NormalizedPolynomials.__init__">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.NormalizedPolynomials.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_polysys</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize the normalized polynomial system with a base polynomial system.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            base_polysys : PolynomialSystem</span>
+<span class="sd">                The base polynomial system to be normalized.&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_polysys</span> <span class="o">=</span> <span class="n">base_polysys</span></div>
+
+
+<div class="viewcode-block" id="NormalizedPolynomials.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.NormalizedPolynomials.recur_coeff">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            deg : int</span>
+<span class="sd">                Degree up to which recurrence coefficients are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            r : numpy.ndarray</span>
+<span class="sd">                Recurrence coefficients for the normalized polynomial system.&quot;&quot;&quot;</span>
+        
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_polysys</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">deg</span><span class="p">))</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_polysys</span><span class="o">.</span><span class="n">sqnorm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">deg</span><span class="o">+</span><span class="mi">1</span><span class="p">)))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">z</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">z</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="n">r</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">z</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">z</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="n">r</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">z</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">/</span> <span class="n">z</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]])</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="NormalizedPolynomials.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.NormalizedPolynomials.weighting_dist">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the weighting distribution of the base polynomial system.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            dist : Distribution</span>
+<span class="sd">                Weighting distribution of the base polynomial system.&quot;&quot;&quot;</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_polysys</span><span class="o">.</span><span class="n">weighting_dist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+</div>
+
+
+<div class="viewcode-block" id="LegendrePolynomials">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LegendrePolynomials">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LegendrePolynomials</span><span class="p">(</span><span class="n">PolynomialSystem</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Implementation of Legendre polynomial system.</span>
+
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        normalized()</span>
+<span class="sd">            Return normalized version of Legendre polynomial system.</span>
+<span class="sd">            </span>
+<span class="sd">        recur_coeff(deg)</span>
+<span class="sd">            Return the recurrence coefficients for Legendre polynomials.</span>
+<span class="sd">            </span>
+<span class="sd">        sqnorm(n)</span>
+<span class="sd">            Return the squared norm of Legendre polynomials of degree `n`.</span>
+<span class="sd">            </span>
+<span class="sd">        weighting_dist()</span>
+<span class="sd">            Return the weighting distribution for Legendre polynomials.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LegendrePolynomials.normalized">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LegendrePolynomials.normalized">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return normalized version of Legendre polynomial system.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys: NormalizedPolynomials</span>
+<span class="sd">                Wrapped normalized Legendre polynomial system.&quot;&quot;&quot;</span>
+        
+        <span class="n">polysys</span> <span class="o">=</span> <span class="n">NormalizedPolynomials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<div class="viewcode-block" id="LegendrePolynomials.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LegendrePolynomials.recur_coeff">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the recurrence coefficients for Legendre polynomials.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            deg : int</span>
+<span class="sd">                Degree up to which recurrence coefficients are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            r : numpy.ndarray</span>
+<span class="sd">                Recurrence coefficients for Legendre polynomials.&quot;&quot;&quot;</span>
+        
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">deg</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">zer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">zer</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="LegendrePolynomials.sqnorm">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LegendrePolynomials.sqnorm">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the squared norm of Legendre polynomials of degree `n`.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            n : array_like</span>
+<span class="sd">                Degrees for which the squared norms are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            nrm2 : numpy.ndarray</span>
+<span class="sd">                Array of squared norms corresponding to degrees in `n`.&quot;&quot;&quot;</span>
+            
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="LegendrePolynomials.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LegendrePolynomials.weighting_dist">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the weighting distribution for Legendre polynomials.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            dist : UniformDistribution</span>
+<span class="sd">                Weighting distribution for Legendre polynomials.&quot;&quot;&quot;</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">UniformDistribution</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+</div>
+
+
+<div class="viewcode-block" id="HermitePolynomials">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.HermitePolynomials">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HermitePolynomials</span><span class="p">(</span><span class="n">PolynomialSystem</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Implementation of Hermite polynomial system.</span>
+
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        normalized()</span>
+<span class="sd">            Return normalized version of Hermite polynomial system.</span>
+
+<span class="sd">        recur_coeff(deg)</span>
+<span class="sd">            Return the recurrence coefficients for Hermite polynomials.</span>
+
+<span class="sd">        sqnorm(n)</span>
+<span class="sd">            Return the squared norm of Hermite polynomials of degree `n`.</span>
+
+<span class="sd">        weighting_dist()</span>
+<span class="sd">            Return the weighting distribution for Hermite polynomials.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="HermitePolynomials.normalized">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.HermitePolynomials.normalized">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return normalized version of Hermite polynomial system.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys: NormalizedPolynomials</span>
+<span class="sd">                Wrapped normalized Hermite polynomial system.&quot;&quot;&quot;</span>
+
+        <span class="n">polysys</span> <span class="o">=</span> <span class="n">NormalizedPolynomials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<div class="viewcode-block" id="HermitePolynomials.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.HermitePolynomials.recur_coeff">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the recurrence coefficients for Hermite polynomials.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            deg :  int</span>
+<span class="sd">                Degree up to which recurrence coefficients are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            r : numpy.ndarray</span>
+<span class="sd">                Recurrence coefficients for Hermite polynomials.&quot;&quot;&quot;</span>
+        
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+        <span class="n">one</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">zero</span><span class="p">,</span> <span class="n">one</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="HermitePolynomials.sqnorm">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.HermitePolynomials.sqnorm">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the squared norm of Hermite polynomials of degree `n`.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            n : array_like</span>
+<span class="sd">                Degrees for which the squared norms are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            nrm2 : numpy.ndarray</span>
+<span class="sd">                Array of squared norms corresponding to degrees in `n`.&quot;&quot;&quot;</span>
+        
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="HermitePolynomials.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.HermitePolynomials.weighting_dist">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the weighting distribution for Hermite polynomials.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            dist : NormalDistribution</span>
+<span class="sd">                Weighting distribution for Hermite polynomials.&quot;&quot;&quot;</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">NormalDistribution</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+</div>
+
+    
+<div class="viewcode-block" id="JacobiPolynomials">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.JacobiPolynomials">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JacobiPolynomials</span><span class="p">(</span><span class="n">PolynomialSystem</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Implementation of Jacobi polynomial system.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        alpha : float</span>
+<span class="sd">            First parameter of Jacobi polynomials.</span>
+
+<span class="sd">        beta : float</span>
+<span class="sd">            Second parameter of Jacobi polynomials.</span>
+
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        __init__(alpha, beta)</span>
+<span class="sd">            Initialize Jacobi polynomial system with parameters alpha and beta.</span>
+
+<span class="sd">        normalized()</span>
+<span class="sd">            Return normalized version of Jacobi polynomial system.</span>
+
+<span class="sd">        recur_coeff(deg)</span>
+<span class="sd">            Return the recurrence coefficients for Jacobi polynomials.</span>
+
+<span class="sd">        sqnorm(n)</span>
+<span class="sd">            Return the squared norm of Jacobi polynomials of degree `n`.</span>
+
+<span class="sd">        weighting_dist()</span>
+<span class="sd">            Return the weighting distribution for Jacobi polynomials.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="JacobiPolynomials.__init__">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.JacobiPolynomials.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        alpha : float</span>
+<span class="sd">            First parameter of Jacobi polynomials.</span>
+
+<span class="sd">        beta : float</span>
+<span class="sd">            Second parameter of Jacobi polynomials.&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span></div>
+
+        
+<div class="viewcode-block" id="JacobiPolynomials.normalized">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.JacobiPolynomials.normalized">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return normalized version of Jacobi polynomial system.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys: NormalizedPolynomials</span>
+<span class="sd">                Wrapped normalized Jacobi polynomial system.&quot;&quot;&quot;</span>
+
+        <span class="n">polysys</span> <span class="o">=</span> <span class="n">NormalizedPolynomials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<div class="viewcode-block" id="JacobiPolynomials.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.JacobiPolynomials.recur_coeff">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the recurrence coefficients for Jacobi polynomials.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            deg : int</span>
+<span class="sd">                Degree up to which recurrence coefficients are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            r : numpy.ndarray</span>
+<span class="sd">                Recurrence coefficients for Jacobi polynomials.&quot;&quot;&quot;</span>
+        
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">deg</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span>
+        
+        <span class="n">b_n</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">a_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">a</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">c_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span> <span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">==</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">b_n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">a_n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">c_n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">a_n</span><span class="p">,</span> <span class="n">b_n</span><span class="p">,</span> <span class="n">c_n</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="JacobiPolynomials.sqnorm">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.JacobiPolynomials.sqnorm">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the squared norm of Jacobi polynomials of degree `n`.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            n : array_like</span>
+<span class="sd">                Degrees for which the squared norms are computed.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            nrm2 : numpy.ndarray</span>
+<span class="sd">                Array of squared norms corresponding to degrees in `n`.&quot;&quot;&quot;</span>
+        
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="n">PolynomialSystem</span><span class="o">.</span><span class="n">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="JacobiPolynomials.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.JacobiPolynomials.weighting_dist">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the weighting distribution for Jacobi polynomials.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            dist : BetaDistribution</span>
+<span class="sd">                Weighting distribution for Jacobi polynomials.&quot;&quot;&quot;</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">BetaDistribution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+</div>
+
+
+<div class="viewcode-block" id="ChebyshevTPolynomials">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevTPolynomials">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChebyshevTPolynomials</span><span class="p">(</span><span class="n">PolynomialSystem</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Implementation of Chebyshev polynomials of the first kind.</span>
+
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        normalized()</span>
+<span class="sd">            Return normalized version of first kind Chebyshev polynomial system.</span>
+
+<span class="sd">        recur_coeff(deg)</span>
+<span class="sd">            Return the recurrence coefficients for first kind Chebyshev polynomials.</span>
+
+<span class="sd">        sqnorm(n)</span>
+<span class="sd">            Return the squared norm of first kind Chebyshev polynomials of degree `n`.</span>
+<span class="sd">        </span>
+<span class="sd">        weighting_dist()</span>
+<span class="sd">            Return the weighting distribution for first kind Chebyshev polynomials.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="ChebyshevTPolynomials.normalized">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevTPolynomials.normalized">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return normalized version of the first kind Chebyshev polynomial system.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys: NormalizedPolynomials</span>
+<span class="sd">                Wrapped normalized first kind Chebyshev polynomial system.&quot;&quot;&quot;</span>
+
+        <span class="n">polysys</span> <span class="o">=</span> <span class="n">NormalizedPolynomials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<div class="viewcode-block" id="ChebyshevTPolynomials.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevTPolynomials.recur_coeff">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">deg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">first_row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">deg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">first_row</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+                <span class="n">one</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">two</span> <span class="o">=</span> <span class="n">one</span><span class="o">*</span><span class="mi">2</span>
+                <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">zero</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">one</span><span class="p">))</span>
+                <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_row</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ChebyshevTPolynomials.sqnorm">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevTPolynomials.sqnorm">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="n">PolynomialSystem</span><span class="o">.</span><span class="n">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="ChebyshevTPolynomials.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevTPolynomials.weighting_dist">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">():</span>
+
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">WignerSemicircleDistribution</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+</div>
+
+
+<div class="viewcode-block" id="ChebyshevUPolynomials">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevUPolynomials">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChebyshevUPolynomials</span><span class="p">(</span><span class="n">PolynomialSystem</span><span class="p">):</span>
+<div class="viewcode-block" id="ChebyshevUPolynomials.normalized">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevUPolynomials.normalized">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return normalized version of second kind Chebyshev polynomial system.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys: NormalizedPolynomials</span>
+<span class="sd">                Wrapped normalized second kind Chebyshev polynomial system.&quot;&quot;&quot;</span>
+        
+        <span class="n">polysys</span> <span class="o">=</span> <span class="n">NormalizedPolynomials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<div class="viewcode-block" id="ChebyshevUPolynomials.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevUPolynomials.recur_coeff">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">deg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">first_row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">deg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">first_row</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+                <span class="n">one</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">two</span> <span class="o">=</span> <span class="n">one</span><span class="o">*</span><span class="mi">2</span>
+                <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">zero</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">one</span><span class="p">))</span>
+                <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_row</span>
+
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="ChebyshevUPolynomials.sqnorm">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevUPolynomials.sqnorm">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="n">PolynomialSystem</span><span class="o">.</span><span class="n">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="ChebyshevUPolynomials.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.ChebyshevUPolynomials.weighting_dist">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">():</span>
+
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">WignerSemicircleDistribution</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+</div>
+
+
+<div class="viewcode-block" id="LaguerrePolynomials">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LaguerrePolynomials">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LaguerrePolynomials</span><span class="p">(</span><span class="n">PolynomialSystem</span><span class="p">):</span>
+<div class="viewcode-block" id="LaguerrePolynomials.normalized">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LaguerrePolynomials.normalized">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return normalized version of Laguerre polynomial system.</span>
+<span class="sd">        </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys: NormalizedPolynomials</span>
+<span class="sd">                Wrapped normalized Laguerre polynomial system.&quot;&quot;&quot;</span>
+
+        <span class="n">polysys</span> <span class="o">=</span> <span class="n">NormalizedPolynomials</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<div class="viewcode-block" id="LaguerrePolynomials.recur_coeff">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LaguerrePolynomials.recur_coeff">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur_coeff</span><span class="p">(</span><span class="n">deg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">deg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">first_row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">deg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">first_row</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+                <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">sec_column</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">third_column</span> <span class="o">=</span> <span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">zero</span><span class="p">,</span> <span class="n">sec_column</span><span class="p">,</span> <span class="n">third_column</span><span class="p">))</span>
+                <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_row</span>
+
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="LaguerrePolynomials.sqnorm">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LaguerrePolynomials.sqnorm">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="n">PolynomialSystem</span><span class="o">.</span><span class="n">sqnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nrm2</span></div>
+
+
+<div class="viewcode-block" id="LaguerrePolynomials.weighting_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.LaguerrePolynomials.weighting_dist">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">weighting_dist</span><span class="p">():</span>
+
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">ExponentialDistribution</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+</div>
+
+
+<div class="viewcode-block" id="syschar_to_polysys">
+<a class="viewcode-back" href="../../distvar.html#distvar.polysys.syschar_to_polysys">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">syschar_to_polysys</span><span class="p">(</span><span class="n">syschar</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Convert a system characteristic string to the corresponding polynomial system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        syschar : str</span>
+<span class="sd">            Characteristic string representing the polynomial system.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        polysys : PolynomialSystem</span>
+<span class="sd">            Corresponding polynomial system.&quot;&quot;&quot;</span>
+    
+    <span class="n">poly_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="n">HermitePolynomials</span><span class="p">,</span>
+                <span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="n">HermitePolynomials</span><span class="o">.</span><span class="n">normalized</span><span class="p">(),</span>
+                <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="n">LegendrePolynomials</span><span class="p">,</span>
+                <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">normalized</span><span class="p">(),</span>
+                <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">ChebyshevTPolynomials</span><span class="p">,</span>
+                <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">ChebyshevTPolynomials</span><span class="o">.</span><span class="n">normalized</span><span class="p">(),</span>
+                <span class="s1">&#39;U&#39;</span><span class="p">:</span> <span class="n">ChebyshevUPolynomials</span><span class="p">,</span>
+                <span class="s1">&#39;u&#39;</span><span class="p">:</span> <span class="n">ChebyshevUPolynomials</span><span class="o">.</span><span class="n">normalized</span><span class="p">(),</span>
+                <span class="s1">&#39;L&#39;</span><span class="p">:</span> <span class="n">LaguerrePolynomials</span><span class="p">,</span>
+                <span class="s1">&#39;l&#39;</span><span class="p">:</span> <span class="n">LaguerrePolynomials</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
+                <span class="p">}</span>
+    
+    <span class="n">polysys</span> <span class="o">=</span> <span class="n">poly_dict</span><span class="p">[</span><span class="n">syschar</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">polysys</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
+    <span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">sqnorm</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">sqnorm</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">LegendrePolynomials</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span><span class="o">.</span><span class="n">recur_coeff</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, TRACE-Structures.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

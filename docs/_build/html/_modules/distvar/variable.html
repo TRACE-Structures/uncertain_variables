@@ -1,0 +1,439 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>distvar.variable &mdash; distvar v1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5cb08e4e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            distvar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">distvar</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">distvar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">distvar.variable</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for distvar.variable</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39; This module implements the Variable class for uncertainty quantification.&#39;&#39;&#39;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformDistribution</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.polysys</span><span class="w"> </span><span class="kn">import</span> <span class="n">syschar_to_polysys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pint</span>
+
+<div class="viewcode-block" id="Variable">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Variable</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39; Variable class for uncertanty quantification.</span>
+<span class="sd">            </span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name: str</span>
+<span class="sd">            Variable name.</span>
+
+<span class="sd">        dist : Distribution object</span>
+<span class="sd">            Variable distribution.</span>
+
+<span class="sd">        fixed_val: float</span>
+<span class="sd">            Fixed value of the variable, if applicable.</span>
+
+<span class="sd">        is_fixed: bool</span>
+<span class="sd">            Flag showing whether the variable is fixed.</span>
+
+<span class="sd">        unit: str, optional</span>
+<span class="sd">            Variable unit.</span>
+<span class="sd">            </span>
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        __init__(self, name, dist_or_num, unit=None, *args, **kwargs)</span>
+<span class="sd">            Variable constructor.</span>
+
+<span class="sd">        __repr__(self)</span>
+<span class="sd">            Returns the string representation of the Variable object.</span>
+
+<span class="sd">        mean(self)</span>
+<span class="sd">            Return mean value of the distribution.</span>
+
+<span class="sd">        var(self)</span>
+<span class="sd">            Return variance of the distribution.</span>
+
+<span class="sd">        moments(self)</span>
+<span class="sd">            Return the moments of the distribution.</span>
+
+<span class="sd">        pdf(self, x)</span>
+<span class="sd">            Return the probability density function of the distribution, evaluated at x.</span>
+
+<span class="sd">        cdf(self, p)</span>
+<span class="sd">            Return the cumulative density function of the distribution, evaluated at p.</span>
+<span class="sd">        </span>
+<span class="sd">        ppf(self, q)</span>
+<span class="sd">            Return the percentage point function (inverse of cdf) of the distribution, evaluated at q.</span>
+
+<span class="sd">        sample(self, n)</span>
+<span class="sd">            Return n samples from the distribution.</span>
+
+<span class="sd">        get_gpc_dist(self)</span>
+<span class="sd">            Return the GPC base distribution.</span>
+
+<span class="sd">        get_gpc_polysys(self, normalized)</span>
+<span class="sd">            Return the GPC polynomial system.</span>
+
+<span class="sd">        get_gpc_syschar(self, normalized)</span>
+<span class="sd">            Return the GPC polynomial system characteristic string.</span>
+
+<span class="sd">        param2germ(self, q)</span>
+<span class="sd">            Convert from parameter to germ space.</span>
+
+<span class="sd">        germ2param(self,x)</span>
+<span class="sd">            Convert from germ to parameter space.</span>
+
+<span class="sd">        convert_to(self, to_unit: str)</span>
+<span class="sd">            Convert the variable and its distribution parameters to a different unit.&#39;&#39;&#39;</span>
+        
+<div class="viewcode-block" id="Variable.__init__">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">dist_or_num</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Variable constructor.</span>
+<span class="sd">            </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            name: str</span>
+<span class="sd">                Variable name.</span>
+
+<span class="sd">            dist_or_num : Distribution object or float</span>
+<span class="sd">                Variable distribution or fixed value.</span>
+
+<span class="sd">            unit: str, optional</span>
+<span class="sd">                Variable unit.</span>
+<span class="sd">                </span>
+<span class="sd">            args, kwargs</span>
+<span class="sd">                Additional arguments.&#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">dist_or_num</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dist_or_num</span><span class="p">,</span> <span class="s1">&#39;pdf&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixed_val</span> <span class="o">=</span> <span class="n">dist_or_num</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dist_or_num</span><span class="p">,</span> <span class="s1">&#39;pdf&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fixed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span></div>
+
+
+<div class="viewcode-block" id="Variable.__repr__">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Returns the string representation of the Variable object.</span>
+<span class="sd">        </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            repr_string : str</span>
+<span class="sd">                String representation of the Variable object.&#39;&#39;&#39;</span>
+        
+        <span class="n">repr_string</span> <span class="o">=</span> <span class="s1">&#39;Param(</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">repr_string</span></div>
+
+
+<div class="viewcode-block" id="Variable.mean">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.mean">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return mean value of the distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            mean : float</span>
+<span class="sd">                Mean value of the distribution.&#39;&#39;&#39;</span>
+        
+        <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">mean</span></div>
+
+
+<div class="viewcode-block" id="Variable.var">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.var">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return variance of the distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            var : float</span>
+<span class="sd">                Variance of the distribution.&#39;&#39;&#39;</span>
+        
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">var</span></div>
+
+
+<div class="viewcode-block" id="Variable.moments">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.moments">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">moments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the moments of the distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            moments : list</span>
+<span class="sd">                Moments of the distribution ([mean, var, skew, kurt]).&#39;&#39;&#39;</span>
+        
+        <span class="n">moments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">moments</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">moments</span></div>
+
+
+<div class="viewcode-block" id="Variable.pdf">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.pdf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the probability density function of the variable, evaluated at x.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points at which to evaluate the pdf.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            pdf_values : array_like</span>
+<span class="sd">                Probability density function values at x.&#39;&#39;&#39;</span>
+        
+        <span class="n">pdf_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pdf_values</span></div>
+
+
+<div class="viewcode-block" id="Variable.cdf">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.cdf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the cumulative distribution function of the variable, evaluated at p.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            p : array_like</span>
+<span class="sd">                Points at which to evaluate the cdf.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            cdf_values : array_like</span>
+<span class="sd">                Cumulative distribution function values at p.&#39;&#39;&#39;</span>
+        
+        <span class="n">cdf_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cdf_values</span></div>
+
+    
+<div class="viewcode-block" id="Variable.ppf">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.ppf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ppf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the percentage point function (inverse of cdf) of the variable, evaluated at q.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            q : array_like</span>
+<span class="sd">                Points at which to evaluate the ppf.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            ppf_values : array_like</span>
+<span class="sd">                Percentage point function values at q.&#39;&#39;&#39;</span>
+        
+        <span class="n">ppf_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ppf_values</span></div>
+
+
+<div class="viewcode-block" id="Variable.sample">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.sample">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Variable.get_gpc_dist">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.get_gpc_dist">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_gpc_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the GPC base distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            dist : Distribution object</span>
+<span class="sd">                GPC base distribution.&#39;&#39;&#39;</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">get_base_dist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+
+
+<div class="viewcode-block" id="Variable.get_gpc_polysys">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.get_gpc_polysys">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_gpc_polysys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalized</span><span class="p">):</span>
+        <span class="n">syschar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gpc_syschar</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">syschar_to_polysys</span><span class="p">(</span><span class="n">syschar</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Variable.get_gpc_syschar">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.get_gpc_syschar">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_gpc_syschar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalized</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the GPC polynomial system characteristic string.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            normalized : bool</span>
+<span class="sd">                Flag indicating whether to return the normalized polynomial system characteristic string.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            syschar : str</span>
+<span class="sd">                GPC polynomial system characteristic string.&#39;&#39;&#39;</span>
+        
+        <span class="n">syschar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">get_base_dist</span><span class="p">()</span><span class="o">.</span><span class="n">orth_polysys_syschar</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">syschar</span></div>
+
+
+<div class="viewcode-block" id="Variable.germ2param">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.germ2param">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">germ2param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Convert from germ to parameter space.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in germ space.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            q : array_like</span>
+<span class="sd">                Points in parameter space.&#39;&#39;&#39;</span>
+        
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">base2dist</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="Variable.param2germ">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.param2germ">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">param2germ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Convert from parameter to germ space.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            q : array_like</span>
+<span class="sd">                Points in parameter space.</span>
+<span class="sd">            </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in germ space.&#39;&#39;&#39;</span>
+        
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">dist2base</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+    
+<div class="viewcode-block" id="Variable.convert_to">
+<a class="viewcode-back" href="../../distvar.html#distvar.variable.Variable.convert_to">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Convert the variable and its distribution parameters to a different unit.</span>
+<span class="sd">            </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            to_unit : str</span>
+<span class="sd">                Target unit for conversion.&#39;&#39;&#39;</span>
+        <span class="n">ureg</span> <span class="o">=</span> <span class="n">pint</span><span class="o">.</span><span class="n">UnitRegistry</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Current unit is not defined.&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_val</span> <span class="o">*</span> <span class="n">ureg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fixed_val</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">to_unit</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">to_unit</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="n">ureg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">to_unit</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">to_unit</span></div>
+</div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">distributions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformDistribution</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">UniformDistribution</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">moments</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">get_gpc_polysys</span><span class="p">(</span><span class="kc">True</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">param2germ</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">germ2param</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">get_gpc_syschar</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, TRACE-Structures.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
