@@ -84,10 +84,6 @@ The research and the development is founded by the Eurpean Union as part of the 
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0-only). See the [LICENSE](LICENSE) file for details.
 
-## Version
-
-Current version: 0.0.1
-
 ## Support
 
 For issues, questions, or contributions, please refer to the project repository or contact the authors.
