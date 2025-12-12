@@ -82,7 +82,7 @@ The research and the development is founded by the Eurpean Union as part of the 
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0-only). See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0-only). See the [LICENSE](https://github.com/TRACE-Structures/uncertain_variables/blob/main/LICENSE) file for details.
 
 ## Support
 
