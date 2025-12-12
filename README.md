@@ -1,5 +1,7 @@
 # uncertain_variables
 
+[![DOI](https://zenodo.org/badge/1114716179.svg)](https://doi.org/10.5281/zenodo.17904266)
+
 A Python package for defining and handling variable sets with probability distributions for surrogate modelling and uncertainty quantification applications.
 
 - Website: [https://buildchain.ilab.sztaki.hu/](https://buildchain.ilab.sztaki.hu/)
