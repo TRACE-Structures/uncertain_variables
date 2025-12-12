@@ -3,8 +3,8 @@
 A Python package for defining and handling variable sets with probability distributions for surrogate modelling and uncertainty quantification applications.
 
 - Website: [https://buildchain.ilab.sztaki.hu/](https://buildchain.ilab.sztaki.hu/)
-- Source code: [https://github.com/TRACE-Structures2/distvar](https://github.com/TRACE-Structures2/distvar)
-- Bug reports: [https://github.com/TRACE-Structures2/distvar/issues](https://github.com/TRACE-Structures2/distvar/issues)
+- Source code: [https://github.com/TRACE-Structures/uncertain_variables](https://github.com/TRACE-Structures/uncertain_variables)
+- Bug reports: [https://github.com/TRACE-Structures/uncertain_variables/issues](https://github.com/TRACE-Structures/uncertain_variables/issues)
 
 ## Overview
 
@@ -76,7 +76,7 @@ The `polysys.py` module implements orthogonal polynomial systems:
 - **`LaguerrePolynomials`**: For exponential distributions
 
 ## Authors and acknowledgment
-The code is developed by András Urbanics, Bence Popovics, Emese Vastag Elmar Zander and Noémi Friedman in the TRACE-Structures group.
+The code is developed by András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander and Noémi Friedman in the TRACE-Structures group.
 
 The research and the development is founded by the Eurpean Union as part of the BUILDCHAIN project.
 
