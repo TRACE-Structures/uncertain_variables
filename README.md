@@ -1,4 +1,4 @@
-# distvar
+# uncertain_variables
 
 A Python package for defining and handling variable sets with probability distributions for surrogate modelling and uncertainty quantification applications.
 
@@ -8,7 +8,7 @@ A Python package for defining and handling variable sets with probability distri
 
 ## Overview
 
-The `distvar` package provides a comprehensive framework for working with random variables and their probability distributions in the context of uncertainty quantification (UQ) and surrogate modelling. It supports various sampling methods, polynomial chaos expansion (PCE) integration, and distribution transformations.
+The `uncertain_variables` package provides a comprehensive framework for working with random variables and their probability distributions in the context of uncertainty quantification (UQ) and surrogate modelling. It supports various sampling methods, polynomial chaos expansion (PCE) integration, and distribution transformations.
 
 ## Features
 
@@ -76,7 +76,7 @@ The `polysys.py` module implements orthogonal polynomial systems:
 - **`LaguerrePolynomials`**: For exponential distributions
 
 ## Authors and acknowledgment
-The code is developed by András Urbanics, Bence Popovics, Emese Vastag, Uroš Bohinc and Noémi Friedman in the TRACE-Structures group.
+The code is developed by András Urbanics, Bence Popovics, Emese Vastag Elmar Zander and Noémi Friedman in the TRACE-Structures group.
 
 The research and the development is founded by the Eurpean Union as part of the BUILDCHAIN project.
 
