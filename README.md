@@ -93,6 +93,11 @@ This work has been funded by the European Commission Horizon Europe Innovation A
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0-only). See the [LICENSE](https://github.com/TRACE-Structures/uncertain_variables/tree/main?tab=GPL-3.0-1-ov-file) file for details.
 
+## Related Projects
+
+- [gPCE_model](https://github.com/TRACE-Structures/gPCE_model/): Generalized Polynomial Chaos Expansion
+- [digital_twinning](https://github.com/TRACE-Structures/digital_twinning/): Digital Twinning
+
 ## Support
 
 For issues, questions, or contributions, please refer to the project repository or contact the authors.
