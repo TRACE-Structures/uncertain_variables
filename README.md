@@ -15,7 +15,7 @@ The `uncertain_variables` package provides a comprehensive framework for working
 ## Installation
 
 ```bash
-pip install digital-twinning
+pip install uncertain-variables
 ```
 
 ## Features
