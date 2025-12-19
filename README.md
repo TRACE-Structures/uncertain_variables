@@ -12,6 +12,12 @@ A Python package for defining and handling variable sets with probability distri
 
 The `uncertain_variables` package provides a comprehensive framework for working with random variables and their probability distributions in the context of uncertainty quantification (UQ) and surrogate modelling. It supports various sampling methods, polynomial chaos expansion (PCE) integration, and distribution transformations.
 
+## Installation
+
+```bash
+pip install digital-twinning
+```
+
 ## Features
 
 - **Multiple Distribution Types**: Normal, Uniform, Log-Normal, Beta, Exponential, and Wigner Semicircle distributions
