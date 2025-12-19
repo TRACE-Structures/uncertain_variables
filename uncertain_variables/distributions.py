@@ -1323,7 +1323,7 @@ class UniformDistribution(Distribution):
         y = np.zeros(x.shape)
         for i in range(len(x)):
             if pdf[i] == 0:
-                y[i] = -np.Inf
+                y[i] = -np.inf
             else:
                 y[i] = np.log(pdf[i])
         return y
@@ -2807,3 +2807,4 @@ if __name__ == "__main__":
     # ax2[2].plot(arr, dist.cdf(arr))
 
     plt.show()
+
