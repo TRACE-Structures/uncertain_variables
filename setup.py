@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='uncertain_variables',
-    version='0.1.3',
+    version='0.1.4',
     author='András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman',
     author_email='popbence@hun-ren.sztaki.hu',
     description='Defining and handling variable sets with probability distributions for surrogate modelling and uncertainty quantification applications',
