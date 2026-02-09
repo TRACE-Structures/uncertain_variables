@@ -1,7 +1,5 @@
 ''' This module implements the Variable class for uncertainty quantification.'''
 
-import numpy as np
-from .distributions import UniformDistribution
 from .polysys import syschar_to_polysys
 import pint
 
@@ -277,14 +275,3 @@ class Variable():
                     setattr(self.dist, attr, q.to(to_unit).magnitude)
 
         self.unit = to_unit
-
-if __name__ == "__main__":
-    from distributions import UniformDistribution
-    P = Variable('p', UniformDistribution(-2,2))
-    print(P.moments())
-    print(P.pdf(np.array([-3, -2, -1, 0, 1, 2, 3])))
-    print(P.cdf(np.array([-3, -2, -1, 0, 1, 2, 3])))
-    print(P.get_gpc_polysys(True))
-    print(P.param2germ(np.array([-3, -2, -1, 0, 1, 2, 3])))
-    print(P.germ2param(np.array([-2, -1, -0.5, 0, 0.5, 1, 2])))
-    print(P.get_gpc_syschar(False))

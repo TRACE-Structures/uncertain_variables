@@ -383,30 +383,30 @@ class VariableSet():
                 Array of shape (n, m) containing the generated samples in parameter space.'''
         
         m = self.num_params()
-        q_i_k = np.zeros([m, n])
+        q_i_k = np.zeros([n, m])
         variables = self.variables
         if method == 'MC':
             np.random.seed(random_seed)
-            xi = np.random.rand(m,n)
+            xi = np.random.rand(n,m)
         # QMC methods
         elif method == 'QMC_Halton':
-            gen = Halton(m, seed=random_seed)
-            xi = gen.random(n).T
+            gen = Halton(n, seed=random_seed)
+            xi = gen.random(m).T
         elif method == 'QMC_LHS':
-            sampler = LHS(d=m, seed=random_seed)
-            xi = sampler.random(n).T
+            sampler = LHS(d=n, seed=random_seed)
+            xi = sampler.random(m).T
         elif method == 'QMC_Sobol':
-            sampler = Sobol(d=m, seed=random_seed)
-            xi = sampler.random(n).T
+            sampler = Sobol(d=n, seed=random_seed)
+            xi = sampler.random(m).T
         elif method == 'Sobol_saltelli':
             problem = {'num_vars': m, 'names': self.param_names(), 'dists': self.get_dist_types(), 'bounds': self.get_dist_params()}
             xi = saltelli.sample(problem, n).T
-            return xi.transpose()
+            return xi
             
         for i, dist in enumerate(variables.values()):
-            q_i_k[i,:] = dist.invcdf(xi[i,:])
+            q_i_k[:, i] = dist.invcdf(xi[:, i])
             
-        return q_i_k.transpose()
+        return q_i_k
     
     def diminished_paramset(self, indices):
         ''' Create a new VariableSet by selecting a subset of variables based on provided indices.
@@ -430,24 +430,3 @@ class VariableSet():
             new_variables[diminished_variable_names[i]] = self.variables[diminished_variable_names[i]]
         new_variable_set.variables = new_variables
         return new_variable_set
-
-if __name__ == "__main__":
-    from distributions import UniformDistribution, NormalDistribution
-    from variable import Variable
-    P1 = Variable('p1', UniformDistribution(-2,2))
-    P2 = Variable('p2', NormalDistribution(0,2))
-
-    Q = VariableSet()
-    Q.add(P1)
-    Q.add(P2)
-
-    print(Q.mean())
-    print(Q.pdf(np.array([-3, -2, -1, 0, 1, 2, 3]*2).reshape(2, -1).T))
-    print(Q.cdf(np.array([-3, -2, -1, 0, 1, 2, 3]*2).reshape(2, -1).T))
-    print(Q.get_gpc_syschars())
-    print(Q.params2germ(np.array([-3, -2, -1, 0, 1, 2, 3]*2).reshape(2, -1).T))
-    print(Q.germ2params(np.array([-2, -1, -0.5, 0, 0.5, 1, 2]*2).reshape(2,-1).T))
-    Q.sample(10)
-    Q.sample(10, method='MC')
-
-    print(Q.get_bounds())
