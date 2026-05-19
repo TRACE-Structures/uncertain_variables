@@ -25,6 +25,9 @@ class VariableSet():
             
         add(self, variable)
             Add a new Variable to the VariableSet.
+        
+        remove(self, variable_name)
+            Remove a Variable from the VariableSet by name.
             
         get_dist_types(self)
             Get the types of distributions for all variables in the VariableSet.
@@ -35,13 +38,13 @@ class VariableSet():
         filter(self, variable_names)
             Create a new VariableSet containing only the specified variables.
             
-        num_params(self)
+        num_variables(self)
             Get the number of variables in the VariableSet.
             
-        param_names(self)
+        variable_names(self)
             Get the names of all variables in the VariableSet.
             
-        get_params(self)
+        get_variables(self)
             Get the dictionary of variables in the VariableSet.
             
         mean(self)
@@ -74,7 +77,7 @@ class VariableSet():
         sample(self, n, method='MC', random_seed=None, **kwargs)
             Generate samples from the VariableSet using specified sampling method.
         
-        diminished_paramset(self, indices)
+        diminished_variable_set(self, indices)
             Create a new VariableSet by selecting a subset of variables based on provided indices.'''
         
     def __init__(self, normalized=True):
@@ -99,6 +102,18 @@ class VariableSet():
         if variable.name in self.variables.keys():
             raise("Variable name {} already exists in VariableSet".format(variable.name))
         self.variables[variable.name] = variable.dist
+
+    def remove(self, variable_name):
+        ''' Remove a Variable from the VariableSet by name.
+
+            Parameter
+            ---------
+            variable_name: str
+                The name of the Variable to be removed from the VariableSet.'''
+        
+        if variable_name not in self.variables.keys():
+            raise KeyError("Variable name {} not found in VariableSet".format(variable_name))
+        del self.variables[variable_name]
 
     def get_dist_types(self):
         ''' Get the types of distributions for all variables in the VariableSet.
@@ -136,44 +151,44 @@ class VariableSet():
                 
             Returns
             -------
-            new_paramset: VariableSet object
+            new_variable_set: VariableSet object
                 New VariableSet containing only the specified variables.'''
         
         new_variable_set = VariableSet(normalized=self.normalized)
-        new_params = {}
+        new_variables = {}
         # To avoid confusion, use a list of original names to map indices
         original_names = list(self.variables.keys())
         for name in variable_names:
             if name not in self.variables:
                 raise KeyError(f"Variable {name} not found in VariableSet")
             idx = original_names.index(name)
-            new_params[name] = self.variables[name]
-        new_variable_set.variables = new_params
+            new_variables[name] = self.variables[name]
+        new_variable_set.variables = new_variables
         return new_variable_set
 
-    def num_params(self):
+    def num_variables(self):
         ''' Get the number of variables in the VariableSet.
         
             Returns
             -------
-            num_params: int
+            num_variables: int
                 Number of variables in the VariableSet.'''
         
-        num_params = len(self.variables)
-        return num_params
+        num_variables = len(self.variables)
+        return num_variables
 
-    def param_names(self):
+    def variable_names(self):
         ''' Get the names of all variables in the VariableSet.
         
             Returns
             -------
-            param_names: list
+            variable_names: list
                 List of variable names in the VariableSet.'''
         
-        param_names = list(self.variables.keys())
-        return param_names
+        variable_names = list(self.variables.keys())
+        return variable_names
     
-    def get_params(self):
+    def get_variables(self):
         ''' Get the dictionary of variables in the VariableSet.
         
             Returns
@@ -193,10 +208,10 @@ class VariableSet():
             q_mean: numpy.ndarray
                 Array of mean values for each variable in the VariableSet.'''
         
-        m = self.num_params()
-        params = self.variables
+        m = self.num_variables()
+        variables = self.variables
         q_mean = np.zeros([m,1])
-        for i, dist in enumerate(params.values()):
+        for i, dist in enumerate(variables.values()):
             q_mean[i] = dist.mean()
         return q_mean
 
@@ -208,10 +223,10 @@ class VariableSet():
             var: numpy.ndarray
                 Array of variances for each variable in the VariableSet.'''
         
-        m = self.num_params()
-        params = self.variables
+        m = self.num_variables()
+        variables = self.variables
         var = np.zeros([m, 1])
-        for i, dist in enumerate(params.values()):
+        for i, dist in enumerate(variables.values()):
             var[i] = dist.var()
         return var
 
@@ -229,7 +244,7 @@ class VariableSet():
             p_q: numpy.ndarray
                 Array of pdf values at the given points. Shape is (1, n).'''
         
-        m = self.num_params()
+        m = self.num_variables()
         assert(q.shape[0] == m)
         n = q.shape[1]
 
@@ -253,7 +268,7 @@ class VariableSet():
             p_q: numpy.ndarray
                 Array of logpdf values at the given points. Shape is (1, n).'''
         
-        m = self.num_params()
+        m = self.num_variables()
         assert(q.shape[0] == m)
         n = q.shape[1]
 
@@ -277,7 +292,7 @@ class VariableSet():
             p_q: numpy.ndarray
                 Array of cdf values at the given points. Shape is (m, n).'''
         
-        m = self.num_params()
+        m = self.num_variables()
         assert (q.shape[0] == m)
         n = q.shape[1]
 
@@ -312,13 +327,13 @@ class VariableSet():
             q_k_i : numpy.ndarray
                 Points in parameter space. Shape is (n, m).'''
         
-        m = self.num_params()
+        m = self.num_variables()
         assert (xi_k_i.shape[1] == m)
         n = xi_k_i.shape[0]
 
-        params = self.variables
+        variables = self.variables
         q_k_i = np.zeros([n, m])
-        for i, dist in enumerate(params.values()):
+        for i, dist in enumerate(variables.values()):
             q_k_i[:, i] = dist.base2dist(xi_k_i[:,i])
         return q_k_i
     
@@ -334,13 +349,13 @@ class VariableSet():
             xi_k_i : numpy.ndarray
                 Points in germ space. Shape is (n, m).'''
         
-        m = self.num_params()
+        m = self.num_variables()
         assert (q_k_i.shape[1] == m)
         n = q_k_i.shape[0]
 
-        params = self.variables
+        variables = self.variables
         xi_k_i = np.zeros([n, m])
-        for i, dist in enumerate(params.values()):
+        for i, dist in enumerate(variables.values()):
             xi_k_i[:, i] = dist.dist2base(q_k_i[:,i])
         return xi_k_i
     
@@ -352,7 +367,7 @@ class VariableSet():
             bounds: numpy.ndarray
                 Array of shape (m, 2) containing the lower and upper bounds for each variable in the VariableSet.'''
         
-        m = self.num_params()
+        m = self.num_variables()
         bounds = np.zeros((m, 2))
         for i, dist in enumerate(self.variables.values()):
             bounds[i, :] = dist.get_bounds()
@@ -382,7 +397,7 @@ class VariableSet():
             q_i_k: numpy.ndarray
                 Array of shape (n, m) containing the generated samples in parameter space.'''
         
-        m = self.num_params()
+        m = self.num_variables()
         q_i_k = np.zeros([n, m])
         variables = self.variables
         if method == 'MC':
@@ -399,7 +414,7 @@ class VariableSet():
             sampler = Sobol(d=n, seed=random_seed)
             xi = sampler.random(m).T
         elif method == 'Sobol_saltelli':
-            problem = {'num_vars': m, 'names': self.param_names(), 'dists': self.get_dist_types(), 'bounds': self.get_dist_params()}
+            problem = {'num_vars': m, 'names': self.variable_names(), 'dists': self.get_dist_types(), 'bounds': self.get_dist_params()}
             xi = saltelli.sample(problem, n).T
             return xi
             
@@ -408,7 +423,7 @@ class VariableSet():
             
         return q_i_k
     
-    def diminished_paramset(self, indices):
+    def diminished_variable_set(self, indices):
         ''' Create a new VariableSet by selecting a subset of variables based on provided indices.
             
             Parameters
@@ -421,9 +436,9 @@ class VariableSet():
             new_variable_set: VariableSet object
                 New VariableSet containing only the selected variables.'''
         
-        assert self.num_params() >= len(indices)
+        assert self.num_variables() >= len(indices)
 
-        diminished_variable_names = np.array(self.param_names())[indices]
+        diminished_variable_names = np.array(self.variable_names())[indices]
         new_variable_set = VariableSet(normalized=self.normalized)
         new_variables = {}
         for i in range(len(indices)):

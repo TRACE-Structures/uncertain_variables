@@ -101,7 +101,7 @@ class Variable():
             repr_string : str
                 String representation of the Variable object.'''
         
-        repr_string = 'Param({}, {})'.format(self.name, self.dist.__repr__())
+        repr_string = 'Variable({}, {})'.format(self.name, self.dist.__repr__())
         return repr_string
 
     def mean(self):
