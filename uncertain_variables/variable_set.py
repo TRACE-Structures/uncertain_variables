@@ -315,8 +315,8 @@ class VariableSet():
             syschar = syschar + dist.get_base_dist().orth_polysys_syschar(True)
         return syschar
     
-    def germ2params(self, xi_k_i):
-        ''' Convert from germ space to parameter space.
+    def germ2variable(self, xi_k_i):
+        ''' Convert from germ space to variable space.
             Parameters
             ----------
             xi_k_i : array_like
@@ -325,7 +325,7 @@ class VariableSet():
             Returns
             -------
             q_k_i : numpy.ndarray
-                Points in parameter space. Shape is (n, m).'''
+                Points in variable space. Shape is (n, m).'''
         
         m = self.num_variables()
         assert (xi_k_i.shape[1] == m)
@@ -337,12 +337,12 @@ class VariableSet():
             q_k_i[:, i] = dist.base2dist(xi_k_i[:,i])
         return q_k_i
     
-    def params2germ(self, q_k_i):
-        ''' Convert from parameter space to germ space.
+    def variable2germ(self, q_k_i):
+        ''' Convert from variable space to germ space.
             Parameters
             ----------
             q_k_i : array_like
-                Points in parameter space to be converted. Shape is (n, m) where n is the number of points and m is the number of variables.
+                Points in variable space to be converted. Shape is (n, m) where n is the number of points and m is the number of variables.
                 
             Returns
             -------

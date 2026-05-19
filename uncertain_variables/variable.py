@@ -219,8 +219,8 @@ class Variable():
         syschar = self.dist.get_base_dist().orth_polysys_syschar(normalized)
         return syschar
 
-    def germ2param(self,x):
-        ''' Convert from germ to parameter space.
+    def germ2variable(self,x):
+        ''' Convert from germ to variable space.
 
             Parameters
             ----------
@@ -230,18 +230,18 @@ class Variable():
             Returns
             -------
             q : array_like
-                Points in parameter space.'''
+                Points in variable space.'''
         
         q = self.dist.base2dist(x)
         return q
 
-    def param2germ(self, q):
-        ''' Convert from parameter to germ space.
+    def variable2germ(self, q):
+        ''' Convert from variable to germ space.
 
             Parameters
             ----------
             q : array_like
-                Points in parameter space.
+                Points in variable space.
             
             Returns
             -------
