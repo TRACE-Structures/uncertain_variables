@@ -64,7 +64,7 @@ def syschar_to_polysys(syschar):
                 'L': LaguerrePolynomials,
                 'l': LaguerrePolynomials.normalized(),
                 'J': JacobiPolynomials,
-                'j': JacobiPolynomials.normalized(),
+                #'j': JacobiPolynomials.normalized(),
                 'm': Monomials
                 }
     
