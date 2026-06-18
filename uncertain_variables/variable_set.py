@@ -415,7 +415,7 @@ class VariableSet():
             xi = sampler.random(m).T
         elif method == 'Sobol_saltelli':
             problem = {'num_vars': m, 'names': self.variable_names(), 'dists': self.get_dist_types(), 'bounds': self.get_dist_params()}
-            xi = saltelli.sample(problem, n).T
+            xi = saltelli.sample(problem, n)
             return xi
             
         for i, dist in enumerate(variables.values()):
