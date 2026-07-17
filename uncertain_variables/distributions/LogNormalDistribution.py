@@ -315,8 +315,7 @@ class LogNormalDistribution(Distribution):
             dist_germ : Distribution object
                 GPC base distribution.'''
         
-        #base = NormalDistribution(0, 1)
-        base = LogNormalDistribution(0, 1)
+        base = NormalDistribution(0, 1)
         return base
 
     def base2dist(self, y):
@@ -332,12 +331,8 @@ class LogNormalDistribution(Distribution):
             x : array_like
                 Points in log-normal distribution space.'''
         
-        # x = np.exp(y * self.sigma + self.mu)
-        # return x
-        # z = (np.log(x) - self.mu) / self.sigma   # standardize in log-space
-        x = np.exp(self.mu + self.sigma * np.log(y))
+        x = np.exp(y * self.sigma + self.mu)
         return x
-
 
     def dist2base(self, x):
         ''' Convert from log-normal distribution space to base (germ) space.
@@ -353,13 +348,9 @@ class LogNormalDistribution(Distribution):
                 Points in base (germ) space.'''
         
         # ignore RuntimeWarning in case x == 0
-        z = (np.log(x) - self.mu) / self.sigma   # standardize in log-space
-        y = np.exp(0 + 1 * z)
-        return y
-
-        # with np.errstate(divide="ignore", invalid="ignore"): #TODO ???
-        #     y = (np.log(x) - self.mu) / self.sigma
-        #     return y
+        with np.errstate(divide="ignore", invalid="ignore"): #TODO ???
+            y = (np.log(x) - self.mu) / self.sigma
+            return y
 
     def stdnor2base(self, y):  # same as base2dist??
         ''' Convert from standard normal space to log-normal distribution space.
