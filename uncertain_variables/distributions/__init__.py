@@ -39,3 +39,8 @@ from .ExponentialDistribution import *
 from .LogNormalDistribution import *
 from .SemiCircleDistribution import *
 from .UniformDistribution import *
+
+def get_mu_and_sigma_of_lognormal(mean, cov):
+    sigma = np.sqrt(np.log(1 + cov**2))
+    mu = np.log(mean) - 0.5 * sigma**2
+    return mu, sigma
