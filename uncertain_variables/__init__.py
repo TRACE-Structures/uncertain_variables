@@ -1,4 +1,4 @@
-__version__ = "0.1.12"
+__version__ = "1.0.0"
 
 from .polysys import *
 from .distributions import *
