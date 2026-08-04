@@ -122,7 +122,7 @@ For issues, questions, or contributions, please refer to the project repository 
    :hidden:
    :maxdepth: 2
 
-   api/uncertain_variables.distributions
-   api/uncertain_variables.polysys
-   api/uncertain_variables.variable
-   api/uncertain_variables.variable_set
+   source/uncertain_variables.distributions
+   source/uncertain_variables.polysys
+   source/uncertain_variables.variable
+   source/uncertain_variables.variable_set
