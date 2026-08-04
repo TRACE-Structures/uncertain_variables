@@ -1,35 +1,4 @@
-''' This module implements various polynomial systems used in polynomial chaos expansions.
-
-    Classes
-    -------
-    PolynomialSystem
-        Abstract base class for polynomial systems.
-
-    NormalizedPolynomials
-        Wrapper class for normalized polynomial systems.
-        
-    LegendrePolynomials
-        Implementation of Legendre polynomial system.
-        
-    HermitePolynomials
-        Implementation of Hermite polynomial system.
-        
-    JacobiPolynomials
-        Implementation of Jacobi polynomial system.
-        
-    ChebyshevTPolynomials
-        Implementation of Chebyshev polynomials of the first kind.
-        
-    ChebyshevUPolynomials
-        Implementation of Chebyshev polynomials of the second kind.
-        
-    LaguerrePolynomials
-        Implementation of Laguerre polynomial system.
-                
-    Functions
-    ---------
-    syschar_to_polysys(syschar)
-        Convert a system characteristic string to the corresponding polynomial system.'''
+''' This module implements various polynomial systems used in polynomial chaos expansions.'''
 
 from .PolynomialSystem import *
 from .ChebyshevTPolynomials import *
