@@ -1,0 +1,224 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uncertain_variables &mdash; uncertain-variables v1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=76e2d817"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Distributions" href="api/uncertain_variables.distributions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            uncertain-variables
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">uncertain_variables</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/uncertain_variables.distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/uncertain_variables.polysys.html">Polysys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/uncertain_variables.variable.html">Variable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/uncertain_variables.variable_set.html">VariableSet</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">uncertain-variables</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">uncertain_variables</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="uncertain-variables">
+<h1>uncertain_variables<a class="headerlink" href="#uncertain-variables" title="Link to this heading"></a></h1>
+<p>A Python package for defining and handling variable sets with probability distributions for surrogate modelling and uncertainty quantification applications. The software is built on Elmar Zander’s <a class="reference external" href="https://github.com/ezander/sglib">sglib</a> approach.</p>
+<ul class="simple">
+<li><p>Website: <a class="reference external" href="https://buildchain.ilab.sztaki.hu/">https://buildchain.ilab.sztaki.hu/</a></p></li>
+<li><p>Source code: <a class="reference external" href="https://github.com/TRACE-Structures/uncertain_variables">https://github.com/TRACE-Structures/uncertain_variables</a></p></li>
+<li><p>Bug reports: <a class="reference external" href="https://github.com/TRACE-Structures/uncertain_variables/issues">https://github.com/TRACE-Structures/uncertain_variables/issues</a></p></li>
+</ul>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">uncertain_variables</span></code> package provides a comprehensive framework for working with random variables and their probability distributions in the context of uncertainty quantification (UQ) and surrogate modelling. It supports various sampling methods, polynomial chaos expansion (PCE) integration, and distribution transformations.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>uncertain-variables
+</pre></div>
+</div>
+</section>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Multiple Distribution Types: Normal, Uniform, Log-Normal, Beta, Exponential, and Wigner Semicircle distributions</p></li>
+<li><p>Variable Management: Create and manage sets of variables with associated probability distributions</p></li>
+<li><p>Advanced Sampling Methods:</p>
+<ul>
+<li><p>Monte Carlo (MC)</p></li>
+<li><p>Quasi-Monte Carlo: Halton, Latin Hypercube (LHS), Sobol sequences</p></li>
+<li><p>Saltelli sampling for sensitivity analysis</p></li>
+</ul>
+</li>
+<li><p>Polynomial Systems: Support for orthogonal polynomial systems (Legendre, Hermite, Jacobi, Chebyshev, Laguerre)</p></li>
+<li><p>Space Transformations: Convert between parameter space, germ space, and standard normal space</p></li>
+<li><p>Unit Conversion: Built-in support for physical unit conversions using <code class="docutils literal notranslate"><span class="pre">pint</span></code></p></li>
+<li><p>GPC Integration: Seamless integration with generalized Polynomial Chaos Expansion methods</p></li>
+</ul>
+</section>
+<section id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Link to this heading"></a></h2>
+<section id="distribution-classes">
+<h3>Distribution Classes<a class="headerlink" href="#distribution-classes" title="Link to this heading"></a></h3>
+<p>The package includes several distribution types in <code class="docutils literal notranslate"><span class="pre">distributions.py</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NormalDistribution</span></code>: Gaussian distribution with mean and standard deviation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UniformDistribution</span></code>: Uniform distribution over [min, max]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LogNormalDistribution</span></code>: Log-normal distribution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BetaDistribution</span></code>: Beta distribution with shape parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ExponentialDistribution</span></code>: Exponential distribution with rate parameter</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WignerSemicircleDistribution</span></code>: Wigner semicircle distribution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TranslatedDistribution</span></code>: Shifted and scaled version of any base distribution</p></li>
+</ul>
+<p>Each distribution supports:</p>
+<ul class="simple">
+<li><p>Probability density function (<code class="docutils literal notranslate"><span class="pre">pdf</span></code>)</p></li>
+<li><p>Cumulative distribution function (<code class="docutils literal notranslate"><span class="pre">cdf</span></code>)</p></li>
+<li><p>Inverse CDF / Percent point function (<code class="docutils literal notranslate"><span class="pre">ppf</span></code>)</p></li>
+<li><p>Moment calculation (<code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">var</span></code>, <code class="docutils literal notranslate"><span class="pre">moments</span></code>)</p></li>
+<li><p>Sampling (<code class="docutils literal notranslate"><span class="pre">sample</span></code>)</p></li>
+<li><p>Space transformations (<code class="docutils literal notranslate"><span class="pre">dist2base</span></code>, <code class="docutils literal notranslate"><span class="pre">base2dist</span></code>)</p></li>
+</ul>
+</section>
+<section id="variable-class">
+<h3>Variable Class<a class="headerlink" href="#variable-class" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Variable</span></code> class represents a single random or deterministic variable:</p>
+<ul class="simple">
+<li><p>Associates a name with a distribution or fixed value</p></li>
+<li><p>Supports physical units with automatic conversion</p></li>
+<li><p>Provides access to distribution properties (mean, variance, pdf, cdf)</p></li>
+<li><p>Enables germ space transformations for polynomial chaos expansions</p></li>
+</ul>
+</section>
+<section id="variableset-class">
+<h3>VariableSet Class<a class="headerlink" href="#variableset-class" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">VariableSet</span></code> class manages collections of variables:</p>
+<ul class="simple">
+<li><p>Add multiple variables with unique names</p></li>
+<li><p>Compute joint statistics (mean vector, variance vector, joint PDF)</p></li>
+<li><p>Generate samples using various methods</p></li>
+<li><p>Filter and create subsets of variables</p></li>
+<li><p>Support polynomial chaos expansion workflows</p></li>
+</ul>
+</section>
+<section id="polynomial-systems">
+<h3>Polynomial Systems<a class="headerlink" href="#polynomial-systems" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">polysys.py</span></code> module implements orthogonal polynomial systems:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LegendrePolynomials</span></code>: For uniform distributions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HermitePolynomials</span></code>: For normal distributions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">JacobiPolynomials</span></code>: For beta distributions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ChebyshevTPolynomials</span></code>: Chebyshev polynomials of the first kind</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ChebyshevUPolynomials</span></code>: Chebyshev polynomials of the second kind</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LaguerrePolynomials</span></code>: For exponential distributions</p></li>
+</ul>
+</section>
+</section>
+<section id="authors-and-acknowledgment">
+<h2>Authors and acknowledgment<a class="headerlink" href="#authors-and-acknowledgment" title="Link to this heading"></a></h2>
+<p>The code is developed by András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander and Noémi Friedman in the TRACE-Structures group.</p>
+<p>This work has been funded by the European Commission Horizon Europe Innovation Action project 101092052 <a class="reference external" href="https://buildchain-project.eu/">BUILDCHAIN</a>.</p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>This project is licensed under the GNU General Public License v3.0 (GPL-3.0-only). See the <a class="reference external" href="https://github.com/TRACE-Structures/uncertain_variables/tree/main?tab=GPL-3.0-1-ov-file">LICENSE</a> file for details.</p>
+</section>
+<section id="related-projects">
+<h2>Related Projects<a class="headerlink" href="#related-projects" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/TRACE-Structures/gPCE_model/">gPCE_model</a>: Generalized Polynomial Chaos Expansion</p></li>
+<li><p><a class="reference external" href="https://github.com/TRACE-Structures/digital_twinning/">digital_twinning</a>: Digital Twinning</p></li>
+</ul>
+</section>
+<section id="support">
+<h2>Support<a class="headerlink" href="#support" title="Link to this heading"></a></h2>
+<p>For issues, questions, or contributions, please refer to the project repository or contact the authors.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api/uncertain_variables.distributions.html" class="btn btn-neutral float-right" title="Distributions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

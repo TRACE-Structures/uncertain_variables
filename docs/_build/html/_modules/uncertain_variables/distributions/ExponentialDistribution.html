@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>uncertain_variables.distributions.ExponentialDistribution &#8212; uncertain-variables v1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=76e2d817"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for uncertain_variables.distributions.ExponentialDistribution</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.Distribution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Distribution</span><span class="p">,</span> <span class="n">unwrap_if_scalar</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<div class="viewcode-block" id="ExponentialDistribution">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExponentialDistribution</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class for exponential distribution.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lambda_ : float</span>
+<span class="sd">            Rate parameter of the exponential distribution.</span>
+
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        __init__(lambda_)</span>
+<span class="sd">            Initialize the exponential distribution with rate parameter lambda_.</span>
+
+<span class="sd">        __repr__()</span>
+<span class="sd">            Returns the string representation of the ExponentialDistribution object.</span>
+
+<span class="sd">        get_dist_type()</span>
+<span class="sd">            Return the type of the distribution.</span>
+<span class="sd">        </span>
+<span class="sd">        get_dist_params()</span>
+<span class="sd">            Return the parameters of the distribution.</span>
+
+<span class="sd">        pdf(x)</span>
+<span class="sd">            Return the probability density function of the exponential distribution, evaluated at x.</span>
+
+<span class="sd">        cdf(x)</span>
+<span class="sd">            Return the cumulative distribution function of the exponential distribution, evaluated at x.</span>
+
+<span class="sd">        invcdf(y)</span>
+<span class="sd">            Return the inverse cumulative distribution function of the exponential distribution, evaluated at y.</span>
+
+<span class="sd">        mean()</span>
+<span class="sd">            Return the mean of the exponential distribution.</span>
+
+<span class="sd">        var()</span>
+<span class="sd">            Return the variance of the exponential distribution.</span>
+
+<span class="sd">        skew()</span>
+<span class="sd">            Return the skewness of the exponential distribution.</span>
+
+<span class="sd">        kurt()</span>
+<span class="sd">            Return the kurtosis of the exponential distribution.</span>
+
+<span class="sd">        sample(n, method=&#39;MC&#39;, **params)</span>
+<span class="sd">            Return n samples from the exponential distribution.</span>
+
+<span class="sd">        orth_polysys()</span>
+<span class="sd">            Return the GPC polynomial system for the exponential distribution.</span>
+
+<span class="sd">        orth_polysys_syschar(normalized)</span>
+<span class="sd">            Return the GPC polynomial system characteristic string for the exponential distribution.</span>
+
+<span class="sd">        get_base_dist()</span>
+<span class="sd">            Return the GPC base distribution.</span>
+
+<span class="sd">        base2dist(y)</span>
+<span class="sd">            Convert from base (germ) space to exponential distribution space.</span>
+
+<span class="sd">        dist2base(x)</span>
+<span class="sd">            Convert from exponential distribution space to base (germ) space.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="ExponentialDistribution.__init__">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize the exponential distribution with rate parameter lambda_.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            lambda_ : float</span>
+<span class="sd">                Rate parameter of the exponential distribution.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span> <span class="o">=</span> <span class="n">lambda_</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.__repr__">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the string representation of the ExponentialDistribution object.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            repr_string : str</span>
+<span class="sd">                String representation of the ExponentialDistribution object.&quot;&quot;&quot;</span>
+        
+        <span class="n">repr_string</span> <span class="o">=</span> <span class="s2">&quot;Exp(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">repr_string</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Check if two ExponentialDistribution objects are equal.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            other : ExponentialDistribution</span>
+<span class="sd">                Another ExponentialDistribution object to compare with.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            is_equal : bool</span>
+<span class="sd">                True if the two ExponentialDistribution objects are equal, False otherwise.&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ExponentialDistribution</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">is_equal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">lambda_</span>
+        <span class="k">return</span> <span class="n">is_equal</span>
+    
+<div class="viewcode-block" id="ExponentialDistribution.get_dist_type">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.get_dist_type">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dist_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the type of the distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            type_string : str</span>
+<span class="sd">                Type of the distribution.&quot;&quot;&quot;</span>
+        
+        <span class="n">type_string</span> <span class="o">=</span> <span class="s2">&quot;exp&quot;</span>
+        <span class="k">return</span> <span class="n">type_string</span></div>
+
+    
+<div class="viewcode-block" id="ExponentialDistribution.get_dist_params">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.get_dist_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dist_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the parameters of the distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            params : float</span>
+<span class="sd">                Parameters of the distribution (lambda_).&quot;&quot;&quot;</span>
+        
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.pdf">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.pdf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the probability density function of the exponential distribution, evaluated at x.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points at which to evaluate the pdf.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Probability density function values at x.&quot;&quot;&quot;</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">unwrap_if_scalar</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.cdf">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.cdf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the cumulative distribution function of the exponential distribution, evaluated at x.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points at which to evaluate the cdf.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Cumulative distribution function values at x.&quot;&quot;&quot;</span>
+        
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="c1"># y = np.zeros(np.size(x))</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">unwrap_if_scalar</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.invcdf">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.invcdf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the inverse cumulative distribution function of the exponential distribution, evaluated at y.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Points at which to evaluate the invcdf.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Inverse cumulative distribution function values at y.&quot;&quot;&quot;</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># ignore RuntimeWarning in case x == 0</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">unwrap_if_scalar</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.mean">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.mean">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the mean of the exponential distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            mean : float</span>
+<span class="sd">                Mean of the exponential distribution.&quot;&quot;&quot;</span>
+        
+        <span class="n">mean</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span>
+        <span class="k">return</span> <span class="n">mean</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.var">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.var">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the variance of the exponential distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            var : float</span>
+<span class="sd">                Variance of the exponential distribution.&quot;&quot;&quot;</span>
+            
+        <span class="n">var</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">return</span> <span class="n">var</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.skew">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.skew">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">skew</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the skewness of the exponential distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            skew : float</span>
+<span class="sd">                Skewness of the exponential distribution.&quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.kurt">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.kurt">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">kurt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the kurtosis of the exponential distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            kurt : float</span>
+<span class="sd">                Kurtosis of the exponential distribution.&quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="mi">6</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.sample">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.sample">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;MC&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return n samples from the exponential distribution.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            n : int</span>
+<span class="sd">                Number of samples to generate.</span>
+
+<span class="sd">            method : str, optional</span>
+<span class="sd">                Sampling method to use (default is &#39;MC&#39; for Monte Carlo).</span>
+<span class="sd">            </span>
+<span class="sd">            **params : dict</span>
+<span class="sd">                Additional parameters for the sampling method.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            samples : array_like</span>
+<span class="sd">                Generated samples from the exponential distribution.&quot;&quot;&quot;</span>
+        
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.UniformDistribution</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformDistribution</span>
+        <span class="n">yi</span> <span class="o">=</span> <span class="n">UniformDistribution</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="n">yi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">xi</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.orth_polysys">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.orth_polysys">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">orth_polysys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the GPC polynomial system for the exponential distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys : PolynomialSystem object</span>
+<span class="sd">                GPC polynomial system for the exponential distribution.&quot;&quot;&quot;</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">polysys</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaguerrePolynomials</span>
+
+            <span class="n">polysys</span> <span class="o">=</span> <span class="n">LaguerrePolynomials</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Distribution</span><span class="o">.</span><span class="n">orth_polysys</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">polysys</span></div>
+
+    
+<div class="viewcode-block" id="ExponentialDistribution.orth_polysys_syschar">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.orth_polysys_syschar">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">orth_polysys_syschar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalized</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the GPC polynomial system characteristic string for the exponential distribution.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            normalized : bool</span>
+<span class="sd">                Flag indicating whether to return the normalized polynomial system characteristic string.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            polysys_char : str</span>
+<span class="sd">                GPC polynomial system characteristic string for the exponential distribution.&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">normalized</span><span class="p">:</span>
+                <span class="n">polysys_char</span> <span class="o">=</span> <span class="s1">&#39;L&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">polysys_char</span> <span class="o">=</span> <span class="s1">&#39;l&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">polysys_char</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">polysys_char</span></div>
+
+
+
+<div class="viewcode-block" id="ExponentialDistribution.get_base_dist">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.get_base_dist">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_base_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the GPC base distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            dist_germ : Distribution object</span>
+<span class="sd">                GPC base distribution.&quot;&quot;&quot;</span>
+            
+        <span class="n">base</span> <span class="o">=</span> <span class="n">ExponentialDistribution</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.base2dist">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.base2dist">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">base2dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Convert from base (germ) space to exponential distribution space.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Points in base (germ) space.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in exponential distribution space.&quot;&quot;&quot;</span>
+            
+        <span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="ExponentialDistribution.dist2base">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.ExponentialDistribution.html#uncertain_variables.distributions.ExponentialDistribution.ExponentialDistribution.dist2base">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dist2base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Convert from exponential distribution space to base (germ) space.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in exponential distribution space.</span>
+<span class="sd">            </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Points in base (germ) space.&quot;&quot;&quot;</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">uncertain-variables</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">uncertain_variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../uncertain_variables.html">uncertain_variables</a><ul>
+  <li><a href="../distributions.html">uncertain_variables.distributions</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

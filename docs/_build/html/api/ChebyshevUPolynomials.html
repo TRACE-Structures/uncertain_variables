@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChebyshevUPolynomials &mdash; uncertain-variables v1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=76e2d817"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="HermitePolynomials" href="HermitePolynomials.html" />
+    <link rel="prev" title="ChebyshevTPolynomials" href="ChebyshevTPolynomials.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            uncertain-variables
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="uncertain_variables.html">uncertain_variables</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.html#distributions">Distributions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="uncertain_variables.html#polysys">Polysys</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ChebyshevTPolynomials.html">ChebyshevTPolynomials</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ChebyshevUPolynomials</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials"><code class="docutils literal notranslate"><span class="pre">ChebyshevUPolynomials</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="HermitePolynomials.html">HermitePolynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="JacobiPolynomials.html">JacobiPolynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LaguerrePolynomials.html">LaguerrePolynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LegendrePolynomials.html">LegendrePolynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Monomials.html">uncertain_variables.polysys.Monomials module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="NormalizedPolynomials.html">NormalizedPolynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PolynomialSystem.html">PolynomialSystem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.html#variable">Variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.html#variableset">VariableSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.html#module-uncertain_variables">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">uncertain-variables</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="uncertain_variables.html">uncertain_variables</a></li>
+      <li class="breadcrumb-item active">ChebyshevUPolynomials</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ChebyshevUPolynomials.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-uncertain_variables.polysys.ChebyshevUPolynomials">
+<span id="chebyshevupolynomials"></span><h1>ChebyshevUPolynomials<a class="headerlink" href="#module-uncertain_variables.polysys.ChebyshevUPolynomials" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uncertain_variables.polysys.ChebyshevUPolynomials.</span></span><span class="sig-name descname"><span class="pre">ChebyshevUPolynomials</span></span><a class="reference internal" href="../_modules/uncertain_variables/polysys/ChebyshevUPolynomials.html#ChebyshevUPolynomials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="PolynomialSystem.html#uncertain_variables.polysys.PolynomialSystem.PolynomialSystem" title="uncertain_variables.polysys.PolynomialSystem.PolynomialSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialSystem</span></code></a></p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code>(deg, xi)</p></td>
+<td><p>Evaluate polynomial system up to degree <cite>deg</cite> at points <cite>xi</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.normalized" title="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.normalized"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalized</span></code></a>()</p></td>
+<td><p>Return normalized version of second kind Chebyshev polynomial system.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.recur_coeff" title="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.recur_coeff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recur_coeff</span></code></a>(deg)</p></td>
+<td><p>Abstract method to return the recurrence coefficients of the polynomial system.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.sqnorm" title="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.sqnorm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqnorm</span></code></a>(self, n)</p></td>
+<td><p>Return the squared norm of the polynomials of degree <cite>n</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqnorm_by_rc</span></code>(rc)</p></td>
+<td><p>Return the squared norm using recurrence coefficients <cite>rc</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.weighting_dist" title="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.weighting_dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weighting_dist</span></code></a>()</p></td>
+<td><p>Abstract method to return the weighting distribution of the polynomial system.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.normalized">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalized</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/polysys/ChebyshevUPolynomials.html#ChebyshevUPolynomials.normalized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.normalized" title="Link to this definition"></a></dt>
+<dd><p>Return normalized version of second kind Chebyshev polynomial system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>polysys</strong> – Wrapped normalized second kind Chebyshev polynomial system.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="NormalizedPolynomials.html#uncertain_variables.polysys.NormalizedPolynomials.NormalizedPolynomials" title="uncertain_variables.polysys.NormalizedPolynomials.NormalizedPolynomials">NormalizedPolynomials</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.recur_coeff">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">recur_coeff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/polysys/ChebyshevUPolynomials.html#ChebyshevUPolynomials.recur_coeff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.recur_coeff" title="Link to this definition"></a></dt>
+<dd><p>Abstract method to return the recurrence coefficients of the polynomial system.
+Subclasses must implement this method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.sqnorm">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sqnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/polysys/ChebyshevUPolynomials.html#ChebyshevUPolynomials.sqnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.sqnorm" title="Link to this definition"></a></dt>
+<dd><p>Return the squared norm of the polynomials of degree <cite>n</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>array_like</em>) – Degrees for which the squared norms are computed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nrm2</strong> – Array of squared norms corresponding to degrees in <cite>n</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.weighting_dist">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weighting_dist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/polysys/ChebyshevUPolynomials.html#ChebyshevUPolynomials.weighting_dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.polysys.ChebyshevUPolynomials.ChebyshevUPolynomials.weighting_dist" title="Link to this definition"></a></dt>
+<dd><p>Abstract method to return the weighting distribution of the polynomial system.
+Subclasses must implement this method.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ChebyshevTPolynomials.html" class="btn btn-neutral float-left" title="ChebyshevTPolynomials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="HermitePolynomials.html" class="btn btn-neutral float-right" title="HermitePolynomials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

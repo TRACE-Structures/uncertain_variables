@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>uncertain_variables.distributions.Distribution &#8212; uncertain-variables v1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=76e2d817"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for uncertain_variables.distributions.Distribution</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats.qmc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Halton</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats.qmc</span><span class="w"> </span><span class="kn">import</span> <span class="n">LatinHypercube</span> <span class="k">as</span> <span class="n">LHS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats.qmc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sobol</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">)</span>
+
+<div class="viewcode-block" id="unwrap_if_scalar">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.unwrap_if_scalar">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">unwrap_if_scalar</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the item if the array has only one element, else return the array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        arr : array_like</span>
+<span class="sd">            Input array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output : scalar or array_like</span>
+<span class="sd">            Unwrapped item if arr has one element, else arr itself.&quot;&quot;&quot;</span>
+    
+    <span class="n">output</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">arr</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="Distribution">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Distribution</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39; Abstract class for probability distributions.</span>
+
+<span class="sd">        Methods</span>
+<span class="sd">        -------</span>
+<span class="sd">        moments()</span>
+<span class="sd">            Return the moments of the distribution.</span>
+<span class="sd">            </span>
+<span class="sd">        logpdf(x)</span>
+<span class="sd">            Return the log of the probability density function of the distribution, evaluated at x.</span>
+<span class="sd">            </span>
+<span class="sd">        sample(n, method=&#39;MC&#39;, **params)</span>
+<span class="sd">            Return n samples from the distribution.</span>
+<span class="sd">            </span>
+<span class="sd">        translate(shift, scale)</span>
+<span class="sd">            Return a translated and scaled version of the distribution.</span>
+
+<span class="sd">        fix_moments(mean, var)</span>
+<span class="sd">            Fix the distribution to have specified mean and variance.</span>
+
+<span class="sd">        fix_bounds(min, max, q0=0, q1=1)</span>
+<span class="sd">            Fix the distribution to have specified bounds.</span>
+
+<span class="sd">        stdnor2base(x)</span>
+<span class="sd">            Convert from standard normal space to distribution space.</span>
+
+<span class="sd">        base2stdnor(y)</span>
+<span class="sd">            Convert from distribution space to standard normal space.</span>
+<span class="sd">            </span>
+<span class="sd">        get_base_dist()</span>
+<span class="sd">            Return the GPC base distribution.</span>
+<span class="sd">            </span>
+<span class="sd">        base2dist(y)</span>
+<span class="sd">            Convert from base (germ) space to distribution space.</span>
+<span class="sd">            </span>
+<span class="sd">        dist2base(x)</span>
+<span class="sd">            Convert from distribution space to base (germ) space.</span>
+<span class="sd">            </span>
+<span class="sd">        orth_polysys()</span>
+<span class="sd">            Return the GPC polynomial system.</span>
+
+<span class="sd">        get_bounds(delta=0.02)</span>
+<span class="sd">            Return the bounds of the distribution.&#39;&#39;&#39;</span>
+            
+<div class="viewcode-block" id="Distribution.pdf">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.pdf">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the probability density function of the distribution, evaluated at x.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Distribution.cdf">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.cdf">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the cumulative distribution function of the distribution, evaluated at x.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Distribution.invcdf">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.invcdf">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the inverse cumulative distribution function of the distribution, evaluated at y.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Distribution.mean">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.mean">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the mean of the distribution.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Distribution.var">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.var">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the variance of the distribution.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Distribution.skew">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.skew">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">skew</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the skewness of the distribution.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Distribution.kurt">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.kurt">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">kurt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Abstract method to return the kurtosis of the distribution.</span>
+<span class="sd">            Subclasses must implement this method.&#39;&#39;&#39;</span>
+        
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Distribution.moments">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.moments">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">moments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the moments of the distribution.</span>
+<span class="sd">        </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            moments : list</span>
+<span class="sd">                List containing the mean, variance, skewness, and kurtosis of the distribution.&#39;&#39;&#39;</span>
+        
+        <span class="n">moments</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">skew</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">kurt</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">moments</span></div>
+
+
+<div class="viewcode-block" id="Distribution.logpdf">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.logpdf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logpdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the log of the probability density function of the distribution, evaluated at x.</span>
+<span class="sd">        </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points at which to evaluate the logpdf.</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Log probability density function values at x.&#39;&#39;&#39;</span>
+        
+        <span class="n">pdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="Distribution.sample">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.sample">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;MC&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;MC&quot;</span><span class="p">:</span>
+            <span class="n">yi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;QMC_Halton&quot;</span><span class="p">:</span>
+            <span class="n">sampler</span> <span class="o">=</span> <span class="n">Halton</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">yi</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;QMC_LHS&quot;</span><span class="p">:</span>
+            <span class="n">sampler</span> <span class="o">=</span> <span class="n">LHS</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">yi</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;QMC_Sobol&quot;</span><span class="p">:</span>
+            <span class="n">sampler</span> <span class="o">=</span> <span class="n">Sobol</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">yi</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></div>
+
+        <span class="c1"># elif method == &#39;Sobol_saltelli&#39;: # It&#39;s not</span>
+
+
+<div class="viewcode-block" id="Distribution.translate">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.translate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return a translated and scaled version of the distribution.</span>
+<span class="sd">            </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            shift : float</span>
+<span class="sd">                Shift to apply to the distribution.</span>
+
+<span class="sd">            scale : float</span>
+<span class="sd">                Scale to apply to the distribution.</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            tdist : TranslatedDistribution</span>
+<span class="sd">                Translated and scaled distribution.&#39;&#39;&#39;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.TranslatedDistribution</span><span class="w"> </span><span class="kn">import</span> <span class="n">TranslatedDistribution</span>
+        <span class="n">tdist</span> <span class="o">=</span> <span class="n">TranslatedDistribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tdist</span></div>
+
+
+<div class="viewcode-block" id="Distribution.get_shift">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.get_shift">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the shift of the distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            shift : float</span>
+<span class="sd">                Shift of the distribution.&quot;&quot;&quot;</span>
+        
+        <span class="n">shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">-</span><span class="n">shift</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift</span></div>
+
+
+<div class="viewcode-block" id="Distribution.get_scale">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.get_scale">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the scale of the distribution.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            scale : float</span>
+<span class="sd">                Scale of the distribution.&quot;&quot;&quot;</span>
+        
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="k">return</span> <span class="n">scale</span></div>
+
+
+<div class="viewcode-block" id="Distribution.fix_moments">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.fix_moments">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fix_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Fix the distribution to have specified mean and variance.</span>
+<span class="sd">        </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            mean : float</span>
+<span class="sd">                Desired mean of the distribution.</span>
+<span class="sd">                </span>
+<span class="sd">            var : float</span>
+<span class="sd">                Desired variance of the distribution.</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            new_dist : TranslatedDistribution</span>
+<span class="sd">                Translated and scaled distribution with specified moments.&#39;&#39;&#39;</span>
+        
+        <span class="n">old_mean</span><span class="p">,</span> <span class="n">old_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="n">mean</span> <span class="o">-</span> <span class="n">old_mean</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span> <span class="o">/</span> <span class="n">old_var</span><span class="p">)</span>
+        <span class="n">new_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_dist</span></div>
+
+
+<div class="viewcode-block" id="Distribution.fix_bounds">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.fix_bounds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fix_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">q1</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Fix the distribution to have specified bounds.</span>
+<span class="sd">        </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            min : float</span>
+<span class="sd">                Desired minimum of the distribution.</span>
+<span class="sd">                </span>
+<span class="sd">            max : float</span>
+<span class="sd">                Desired maximum of the distribution.</span>
+<span class="sd">                </span>
+<span class="sd">            q0 : float, optional</span>
+<span class="sd">                Quantile corresponding to the minimum (default is 0).</span>
+<span class="sd">                </span>
+<span class="sd">            q1 : float, optional</span>
+<span class="sd">                Quantile corresponding to the maximum (default is 1).</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            new_dist : TranslatedDistribution</span>
+<span class="sd">                Translated and scaled distribution with specified bounds.&#39;&#39;&#39;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">q0</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q0 must be between 0 and 1, got </span><span class="si">{</span><span class="n">q0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">q0</span> <span class="o">&lt;=</span> <span class="n">q1</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q1 must be between q0 and 1, got </span><span class="si">{</span><span class="n">q1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">old_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
+        <span class="n">old_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">old_min</span><span class="p">):</span>
+            <span class="c1"># raise ValueError(f&quot;Lower quantile (q0) gives infinity (unbounded distribution?)&quot;)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Lower quantile (q0) gives infinity (unbounded distribution?). Using new q0=0.02&quot;</span>
+            <span class="p">)</span>
+            <span class="n">old_min</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bounds</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">old_max</span><span class="p">):</span>
+            <span class="c1"># raise ValueError(f&quot;Upper quantile (q1) gives infinity (unbounded distribution?)&quot;)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Upper quantile (q1) gives infinity (unbounded distribution?). Using new q1=0.98&quot;</span>
+            <span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">old_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bounds</span><span class="p">()</span>
+
+        <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">old_max</span> <span class="o">-</span> <span class="n">old_min</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="nb">min</span> <span class="o">-</span> <span class="p">((</span><span class="n">old_min</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">+</span> <span class="n">center</span><span class="p">)</span>
+        <span class="n">new_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_dist</span></div>
+
+
+<div class="viewcode-block" id="Distribution.stdnor2base">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.stdnor2base">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stdnor2base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Convert from standard normal space to distribution space.</span>
+<span class="sd">        </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in standard normal space.</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Points in distribution space.&#39;&#39;&#39;</span>
+        
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.NormalDistribution</span><span class="w"> </span><span class="kn">import</span> <span class="n">NormalDistribution</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="n">NormalDistribution</span><span class="p">()</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="Distribution.base2stdnor">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.base2stdnor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">base2stdnor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Convert from distribution space to standard normal space.</span>
+<span class="sd">        </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Points in distribution space.</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in standard normal space.&#39;&#39;&#39;</span>
+        
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.NormalDistribution</span><span class="w"> </span><span class="kn">import</span> <span class="n">NormalDistribution</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">NormalDistribution</span><span class="p">()</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="Distribution.get_base_dist">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.get_base_dist">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_base_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the GPC base distribution.</span>
+<span class="sd">            </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            dist_germ : Distribution object</span>
+<span class="sd">                GPC base distribution.&#39;&#39;&#39;</span>
+        
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.NormalDistribution</span><span class="w"> </span><span class="kn">import</span> <span class="n">NormalDistribution</span>
+        <span class="n">dist_germ</span> <span class="o">=</span> <span class="n">NormalDistribution</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist_germ</span></div>
+
+
+<div class="viewcode-block" id="Distribution.base2dist">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.base2dist">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">base2dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Convert from base (germ) space to distribution space.</span>
+<span class="sd">            </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Points in base (germ) space.</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in distribution space.&#39;&#39;&#39;</span>
+        
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_base_dist</span><span class="p">()</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="Distribution.dist2base">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.dist2base">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dist2base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Convert from distribution space to base (germ) space.</span>
+<span class="sd">            </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            x : array_like</span>
+<span class="sd">                Points in distribution space.</span>
+<span class="sd">                </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            y : array_like</span>
+<span class="sd">                Points in base (germ) space.&#39;&#39;&#39;</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_base_dist</span><span class="p">()</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="Distribution.orth_polysys">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.orth_polysys">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">orth_polysys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the GPC polynomial system.</span>
+
+<span class="sd">            Raises</span>
+<span class="sd">            ------</span>
+<span class="sd">            Exception</span>
+<span class="sd">                If no polynomial system is defined for this distribution.&quot;&quot;&quot;</span>
+        
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No polynomial system for this distribution (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Distribution.get_bounds">
+<a class="viewcode-back" href="../../../api/uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution.get_bounds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; Return the bounds of the distribution.</span>
+<span class="sd">            </span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            delta : float, optional</span>
+<span class="sd">                Small probability to define the bounds (default is 0.02).</span>
+<span class="sd">            </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            bounds : array_like</span>
+<span class="sd">                Bounds of the distribution as [lower_bound, upper_bound].&#39;&#39;&#39;</span>
+        
+        <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">delta</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">delta</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">bounds</span></div>
+</div>
+
+    
+    
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">uncertain-variables</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">uncertain_variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../uncertain_variables.html">uncertain_variables</a><ul>
+  <li><a href="../distributions.html">uncertain_variables.distributions</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

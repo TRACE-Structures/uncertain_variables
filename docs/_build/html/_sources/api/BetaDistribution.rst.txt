@@ -1,0 +1,7 @@
+BetaDistribution
+================
+
+.. automodule:: BetaDistribution
+   :members:
+   :show-inheritance:
+   :undoc-members:

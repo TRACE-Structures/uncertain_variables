@@ -1,0 +1,663 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniformDistribution &mdash; uncertain-variables v1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=76e2d817"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="uncertain_variables.polysys package" href="uncertain_variables.polysys.html" />
+    <link rel="prev" title="TranslatedDistribution" href="uncertain_variables.distributions.TranslatedDistribution.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            uncertain-variables
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">uncertain_variables</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="uncertain_variables.distributions.html">Distributions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.html#uncertain_variables.distributions.get_mu_and_sigma_of_lognormal"><code class="docutils literal notranslate"><span class="pre">get_mu_and_sigma_of_lognormal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.Distribution.html">Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.BetaDistribution.html">BetaDistribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.ExponentialDistribution.html">ExponentialDistribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.LogNormalDistribution.html">LogNormalDistribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.NormalDistribution.html">NormalDistribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.SemiCircleDistribution.html">SemiCircleDistribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertain_variables.distributions.TranslatedDistribution.html">TranslatedDistribution</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">UniformDistribution</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution"><code class="docutils literal notranslate"><span class="pre">UniformDistribution</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.a"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.a</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.b"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.b</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.__init__"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.__repr__"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.__repr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_type"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_dist_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_params"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_dist_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.pdf"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.pdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.logpdf"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.logpdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.cdf"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.cdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.invcdf"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.invcdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.mean"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.var"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.var()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.skew"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.skew()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.kurt"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.kurt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.translate"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.translate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_base_dist"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_base_dist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.base2dist"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.base2dist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.dist2base"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.dist2base()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.orth_polysys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys_syschar"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.orth_polysys_syschar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_bounds"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_dist_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_dist_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.pdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.logpdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.cdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.invcdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.var()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.skew()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.kurt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.translate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_base_dist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.base2dist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.dist2base()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.orth_polysys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.orth_polysys_syschar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16"><code class="docutils literal notranslate"><span class="pre">UniformDistribution.get_bounds()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="uncertain_variables.polysys.html">uncertain_variables.polysys package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uncertain_variables.variable.html">uncertain_variables.variable module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">uncertain-variables</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="uncertain_variables.distributions.html">Distributions</a></li>
+      <li class="breadcrumb-item active">UniformDistribution</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/uncertain_variables.distributions.UniformDistribution.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-uncertain_variables.distributions.UniformDistribution">
+<span id="uniformdistribution"></span><h1>UniformDistribution<a class="headerlink" href="#module-uncertain_variables.distributions.UniformDistribution" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uncertain_variables.distributions.UniformDistribution.</span></span><span class="sig-name descname"><span class="pre">UniformDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="uncertain_variables.distributions.Distribution.html#uncertain_variables.distributions.Distribution.Distribution" title="uncertain_variables.distributions.Distribution.Distribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distribution</span></code></a></p>
+<p>Class for uniform distribution.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.a">
+<span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.a" title="Link to this definition"></a></dt>
+<dd><p>Lower bound of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.b">
+<span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.b" title="Link to this definition"></a></dt>
+<dd><p>Upper bound of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the uniform distribution with bounds a and b.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Returns the string representation of the UniformDistribution object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_type">
+<span class="sig-name descname"><span class="pre">get_dist_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_dist_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_type" title="Link to this definition"></a></dt>
+<dd><p>Return the type of the distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_params">
+<span class="sig-name descname"><span class="pre">get_dist_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_dist_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_params" title="Link to this definition"></a></dt>
+<dd><p>Return the parameters of the distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.pdf">
+<span class="sig-name descname"><span class="pre">pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.pdf" title="Link to this definition"></a></dt>
+<dd><p>Return the probability density function of the uniform distribution, evaluated at x.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.logpdf">
+<span class="sig-name descname"><span class="pre">logpdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.logpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.logpdf" title="Link to this definition"></a></dt>
+<dd><p>Return the log of the probability density function of the uniform distribution, evaluated at x.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.cdf">
+<span class="sig-name descname"><span class="pre">cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.cdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.cdf" title="Link to this definition"></a></dt>
+<dd><p>Return the cumulative distribution function of the uniform distribution, evaluated at x.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.invcdf">
+<span class="sig-name descname"><span class="pre">invcdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.invcdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.invcdf" title="Link to this definition"></a></dt>
+<dd><p>Return the inverse cumulative distribution function of the uniform distribution, evaluated at y.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.mean" title="Link to this definition"></a></dt>
+<dd><p>Return the mean of the uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.var">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.var" title="Link to this definition"></a></dt>
+<dd><p>Return the variance of the uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.skew">
+<span class="sig-name descname"><span class="pre">skew</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.skew"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.skew" title="Link to this definition"></a></dt>
+<dd><p>Return the skewness of the uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.kurt">
+<span class="sig-name descname"><span class="pre">kurt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.kurt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.kurt" title="Link to this definition"></a></dt>
+<dd><p>Return the kurtosis of the uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.translate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.translate" title="Link to this definition"></a></dt>
+<dd><p>Return a translated and scaled version of the uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_base_dist">
+<span class="sig-name descname"><span class="pre">get_base_dist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_base_dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_base_dist" title="Link to this definition"></a></dt>
+<dd><p>Return the GPC base distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.base2dist">
+<span class="sig-name descname"><span class="pre">base2dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.base2dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.base2dist" title="Link to this definition"></a></dt>
+<dd><p>Convert from base (germ) space to uniform distribution space.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.dist2base">
+<span class="sig-name descname"><span class="pre">dist2base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.dist2base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.dist2base" title="Link to this definition"></a></dt>
+<dd><p>Convert from uniform distribution space to base (germ) space.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys">
+<span class="sig-name descname"><span class="pre">orth_polysys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.orth_polysys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys" title="Link to this definition"></a></dt>
+<dd><p>Return the GPC polynomial system for the uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys_syschar">
+<span class="sig-name descname"><span class="pre">orth_polysys_syschar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normalized</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.orth_polysys_syschar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys_syschar" title="Link to this definition"></a></dt>
+<dd><p>Return the GPC polynomial system characteristic string for the uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_bounds">
+<span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_bounds" title="Link to this definition"></a></dt>
+<dd><p>Return the bounds of the uniform distribution.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id12" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.base2dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base2dist</span></code></a>(y)</p></td>
+<td><p>Convert from base (germ) space to uniform distribution space.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">base2stdnor</span></code>(y)</p></td>
+<td><p>Convert from distribution space to standard normal space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id4" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.cdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cdf</span></code></a>(x)</p></td>
+<td><p>Return the cumulative distribution function of the uniform distribution, evaluated at x.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id13" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.dist2base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dist2base</span></code></a>(x)</p></td>
+<td><p>Convert from uniform distribution space to base (germ) space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fix_bounds</span></code>(min, max[, q0, q1])</p></td>
+<td><p>Fix the distribution to have specified bounds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fix_moments</span></code>(mean, var)</p></td>
+<td><p>Fix the distribution to have specified mean and variance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id11" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_base_dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_base_dist</span></code></a>()</p></td>
+<td><p>Return the GPC base distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id16" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bounds</span></code></a>([delta])</p></td>
+<td><p>Return the bounds of the uniform distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dist_params</span></code></a>()</p></td>
+<td><p>Return the parameters of the distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.get_dist_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dist_type</span></code></a>()</p></td>
+<td><p>Return the type of the distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scale</span></code>()</p></td>
+<td><p>Return the scale of the distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_shift</span></code>()</p></td>
+<td><p>Return the shift of the distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id5" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.invcdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">invcdf</span></code></a>(y)</p></td>
+<td><p>Return the inverse cumulative distribution function of the uniform distribution, evaluated at y.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id9" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.kurt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kurt</span></code></a>()</p></td>
+<td><p>Return the kurtosis of the uniform distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id3" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.logpdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logpdf</span></code></a>(x)</p></td>
+<td><p>Return the log of the probability density function of the uniform distribution, evaluated at x.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id6" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></a>()</p></td>
+<td><p>Return the mean of the uniform distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moments</span></code>()</p></td>
+<td><p>Return the moments of the distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id14" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">orth_polysys</span></code></a>()</p></td>
+<td><p>Return the GPC polynomial system for the uniform distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id15" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.orth_polysys_syschar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">orth_polysys_syschar</span></code></a>(normalized)</p></td>
+<td><p>Return the GPC polynomial system characteristic string for the uniform distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.pdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf</span></code></a>(x)</p></td>
+<td><p>Return the probability density function of the uniform distribution, evaluated at x.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id8" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.skew"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skew</span></code></a>()</p></td>
+<td><p>Return the skewness of the uniform distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stdnor2base</span></code>(x)</p></td>
+<td><p>Convert from standard normal space to distribution space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.translate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">translate</span></code></a>(shift, scale)</p></td>
+<td><p>Return a translated and scaled version of the uniform distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id7" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution.var"><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code></a>()</p></td>
+<td><p>Return the variance of the uniform distribution.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>sample</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">get_dist_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_dist_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Return the type of the distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dist_type</strong> – Type of the distribution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">get_dist_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_dist_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>Return the parameters of the distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> – Parameters of the distribution (a, b).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Return the probability density function of the uniform distribution, evaluated at x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>array_like</em>) – Points at which to evaluate the pdf.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>y</strong> – Probability density function values at x.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">logpdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.logpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>Return the log of the probability density function of the uniform distribution, evaluated at x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>array_like</em>) – Points at which to evaluate the logpdf.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>y</strong> – Log probability density function values at x.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.cdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>Return the cumulative distribution function of the uniform distribution, evaluated at x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>array_like</em>) – Points at which to evaluate the cdf.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>y</strong> – Cumulative distribution function values at x.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">invcdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.invcdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>Return the inverse cumulative distribution function of the uniform distribution, evaluated at y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>y</strong> (<em>array_like</em>) – Points at which to evaluate the invcdf.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>x</strong> – Inverse cumulative distribution function values at y.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><p>Return the mean of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mean</strong> – Mean of the uniform distribution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>Return the variance of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>var</strong> – Variance of the uniform distribution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">skew</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.skew"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>Return the skewness of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skew</strong> – Skewness of the uniform distribution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">kurt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.kurt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd><p>Return the kurtosis of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kurt</strong> – Kurtosis of the uniform distribution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.translate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>Return a translated and scaled version of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shift</strong> (<em>float</em>) – Shift to apply to the distribution.</p></li>
+<li><p><strong>scale</strong> (<em>float</em>) – Scale to apply to the distribution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>new_dist</strong> – Translated and scaled uniform distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#uncertain_variables.distributions.UniformDistribution.UniformDistribution" title="uncertain_variables.distributions.UniformDistribution.UniformDistribution">UniformDistribution</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">get_base_dist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_base_dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd><p>Return the GPC base distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dist_germ</strong> – GPC base distribution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Distribution object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">base2dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.base2dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd><p>Convert from base (germ) space to uniform distribution space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>y</strong> (<em>array_like</em>) – Points in base (germ) space.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>x</strong> – Points in distribution space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">dist2base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.dist2base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd><p>Convert from uniform distribution space to base (germ) space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>array_like</em>) – Points in distribution space.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>y</strong> – Points in base (germ) space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">orth_polysys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.orth_polysys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd><p>Return the GPC polynomial system for the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>polysys</strong> – GPC polynomial system for the uniform distribution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>PolynomialSystem object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">orth_polysys_syschar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normalized</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.orth_polysys_syschar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd><p>Return the GPC polynomial system characteristic string for the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>normalized</strong> (<em>bool</em>) – Flag indicating whether to return the normalized polynomial system characteristic string.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>polysys_char</strong> – GPC polynomial system characteristic string for the uniform distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uncertain_variables/distributions/UniformDistribution.html#UniformDistribution.get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dd><p>Return the bounds of the uniform distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>delta</strong> (<em>int</em><em>, </em><em>optional</em>) – Expansion factor for the bounds (default is 0).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>bounds</strong> – Array containing the lower and upper bounds of the uniform distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="uncertain_variables.distributions.TranslatedDistribution.html" class="btn btn-neutral float-left" title="TranslatedDistribution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="uncertain_variables.polysys.html" class="btn btn-neutral float-right" title="uncertain_variables.polysys package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
