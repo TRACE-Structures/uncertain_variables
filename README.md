@@ -1,6 +1,6 @@
 # uncertain_variables
 
-[![DOI](https://zenodo.org/badge/1114716179.svg)](https://zenodo.org/badge/latestdoi/1114716179)
+[![DOI](https://zenodo.org/badge/1114716179.svg)](https://doi.org/10.5281/zenodo.17904266)
 [![PyPI - Version](https://img.shields.io/pypi/v/uncertain_variables?style=for-the-badge)](https://pypi.org/project/uncertain_variables/)
 
 A Python package for defining and handling variable sets with probability distributions for surrogate modelling and uncertainty quantification applications. The software is built on Elmar Zander's [sglib](https://github.com/ezander/sglib) approach.
