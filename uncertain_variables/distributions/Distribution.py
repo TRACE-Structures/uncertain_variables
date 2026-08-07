@@ -24,48 +24,7 @@ def unwrap_if_scalar(arr):
 
 
 class Distribution(ABC):
-    ''' Abstract class for probability distributions.
-
-        Methods
-        -------
-        moments()
-            Return the moments of the distribution.
-            
-        logpdf(x)
-            Return the log of the probability density function of the distribution, evaluated at x.
-            
-        sample(n, method='MC', **params)
-            Return n samples from the distribution.
-            
-        translate(shift, scale)
-            Return a translated and scaled version of the distribution.
-
-        fix_moments(mean, var)
-            Fix the distribution to have specified mean and variance.
-
-        fix_bounds(min, max, q0=0, q1=1)
-            Fix the distribution to have specified bounds.
-
-        stdnor2base(x)
-            Convert from standard normal space to distribution space.
-
-        base2stdnor(y)
-            Convert from distribution space to standard normal space.
-            
-        get_base_dist()
-            Return the GPC base distribution.
-            
-        base2dist(y)
-            Convert from base (germ) space to distribution space.
-            
-        dist2base(x)
-            Convert from distribution space to base (germ) space.
-            
-        orth_polysys()
-            Return the GPC polynomial system.
-
-        get_bounds(delta=0.02)
-            Return the bounds of the distribution.'''
+    ''' Abstract class for probability distributions.'''
             
     @abstractmethod
     def pdf(self, x):

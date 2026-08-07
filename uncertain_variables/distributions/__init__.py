@@ -1,7 +1,5 @@
 ''' This module implements various probability distributions for uncertainty quantification.
 
-    Classes
-    -------
     Distribution(ABC)
         Abstract base class for probability distributions.
         
@@ -26,8 +24,6 @@
     WignerSemicircleDistribution(Distribution)
         Class for Wigner semicircle distribution.
         
-    Functions
-    ---------
     unwrap_if_scalar(arr)
         Utility function to unwrap single-element arrays.'''
 
