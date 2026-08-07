@@ -7,42 +7,7 @@ class SemiCircleDistribution(Distribution):
         Attributes
         ----------
         radius : float
-            Radius of the semicircle.
-
-        Methods
-        -------
-        __init__(radius)
-            Initialize the Wigner semicircle distribution with radius.
-
-        __repr__()
-            Returns the string representation of the WignerSemicircleDistribution object.
-
-        get_dist_type()
-            Return the type of the distribution.
-
-        get_dist_params()
-            Return the parameters of the distribution.
-
-        pdf(x)
-            Return the probability density function of the Wigner semicircle distribution, evaluated at x.
-
-        cdf(x)
-            Return the cumulative distribution function of the Wigner semicircle distribution, evaluated at x.
-
-        invcdf(y)
-            Return the inverse cumulative distribution function of the Wigner semicircle distribution, evaluated at y.
-
-        mean()
-            Return the mean of the Wigner semicircle distribution.
-
-        var()
-            Return the variance of the Wigner semicircle distribution.
-
-        skew()
-            Return the skewness of the Wigner semicircle distribution.
-
-        kurt()
-            Return the kurtosis of the Wigner semicircle distribution."""
+            Radius of the semicircle."""
 
     def __init__(self, radius):
         """ Initialize the Wigner semicircle distribution with radius.

@@ -21,54 +21,7 @@ class Variable():
             Flag showing whether the variable is fixed.
 
         unit: str, optional
-            Variable unit.
-            
-        Methods
-        -------
-        __init__(self, name, dist_or_num, unit=None, *args, **kwargs)
-            Variable constructor.
-
-        __repr__(self)
-            Returns the string representation of the Variable object.
-
-        mean(self)
-            Return mean value of the distribution.
-
-        var(self)
-            Return variance of the distribution.
-
-        moments(self)
-            Return the moments of the distribution.
-
-        pdf(self, x)
-            Return the probability density function of the distribution, evaluated at x.
-
-        cdf(self, p)
-            Return the cumulative density function of the distribution, evaluated at p.
-        
-        ppf(self, q)
-            Return the percentage point function (inverse of cdf) of the distribution, evaluated at q.
-
-        sample(self, n)
-            Return n samples from the distribution.
-
-        get_gpc_dist(self)
-            Return the GPC base distribution.
-
-        get_gpc_polysys(self, normalized)
-            Return the GPC polynomial system.
-
-        get_gpc_syschar(self, normalized)
-            Return the GPC polynomial system characteristic string.
-
-        param2germ(self, q)
-            Convert from parameter to germ space.
-
-        germ2param(self,x)
-            Convert from germ to parameter space.
-
-        convert_to(self, to_unit: str)
-            Convert the variable and its distribution parameters to a different unit.'''
+            Variable unit.'''
         
     def __init__(self, name :str, dist_or_num, unit=None, *args, **kwargs):
         ''' Variable constructor.

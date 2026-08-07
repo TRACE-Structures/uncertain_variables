@@ -10,66 +10,7 @@ class UniformDistribution(Distribution):
             Lower bound of the uniform distribution.
             
         b : float
-            Upper bound of the uniform distribution.
-            
-        Methods
-        -------
-        __init__(a=0, b=1)
-            Initialize the uniform distribution with bounds a and b.
-            
-        __repr__()
-            Returns the string representation of the UniformDistribution object.
-
-        get_dist_type()
-            Return the type of the distribution.
-
-        get_dist_params()
-            Return the parameters of the distribution.
-            
-        pdf(x)
-            Return the probability density function of the uniform distribution, evaluated at x.
-            
-        logpdf(x)
-            Return the log of the probability density function of the uniform distribution, evaluated at x.
-            
-        cdf(x)
-            Return the cumulative distribution function of the uniform distribution, evaluated at x.
-            
-        invcdf(y)
-            Return the inverse cumulative distribution function of the uniform distribution, evaluated at y.
-            
-        mean()
-            Return the mean of the uniform distribution.
-        
-        var()
-            Return the variance of the uniform distribution.
-            
-        skew()
-            Return the skewness of the uniform distribution.
-            
-        kurt()
-            Return the kurtosis of the uniform distribution.
-            
-        translate(shift, scale)
-            Return a translated and scaled version of the uniform distribution.
-            
-        get_base_dist()
-            Return the GPC base distribution.
-            
-        base2dist(y)
-            Convert from base (germ) space to uniform distribution space.
-            
-        dist2base(x)
-            Convert from uniform distribution space to base (germ) space.
-            
-        orth_polysys()
-            Return the GPC polynomial system for the uniform distribution.
-            
-        orth_polysys_syschar(normalized)
-            Return the GPC polynomial system characteristic string for the uniform distribution.
-            
-        get_bounds(delta=0)
-            Return the bounds of the uniform distribution.'''
+            Upper bound of the uniform distribution.'''
     
     def __init__(self, a=0, b=1):
         ''' Initialize the uniform distribution with bounds a and b.

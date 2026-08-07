@@ -12,61 +12,8 @@ class BetaDistribution(Distribution):
             First shape parameter of the beta distribution.
             
         b : float
-            Second shape parameter of the beta distribution.
-            
-        Methods
-        -------
-        __init__(a, b)
-            Initialize the beta distribution with shape parameters a and b.
-            
-        __repr__()
-            Returns the string representation of the BetaDistribution object.
-            
-        get_dist_type()
-            Return the type of the distribution.
-            
-        get_dist_params()
-            Return the parameters of the distribution.
-            
-        pdf(x)
-            Return the probability density function of the beta distribution, evaluated at x.
-            
-        cdf(x)
-            Return the cumulative distribution function of the beta distribution, evaluated at x.
+            Second shape parameter of the beta distribution.'''
         
-        invcdf(y)
-            Return the inverse cumulative distribution function of the beta distribution, evaluated at y.
-            
-        moments()
-            Return the first four moments of the beta distribution.
-            
-        mean()
-            Return the mean of the beta distribution.
-            
-        var()
-            Return the variance of the beta distribution.
-            
-        skew()
-            Return the skewness of the beta distribution.
-            
-        kurt()
-            Return the kurtosis of the beta distribution.
-            
-        get_base_dist()
-            Return the GPC base distribution.
-            
-        base2dist(y)
-            Convert from base (germ) space to beta distribution space.
-            
-        dist2base(x)
-            Convert from beta distribution space to base (germ) space.
-            
-        orth_polysys()
-            Return the GPC polynomial system for the beta distribution.
-            
-        orth_polysys_syschar(normalized)
-            Return the GPC polynomial system characteristic string for the beta distribution.'''
-    
     def __init__(self, a, b):
         ''' Initialize the beta distribution with shape parameters a and b.
         

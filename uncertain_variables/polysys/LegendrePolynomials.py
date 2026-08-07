@@ -4,21 +4,7 @@ from .NormalizedPolynomials import NormalizedPolynomials
 from ..distributions import UniformDistribution
 
 class LegendrePolynomials(PolynomialSystem):
-    """ Implementation of Legendre polynomial system.
-
-        Methods
-        -------
-        normalized()
-            Return normalized version of Legendre polynomial system.
-            
-        recur_coeff(deg)
-            Return the recurrence coefficients for Legendre polynomials.
-            
-        sqnorm(n)
-            Return the squared norm of Legendre polynomials of degree `n`.
-            
-        weighting_dist()
-            Return the weighting distribution for Legendre polynomials."""
+    """ Implementation of Legendre polynomial system."""
 
     @classmethod
     def normalized(self):

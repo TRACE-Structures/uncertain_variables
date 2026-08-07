@@ -7,60 +7,7 @@ class ExponentialDistribution(Distribution):
         Attributes
         ----------
         lambda_ : float
-            Rate parameter of the exponential distribution.
-
-        Methods
-        -------
-        __init__(lambda_)
-            Initialize the exponential distribution with rate parameter lambda_.
-
-        __repr__()
-            Returns the string representation of the ExponentialDistribution object.
-
-        get_dist_type()
-            Return the type of the distribution.
-        
-        get_dist_params()
-            Return the parameters of the distribution.
-
-        pdf(x)
-            Return the probability density function of the exponential distribution, evaluated at x.
-
-        cdf(x)
-            Return the cumulative distribution function of the exponential distribution, evaluated at x.
-
-        invcdf(y)
-            Return the inverse cumulative distribution function of the exponential distribution, evaluated at y.
-
-        mean()
-            Return the mean of the exponential distribution.
-
-        var()
-            Return the variance of the exponential distribution.
-
-        skew()
-            Return the skewness of the exponential distribution.
-
-        kurt()
-            Return the kurtosis of the exponential distribution.
-
-        sample(n, method='MC', **params)
-            Return n samples from the exponential distribution.
-
-        orth_polysys()
-            Return the GPC polynomial system for the exponential distribution.
-
-        orth_polysys_syschar(normalized)
-            Return the GPC polynomial system characteristic string for the exponential distribution.
-
-        get_base_dist()
-            Return the GPC base distribution.
-
-        base2dist(y)
-            Convert from base (germ) space to exponential distribution space.
-
-        dist2base(x)
-            Convert from exponential distribution space to base (germ) space."""
+            Rate parameter of the exponential distribution."""
     
     def __init__(self, lambda_):
         """ Initialize the exponential distribution with rate parameter lambda_.

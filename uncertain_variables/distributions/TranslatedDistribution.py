@@ -16,63 +16,7 @@ class TranslatedDistribution(Distribution):
             Scaling factor applied to centered values.
 
         center: float
-            Center point for scaling transformation.
-            
-        Methods
-        -------
-        __init__(dist, shift, scale, center=None)
-            Initialize the translated distribution.
-            
-        __repr__()
-            Return a string representation of the translated distribution.
-            
-        get_dist_type()
-            Return the type identifier of this distribution.
-            
-        get_dist_params()
-            Return the parameter tuple of the translated distribution.
-            
-        translate_points(x, forward)
-            Apply the forward or backward affine transformation to points.
-            
-        pdf(x)
-            Evaluate the probability density function.
-
-        cdf(x)
-            Evaluate the cumulative distribution function.
-
-        invcdf(y)
-            Evaluate the inverse cumulative distribution function.
-
-        mean()
-            Return the mean of the translated distribution.
-
-        var()
-            Return the variance of the translated distribution.
-
-        skew()
-            Return the skewness of the translated distribution.
-
-        kurt()
-            Return the kurtosis of the translated distribution.
-
-        sample(n)
-            Draw random samples from the translated distribution.
-
-        moments()
-            Return the first four moments of the translated distribution.
-
-        get_base_dist()
-            Return the underlying base distribution.
-
-        translate_points_forward(x, shift, scale, center)
-            Apply the forward affine transformation.
-
-        translate_points_backwards(x, shift, scale, center)
-            Apply the inverse affine transformation.
-
-        translate_moments(m, shift, scale, center)
-            Transform the moments of a distribution under an affine transformation.'''
+            Center point for scaling transformation.'''
     
     def __init__(self, dist, shift, scale, center=None):
         ''' Initialize the translated distribution.

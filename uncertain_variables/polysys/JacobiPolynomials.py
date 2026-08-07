@@ -12,24 +12,7 @@ class JacobiPolynomials(PolynomialSystem):
             First parameter of Jacobi polynomials.
 
         beta : float
-            Second parameter of Jacobi polynomials.
-
-        Methods
-        -------
-        __init__(alpha, beta)
-            Initialize Jacobi polynomial system with parameters alpha and beta.
-
-        normalized()
-            Return normalized version of Jacobi polynomial system.
-
-        recur_coeff(deg)
-            Return the recurrence coefficients for Jacobi polynomials.
-
-        sqnorm(n)
-            Return the squared norm of Jacobi polynomials of degree `n`.
-
-        weighting_dist()
-            Return the weighting distribution for Jacobi polynomials."""
+            Second parameter of Jacobi polynomials."""
     
     def __init__(self, alpha, beta):
         """ 

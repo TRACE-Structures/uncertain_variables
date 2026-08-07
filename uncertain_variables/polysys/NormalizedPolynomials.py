@@ -7,18 +7,7 @@ class NormalizedPolynomials(PolynomialSystem):
         Attributes
         ----------
         base_polysys : PolynomialSystem
-            The base polynomial system to be normalized.
-
-        Methods
-        -------
-        __init__(base_polysys)
-            Initialize the normalized polynomial system with a base polynomial system.
-
-        recur_coeff(deg)
-            Return the recurrence coefficients for the normalized polynomial system.
-
-        weighting_dist()
-            Return the weighting distribution of the base polynomial system."""
+            The base polynomial system to be normalized."""
     
     def __init__(self, base_polysys):
         """ Initialize the normalized polynomial system with a base polynomial system.

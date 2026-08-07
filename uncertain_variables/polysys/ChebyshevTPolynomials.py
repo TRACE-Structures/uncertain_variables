@@ -4,21 +4,7 @@ from .NormalizedPolynomials import NormalizedPolynomials
 from ..distributions import SemiCircleDistribution
 
 class ChebyshevTPolynomials(PolynomialSystem):
-    """ Implementation of Chebyshev polynomials of the first kind.
-
-        Methods
-        -------
-        normalized()
-            Return normalized version of first kind Chebyshev polynomial system.
-
-        recur_coeff(deg)
-            Return the recurrence coefficients for first kind Chebyshev polynomials.
-
-        sqnorm(n)
-            Return the squared norm of first kind Chebyshev polynomials of degree `n`.
-        
-        weighting_dist()
-            Return the weighting distribution for first kind Chebyshev polynomials."""
+    """ Implementation of Chebyshev polynomials of the first kind."""
     
     @classmethod
     def normalized(self):

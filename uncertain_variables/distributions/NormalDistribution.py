@@ -11,60 +11,7 @@ class NormalDistribution(Distribution):
             Mean of the normal distribution.
             
         sigma : float
-            Standard deviation of the normal distribution.
-            
-        Methods
-        -------
-        __init__(mu=0, sigma=1)
-            Initialize the normal distribution with mean mu and standard deviation sigma.
-            
-        __repr__()
-            Returns the string representation of the NormalDistribution object.
-            
-        pdf(x)
-            Return the probability density function of the normal distribution, evaluated at x.
-            
-        logpdf(x)
-            Return the log of the probability density function of the normal distribution, evaluated at x.
-            
-        cdf(x)
-            Return the cumulative distribution function of the normal distribution, evaluated at x.
-            
-        invcdf(y)
-            Return the inverse cumulative distribution function of the normal distribution, evaluated at y.
-            
-        sample(n, method='MC', **params)
-            Return n samples from the normal distribution.
-            
-        mean()
-            Return the mean of the normal distribution.
-            
-        var()
-            Return the variance of the normal distribution.
-            
-        skew()
-            Return the skewness of the normal distribution.
-            
-        kurt()
-            Return the kurtosis of the normal distribution.
-            
-        get_base_dist()
-            Return the GPC base distribution.
-            
-        translate(shift, scale)
-            Return a translated and scaled version of the normal distribution.
-            
-        base2dist(y)
-            Convert from base (germ) space to normal distribution space.
-            
-        dist2base(x)
-            Convert from normal distribution space to base (germ) space.
-            
-        orth_polysys()
-            Return the GPC polynomial system for the normal distribution.
-            
-        orth_polysys_syschar(normalized)
-            Return the GPC polynomial system characteristic string for the normal distribution.'''
+            Standard deviation of the normal distribution.'''
     
     def __init__(self, mu=0, sigma=1):
         ''' Initialize the normal distribution with mean mu and standard deviation sigma.

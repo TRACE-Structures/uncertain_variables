@@ -16,69 +16,7 @@ class VariableSet():
             Flag indicating whether the variables are normalized.
 
         variables: dict
-            Dictionary of variable names and their corresponding Distribution objects.
-            
-        Methods
-        -------
-        __init__(self, normalized=True)
-            VariableSet constructor.
-            
-        add(self, variable)
-            Add a new Variable to the VariableSet.
-        
-        remove(self, variable_name)
-            Remove a Variable from the VariableSet by name.
-            
-        get_dist_types(self)
-            Get the types of distributions for all variables in the VariableSet.
-            
-        get_dist_params(self)
-            Get the parameters of distributions for all variables in the VariableSet.
-            
-        filter(self, variable_names)
-            Create a new VariableSet containing only the specified variables.
-            
-        num_variables(self)
-            Get the number of variables in the VariableSet.
-            
-        variable_names(self)
-            Get the names of all variables in the VariableSet.
-            
-        get_variables(self)
-            Get the dictionary of variables in the VariableSet.
-            
-        mean(self)
-            Get the mean values of all variables in the VariableSet.
-            
-        var(self)
-            Get the variances of all variables in the VariableSet.
-            
-        pdf(self, q)
-            Get the probability density function values for all variables in the VariableSet at given points.
-            
-        logpdf(self, q)
-            Get the log probability density function values for all variables in the VariableSet at given points.
-            
-        cdf(self, q)
-            Get the cumulative distribution function values for all variables in the VariableSet at given points.
-            
-        get_gpc_syschars(self)
-            Get the GPC polynomial system characteristic string for all variables in the VariableSet.
-            
-        germ2params(self, xi_k_i)
-            Convert from germ space to parameter space.
-            
-        params2germ(self, q_k_i)
-            Convert from parameter space to germ space.
-            
-        get_bounds(self)
-            Get the bounds of all variables in the VariableSet.
-            
-        sample(self, n, method='MC', random_seed=None, **kwargs)
-            Generate samples from the VariableSet using specified sampling method.
-        
-        diminished_variable_set(self, indices)
-            Create a new VariableSet by selecting a subset of variables based on provided indices.'''
+            Dictionary of variable names and their corresponding Distribution objects.'''
         
     def __init__(self, normalized=True):
         ''' VariableSet constructor.

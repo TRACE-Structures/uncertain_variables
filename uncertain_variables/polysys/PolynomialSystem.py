@@ -2,21 +2,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 class PolynomialSystem(ABC):
-    ''' Abstract base class for polynomial systems.
-    
-        Methods
-        -------
-        evaluate(deg, xi)
-            Evaluate the polynomial system up to degree deg at points xi.
-
-        sqnorm(n)
-            Return the squared norm of the polynomials of degree n.
-
-        sqnorm_by_rc(rc)
-            Return the squared norm using recurrence coefficients rc.
-
-        normalized()
-            Return the normalized version of the polynomial system.'''
+    ''' Abstract base class for polynomial systems.'''
     
     def evaluate(self, deg, xi):
         '''Evaluate polynomial system up to degree `deg` at points `xi`.

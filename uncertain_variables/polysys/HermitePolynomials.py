@@ -5,21 +5,7 @@ from ..distributions import NormalDistribution
 import scipy.special as sp
 
 class HermitePolynomials(PolynomialSystem):
-    """ Implementation of Hermite polynomial system.
-
-        Methods
-        -------
-        normalized()
-            Return normalized version of Hermite polynomial system.
-
-        recur_coeff(deg)
-            Return the recurrence coefficients for Hermite polynomials.
-
-        sqnorm(n)
-            Return the squared norm of Hermite polynomials of degree `n`.
-
-        weighting_dist()
-            Return the weighting distribution for Hermite polynomials."""
+    """ Implementation of Hermite polynomial system."""
     
     @classmethod
     def normalized(self):

@@ -12,69 +12,7 @@ class LogNormalDistribution(Distribution):
             Mean of the underlying normal distribution.
             
         sigma : float
-            Standard deviation of the underlying normal distribution.
-            
-        Methods
-        -------
-        __init__(mu=0, sigma=1)
-            Initialize the log-normal distribution with parameters mu and sigma.
-            
-        __repr__()
-            Returns the string representation of the LogNormalDistribution object.
-            
-        get_dist_type()
-            Return the type of the distribution.
-            
-        get_dist_params()
-            Return the parameters of the distribution.
-            
-        pdf(x)
-            Return the probability density function of the log-normal distribution, evaluated at x.
-            
-        logpdf(x)
-            Return the log of the probability density function of the log-normal distribution, evaluated at x.
-            
-        cdf(x)
-            Return the cumulative distribution function of the log-normal distribution, evaluated at x.
-            
-        invcdf(y)
-            Return the inverse cumulative distribution function of the log-normal distribution, evaluated at y.
-            
-        sample(n, method='MC', **params)
-            Return n samples from the log-normal distribution.
-            
-        mean()
-            Return the mean of the log-normal distribution.
-            
-        var()
-            Return the variance of the log-normal distribution.
-            
-        skew()
-            Return the skewness of the log-normal distribution.
-            
-        kurt()
-            Return the kurtosis of the log-normal distribution.
-            
-        get_base_dist()
-            Return the GPC base distribution.
-            
-        base2dist(y)
-            Convert from base (germ) space to log-normal distribution space.
-            
-        dist2base(x)
-            Convert from log-normal distribution space to base (germ) space.
-            
-        stdnor2base(y)
-            Convert from standard normal space to log-normal distribution space.
-            
-        base2stdnor(x)
-            Convert from log-normal distribution space to standard normal space.
-            
-        orth_polysys()
-            Return the GPC polynomial system for the log-normal distribution.
-            
-        orth_polysys_syschar(normalized)
-            Return the GPC polynomial system characteristic string for the log-normal distribution.'''
+            Standard deviation of the underlying normal distribution.'''
     
     def __init__(self, mu=0, sigma=1):
         ''' Initialize the log-normal distribution with parameters mu and sigma.
