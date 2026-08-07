@@ -1,7 +1,7 @@
 VariableSet
 ===========
 
-.. automodule:: uncertain_variables.variable_set
+.. automodule:: uncertain_variables.VariableSet
    :members:
    :show-inheritance:
    :undoc-members:
