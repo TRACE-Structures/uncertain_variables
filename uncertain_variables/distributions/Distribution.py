@@ -145,8 +145,8 @@ class Distribution(ABC):
             shift : float
                 Shift of the distribution."""
         
-        shift = self-shift
-        return self.shift
+        shift = self.shift
+        return shift
 
     def get_scale(self):
         """ Return the scale of the distribution.

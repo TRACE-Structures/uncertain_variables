@@ -13,7 +13,7 @@
 project = 'uncertain-variables'
 copyright = '2026, András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman'
 author = 'András Urbanics, Bence Popovics, Emese Vastag, Elmar Zander, Noémi Friedman'
-release = 'v1.0.0'
+release = 'v1.0.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
