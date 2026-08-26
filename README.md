@@ -1,6 +1,6 @@
 # uncertain_variables
 
-[![DOI](https://zenodo.org/badge/21439838.svg)](https://doi.org/10.5281/zenodo.21439838)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21439838-blue)](https://doi.org/10.5281/zenodo.21439838)
 [![Read the Docs](https://img.shields.io/readthedocs/uncertain-variables?style=flat&logo=readthedocs)](https://uncertain-variables.readthedocs.io/en/latest/)
 [![PyPI - Version](https://img.shields.io/pypi/v/uncertain_variables?style=flat)](https://pypi.org/project/uncertain_variables/)
 
