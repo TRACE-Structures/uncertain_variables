@@ -22,7 +22,12 @@ class UniformDistribution(Distribution):
                 
             b : float, default = 1
                 Upper bound of the uniform distribution.'''
-        assert b > a
+
+        if not (isinstance(a, (int, float)) and isinstance(b, (int, float)) and b > a):
+            raise ValueError("Uniform bounds must be numeric with b > a.")
+        if not (np.isfinite(a) and np.isfinite(b)):
+            raise ValueError("Uniform bounds must be finite numeric values.")
+
         self.a = a
         self.b = b
 
@@ -49,8 +54,10 @@ class UniformDistribution(Distribution):
             -------
             is_equal : bool
                 True if the two UniformDistribution objects are equal, False otherwise.'''
+        
         if not isinstance(other, UniformDistribution):
             return False
+        
         is_equal = (self.a == other.a) and (self.b == other.b)
         return is_equal
 
@@ -89,6 +96,7 @@ class UniformDistribution(Distribution):
             y : array_like
                 Probability density function values at x.'''
         
+        x = np.asarray(x)
         a = self.a
         b = self.b
         y = 1 / (b - a) * np.ones(np.size(x))
@@ -110,17 +118,30 @@ class UniformDistribution(Distribution):
             y : array_like
                 Log probability density function values at x.'''
         
-        a = self.a
-        b = self.b
+        # a = self.a
+        # b = self.b
+        # pdf = self.pdf(x)
+        # pdf = np.array(pdf)  # OR
+        # pdf = pdf.reshape(x.shape)
+        # y = np.zeros(x.shape)
+        # for i in range(len(x)):
+        #     if pdf[i] == 0:
+        #         y[i] = -np.inf
+        #     else:
+        #         y[i] = np.log(pdf[i])
+        # return y
+
+        x = np.asarray(x)
         pdf = self.pdf(x)
-        pdf = np.array(pdf)  # OR
-        pdf = pdf.reshape(x.shape)
-        y = np.zeros(x.shape)
-        for i in range(len(x)):
+        if np.isscalar(pdf):
+            pdf = np.array([pdf])
+        y = np.zeros(pdf.shape)
+        for i in range(len(pdf)):
             if pdf[i] == 0:
                 y[i] = -np.inf
             else:
                 y[i] = np.log(pdf[i])
+        y = unwrap_if_scalar(y)
         return y
 
     def cdf(self, x):
@@ -136,10 +157,18 @@ class UniformDistribution(Distribution):
             y : array_like
                 Cumulative distribution function values at x.'''
         
+        # a = self.a
+        # b = self.b
+        # y = (x - a) / (b - a)
+        # y = np.clip(y, 0, 1)
+        # return y
+
         a = self.a
         b = self.b
+        x = np.asarray(x)   
         y = (x - a) / (b - a)
         y = np.clip(y, 0, 1)
+        y = unwrap_if_scalar(y)
         return y
 
     def invcdf(self, y):
@@ -157,7 +186,7 @@ class UniformDistribution(Distribution):
         
         a = self.a
         b = self.b
-        y = np.array(y)
+        y = np.asarray(y)
         x = np.full(np.size(y), np.nan)
         ind = (y >= 0) & (y <= 1)
         x[ind] = a + (b - a) * y[ind]
@@ -215,13 +244,26 @@ class UniformDistribution(Distribution):
             shift : float
                 Shift to apply to the distribution.
             scale : float
-                Scale to apply to the distribution.
+                Scale to apply to the distribution. Must be a positive numeric value.
 
             Returns
             -------
             new_dist : UniformDistribution
                 Translated and scaled uniform distribution."""
         
+        # m = (self.a + self.b) / 2
+        # v = scale * (self.b - self.a) / 2
+
+        # a = m + shift - v
+        # b = m + shift + v
+        # new_dist = UniformDistribution(a, b)
+        # return new_dist
+    
+        if not (isinstance(shift, (int, float))):
+            raise ValueError("Shift must be a numeric value.")
+        if not (isinstance(scale, (int, float)) and scale > 0):
+            raise ValueError("Scale must be a positive numeric value.")
+
         m = (self.a + self.b) / 2
         v = scale * (self.b - self.a) / 2
 
@@ -253,7 +295,9 @@ class UniformDistribution(Distribution):
             -------
             x : array_like
                 Points in distribution space."""
+
         
+        y = np.asarray(y)
         x = self.mean() + y * (self.b - self.a) / 2
         return x
 
@@ -270,6 +314,7 @@ class UniformDistribution(Distribution):
             y : array_like
                 Points in base (germ) space."""
         
+        x = np.asarray(x)
         y = (x - self.mean()) * 2 / (self.b - self.a)
         return y
 
@@ -281,13 +326,20 @@ class UniformDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the uniform distribution."""
         
-        from polysys import LegendrePolynomials
+        # from polysys import LegendrePolynomials
+
+        # if self.a == -1 and self.b == 1:
+        #     polysys = LegendrePolynomials()
+        # else:
+        #     polysys = Distribution.orth_polysys(self)
+        # return polysys
+
+        from ..polysys import LegendrePolynomials
 
         if self.a == -1 and self.b == 1:
-            polysys = LegendrePolynomials()
-        else:
-            polysys = Distribution.orth_polysys(self)
-        return polysys
+            return LegendrePolynomials()
+        else: 
+            raise Exception(f"No polynomial system for this distribution ({self})") 
 
     def orth_polysys_syschar(self, normalized):
         """ Return the GPC polynomial system characteristic string for the uniform distribution.
@@ -302,14 +354,22 @@ class UniformDistribution(Distribution):
             polysys_char : str
                 GPC polynomial system characteristic string for the uniform distribution."""
         
-        if self.a == -1 and self.b == 1:
-            if normalized:
-                polysys_char = "p"
-            else:
-                polysys_char = "P"
+        # if self.a == -1 and self.b == 1:
+        #     if normalized:
+        #         polysys_char = "p"
+        #     else:
+        #         polysys_char = "P"
+        # else:
+        #     polysys_char = []
+        # return polysys_char
+
+        if not (self.a == -1 and self.b == 1):
+            raise Exception(f"No polynomial system for this distribution ({self})")
+
+        if normalized == True:
+            return "p"
         else:
-            polysys_char = []
-        return polysys_char
+            return "P"
 
     def get_bounds(self, delta=0):
         """ Return the bounds of the uniform distribution.
@@ -324,9 +384,16 @@ class UniformDistribution(Distribution):
             bounds : numpy.ndarray
                 Array containing the lower and upper bounds of the uniform distribution."""
         
+        if not isinstance(delta, (int, float)):
+            raise ValueError("delta must be a numeric value")
+        
         a = self.a
         b = self.b
 
         ab = b - a
-        bounds = np.array([a - ab * delta, b + ab * delta])
+
+        # The modified function contracts the bounds by delta instead of expanding them
+        # bounds = np.array([a - ab * delta, b + ab * delta])
+        
+        bounds = np.array([a + ab * delta, b - ab * delta])
         return bounds
