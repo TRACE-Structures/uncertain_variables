@@ -98,12 +98,34 @@ class Distribution(ABC):
             -------
             y : array_like
                 Log probability density function values at x.'''
-        
+
+        x = np.asarray(x)
         pdf = self.pdf(x)
         y = np.log(pdf)
         return y
 
     def sample(self, n, method="MC", **params):
+        """Generate random samples from the distribution using the specified sampling method.
+
+            Parameters
+            ----------
+            n : int
+                Number of samples to generate.
+            method : str, optional
+                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
+                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
+                Default is "MC".
+            **params : dict
+                Additional parameters for the sampling method.
+
+            Returns
+            -------
+            samples : array_like
+                Generated random samples from the distribution. """
+        
+        if not isinstance(n, int) or n <= 0:
+            raise ValueError("Number of samples must be a positive integer.")
+
         if method == "MC":
             yi = np.random.rand(n)
         elif method == "QMC_Halton":
@@ -115,8 +137,10 @@ class Distribution(ABC):
         elif method == "QMC_Sobol":
             sampler = Sobol(d=1)
             yi = sampler.random(n)
-        # elif method == 'Sobol_saltelli': # It's not
-
+        else:
+            raise ValueError(f"Unknown sampling method: {method}")
+        yi = np.asarray(yi).ravel()
+        return self.invcdf(yi)
 
     def translate(self, shift, scale):
         ''' Return a translated and scaled version of the distribution.
@@ -127,12 +151,18 @@ class Distribution(ABC):
                 Shift to apply to the distribution.
 
             scale : float
-                Scale to apply to the distribution.
+                Scale to apply to the distribution.  Must be a positive numeric value.
                 
             Returns
             -------
             tdist : TranslatedDistribution
                 Translated and scaled distribution.'''
+
+        if not (isinstance(shift, (int, float))):
+            raise ValueError("Shift must be a numeric value.")
+        if not (isinstance(scale, (int, float)) and scale > 0):
+            raise ValueError("Scale must be a positive numeric value.")
+        
         from .TranslatedDistribution import TranslatedDistribution
         tdist = TranslatedDistribution(self, shift, scale)
         return tdist
@@ -174,6 +204,11 @@ class Distribution(ABC):
             -------
             new_dist : TranslatedDistribution
                 Translated and scaled distribution with specified moments.'''
+
+        if not (isinstance(mean, (int, float))):
+            raise ValueError("Mean must be a numeric value.")
+        if not (isinstance(var, (int, float)) and var > 0):
+            raise ValueError("Variance must be a positive numeric value.")
         
         old_mean, old_var = self.mean(), self.var()
         self.shift = mean - old_mean
@@ -202,7 +237,13 @@ class Distribution(ABC):
             -------
             new_dist : TranslatedDistribution
                 Translated and scaled distribution with specified bounds.'''
-        
+
+        if not (isinstance(min, (int, float))):
+            raise ValueError("Minimum must be a numeric value.")
+        if not (isinstance(max, (int, float))):
+            raise ValueError("Maximum must be a numeric value.")
+        if min >= max:
+            raise ValueError("Minimum must be less than maximum.")
         if not (0 <= q0 <= 1):
             raise ValueError(f"q0 must be between 0 and 1, got {q0}")
         if not (q0 <= q1 <= 1):
@@ -242,7 +283,8 @@ class Distribution(ABC):
             -------
             y : array_like
                 Points in distribution space.'''
-        
+
+        x = np.asarray(x)
         from .NormalDistribution import NormalDistribution
         y = self.invcdf(NormalDistribution().cdf(x))
         return y
@@ -259,7 +301,8 @@ class Distribution(ABC):
             -------
             x : array_like
                 Points in standard normal space.'''
-        
+
+        y = np.asarray(y)
         from .NormalDistribution import NormalDistribution
         x = NormalDistribution().invcdf(self.cdf(y))
         return x
@@ -288,7 +331,8 @@ class Distribution(ABC):
             -------
             x : array_like
                 Points in distribution space.'''
-        
+
+        y = np.asarray(y)
         x = self.invcdf(self.get_base_dist().cdf(y))
         return x
 
@@ -305,6 +349,7 @@ class Distribution(ABC):
             y : array_like
                 Points in base (germ) space.'''
         
+        x = np.asarray(x)
         y = self.get_base_dist().invcdf(self.cdf(x))
         return y
 
@@ -330,6 +375,9 @@ class Distribution(ABC):
             -------
             bounds : array_like
                 Bounds of the distribution as [lower_bound, upper_bound].'''
+
+        if not (isinstance(delta, (int, float)) and 0 < delta < 0.5):
+            raise ValueError("Delta must be a float between 0 and 0.5.")
         
         bounds = self.invcdf(np.array([delta, 1 - delta]))
         return bounds
