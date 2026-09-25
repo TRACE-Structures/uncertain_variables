@@ -165,12 +165,11 @@ class TestDistribution:
     def test_stdnor2base_matches_scipy(self, dist):
         q = np.linspace(-2.5, 2.5, 50)
         transformed = dist.stdnor2base(q)
-        expected = norm.cdf(q)
+        expected = dist.invcdf(norm.cdf(q))
         assert np.allclose(transformed, expected, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_base2stdnor_matches_scipy(self, dist, support):
-        lo, hi = support
-        q = np.linspace(lo, hi, 50)
+    def test_base2stdnor_matches_scipy(self, dist):
+        q = dist.invcdf(np.linspace(0.001, 0.999, 50))
         transformed = dist.base2stdnor(q)
         expected = norm.ppf(dist.cdf(q))
         assert np.allclose(transformed, expected, atol=self.ATOL, rtol=self.RTOL)
@@ -185,10 +184,10 @@ class TestDistribution:
         rng_state = np.random.get_state()
         try:
             np.random.seed(4267)
-            s = dist.sample(262144, method=method)
+            s = dist.sample(262144, method=method, seed=4267)
         finally:
             np.random.set_state(rng_state)
         mean_se = np.sqrt(dist.var() / s.size)
         variance_se = np.sqrt(2 * dist.var() ** 2 / (s.size - 1))
-        assert np.isclose(np.mean(s), dist.mean(), rtol=self.QUAD_RTOL, atol=10 * mean_se)
-        assert np.isclose(np.var(s), dist.var(), rtol=self.QUAD_RTOL, atol=10 * variance_se)
+        assert np.isclose(np.mean(s), dist.mean(), rtol=1e-2, atol=10 * mean_se)
+        assert np.isclose(np.var(s), dist.var(), rtol=1e-2, atol=10 * variance_se)

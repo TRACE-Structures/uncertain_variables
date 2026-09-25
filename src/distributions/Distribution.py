@@ -72,7 +72,7 @@ class Distribution(ABC):
     def kurt(self):
         ''' Abstract method to return the kurtosis of the distribution.
             Subclasses must implement this method.'''
-        
+
         pass
 
     def moments(self):
@@ -104,7 +104,7 @@ class Distribution(ABC):
         y = np.log(pdf)
         return y
 
-    def sample(self, n, method="MC", **params):
+    def sample(self, n, method="MC", seed=None, **params):
         """Generate random samples from the distribution using the specified sampling method.
 
             Parameters
@@ -115,6 +115,8 @@ class Distribution(ABC):
                 Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
                 "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
                 Default is "MC".
+            seed : int, optional
+                Seed for the random number generator. Default is None.
             **params : dict
                 Additional parameters for the sampling method.
 
@@ -127,15 +129,16 @@ class Distribution(ABC):
             raise ValueError("Number of samples must be a positive integer.")
 
         if method == "MC":
-            yi = np.random.rand(n)
+            rng = np.random.default_rng(seed)
+            yi = rng.random(n)
         elif method == "QMC_Halton":
-            sampler = Halton(d=1)
+            sampler = Halton(d=1, seed=seed)
             yi = sampler.random(n)
         elif method == "QMC_LHS":
-            sampler = LHS(d=1)
+            sampler = LHS(d=1, seed=seed)
             yi = sampler.random(n)
         elif method == "QMC_Sobol":
-            sampler = Sobol(d=1)
+            sampler = Sobol(d=1, seed=seed)
             yi = sampler.random(n)
         else:
             raise ValueError(f"Unknown sampling method: {method}")

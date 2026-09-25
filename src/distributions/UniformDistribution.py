@@ -23,7 +23,7 @@ class UniformDistribution(Distribution):
             b : float, default = 1
                 Upper bound of the uniform distribution.'''
 
-        if not (isinstance(a, (int, float)) and isinstance(b, (int, float)) and b > a):
+        if not (isinstance(a, (int, float, np.number)) and isinstance(b, (int, float, np.number)) and b > a):
             raise ValueError("Uniform bounds must be numeric with b > a.")
         if not (np.isfinite(a) and np.isfinite(b)):
             raise ValueError("Uniform bounds must be finite numeric values.")
@@ -80,7 +80,7 @@ class UniformDistribution(Distribution):
             params : tuple
                 Parameters of the distribution (a, b).'''
         
-        params = [self.a, self.b]
+        params = (self.a, self.b)
         return params
 
     def pdf(self, x):
@@ -163,9 +163,9 @@ class UniformDistribution(Distribution):
         # y = np.clip(y, 0, 1)
         # return y
 
+        x = np.asarray(x) 
         a = self.a
-        b = self.b
-        x = np.asarray(x)   
+        b = self.b  
         y = (x - a) / (b - a)
         y = np.clip(y, 0, 1)
         y = unwrap_if_scalar(y)
@@ -183,10 +183,10 @@ class UniformDistribution(Distribution):
             -------
             x : array_like
                 Inverse cumulative distribution function values at y.'''
-        
+
+        y = np.asarray(y)
         a = self.a
         b = self.b
-        y = np.asarray(y)
         x = np.full(np.size(y), np.nan)
         ind = (y >= 0) & (y <= 1)
         x[ind] = a + (b - a) * y[ind]
@@ -226,12 +226,12 @@ class UniformDistribution(Distribution):
         return skew
 
     def kurt(self):
-        ''' Return the kurtosis of the uniform distribution.
+        ''' Return the excess kurtosis of the uniform distribution.
 
             Returns
             -------
             kurt : float
-                Kurtosis of the uniform distribution.'''
+                Excess kurtosis of the uniform distribution.'''
         
         kurt = -6 / 5
         return kurt
@@ -259,9 +259,9 @@ class UniformDistribution(Distribution):
         # new_dist = UniformDistribution(a, b)
         # return new_dist
     
-        if not (isinstance(shift, (int, float))):
+        if not (isinstance(shift, (int, float, np.number))):
             raise ValueError("Shift must be a numeric value.")
-        if not (isinstance(scale, (int, float)) and scale > 0):
+        if not (isinstance(scale, (int, float, np.number)) and scale > 0):
             raise ValueError("Scale must be a positive numeric value.")
 
         m = (self.a + self.b) / 2
@@ -365,6 +365,7 @@ class UniformDistribution(Distribution):
 
         if not (self.a == -1 and self.b == 1):
             raise Exception(f"No polynomial system for this distribution ({self})")
+            # OR return []
 
         if normalized == True:
             return "p"
@@ -384,12 +385,11 @@ class UniformDistribution(Distribution):
             bounds : numpy.ndarray
                 Array containing the lower and upper bounds of the uniform distribution."""
         
-        if not isinstance(delta, (int, float)):
+        if not isinstance(delta, (int, float, np.number)):
             raise ValueError("delta must be a numeric value")
         
         a = self.a
         b = self.b
-
         ab = b - a
 
         # The modified function contracts the bounds by delta instead of expanding them

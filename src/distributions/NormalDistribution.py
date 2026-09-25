@@ -1,6 +1,9 @@
-from .Distribution import Distribution
+from random import seed
+
+from .Distribution import Distribution, unwrap_if_scalar
 import numpy as np
 import scipy.special as sc
+from scipy.stats import norm as sc_norm
 
 class NormalDistribution(Distribution):
     ''' Class for normal (Gaussian) distribution.
@@ -24,7 +27,15 @@ class NormalDistribution(Distribution):
             sigma : float, default = 1
                 Standard deviation of the normal distribution.'''
         
-        assert sigma > 0
+        if not (isinstance(sigma, (int, float, np.number)) and sigma > 0):
+            raise ValueError("Standard deviation sigma must be a positive number.")
+        if not (isinstance(mu, (int, float, np.number))):
+            raise ValueError("Mean mu must be a number.")  
+        if not np.isfinite(mu):
+            raise ValueError("Mean mu must be a finite number.")
+        if not np.isfinite(sigma):
+            raise ValueError("Standard deviation sigma must be a finite number.")
+        
         self.mu = mu
         self.sigma = sigma
 
@@ -54,6 +65,7 @@ class NormalDistribution(Distribution):
         
         if not isinstance(other, NormalDistribution):
             return False
+        
         is_equal = (self.mu == other.mu) and (self.sigma == other.sigma)
         return is_equal
 
@@ -65,10 +77,19 @@ class NormalDistribution(Distribution):
             str
                 Always returns ``'translated'``."""
 
-        return "norm"
+        dist_type = "norm"
+        return dist_type
     
     def get_dist_params(self):
-        return self.mu, self.sigma
+        """Return the parameters of the normal distribution.
+
+            Returns
+            -------
+            params : tuple
+                Parameters of the distribution (mu, sigma)."""
+        
+        params = (self.mu, self.sigma)
+        return params
 
     def pdf(self, x):
         ''' Return the probability density function of the normal distribution, evaluated at x.
@@ -83,12 +104,20 @@ class NormalDistribution(Distribution):
             y : array_like
                 Probability density function values at x.'''
         
+        # mu = self.mu
+        # sigma = self.sigma
+        # root = (x - mu) / sigma
+        # y_exp = root**2
+        # y_exp = -1 / 2 * y_exp
+        # y = np.exp(y_exp) / (sigma * np.sqrt(2 * np.pi))
+        # return y
+
+        x = np.asarray(x)
         mu = self.mu
         sigma = self.sigma
-        root = (x - mu) / sigma
-        y_exp = root**2
-        y_exp = -1 / 2 * y_exp
+        y_exp = -1 / 2 * (((x - mu) / sigma)**2)
         y = np.exp(y_exp) / (sigma * np.sqrt(2 * np.pi))
+        y = unwrap_if_scalar(y)
         return y
 
     def logpdf(self, x):
@@ -103,11 +132,13 @@ class NormalDistribution(Distribution):
             -------
             y : array_like
                 Log probability density function values at x.'''
-        
+
+        x = np.asarray(x)
         mu = self.mu
         sigma = self.sigma
         root = (x - mu) / sigma
         y = -1 / 2 * (root**2) - np.log(sigma * np.sqrt(2 * np.pi))
+        y = unwrap_if_scalar(y)
         return y
 
     def cdf(self, x):
@@ -122,10 +153,19 @@ class NormalDistribution(Distribution):
             -------
             y : array_like
                 Cumulative distribution function values at x.'''
-        
+
+        # x = np.asarray(x)
+        # mu = self.mu
+        # sigma = self.sigma
+        # y = 1 / 2 * (1 + sc.erf((x - mu) / (sigma * np.sqrt(2))))
+        # y = unwrap_if_scalar(y)
+        # return y
+
+        x = np.asarray(x)
         mu = self.mu
         sigma = self.sigma
-        y = 1 / 2 * (1 + sc.erf((x - mu) / (sigma * np.sqrt(2))))
+        y = sc_norm.cdf(x, loc=mu, scale=sigma)
+        y = unwrap_if_scalar(y)
         return y
 
     def invcdf(self, y):
@@ -141,42 +181,76 @@ class NormalDistribution(Distribution):
             x : array_like
                 Inverse cumulative distribution function values at y.'''
         
+        # mu = self.mu
+        # sigma = self.sigma
+        # y = np.array(y)
+        # x = np.full(y.shape, np.nan)  # original
+        # ind = (y >= 0) & (y <= 1)
+        # x[ind] = mu + sigma * np.sqrt(2) * sc.erfinv(2 * y[ind] - 1)
+        # x = x / 1
+        # return x
+
+        y = np.asarray(y)
         mu = self.mu
         sigma = self.sigma
-        y = np.array(y)
-        x = np.full(y.shape, np.nan)  # original
+        x = np.full(y.shape, np.nan)  
         ind = (y >= 0) & (y <= 1)
-        x[ind] = mu + sigma * np.sqrt(2) * sc.erfinv(2 * y[ind] - 1)
-        x = x / 1
+        x[ind] = sc_norm.ppf(y[ind], loc=mu, scale=sigma)
+        x = unwrap_if_scalar(x)
         return x
 
-    def sample(self, n, method="MC", **params): # ??? TODO
-        ''' Return n samples from the normal distribution.
+    def sample(self, n, method="MC", seed=None, **params): 
+        # ''' Return n samples from the normal distribution.
+
+        #     Parameters
+        #     ----------
+        #     n : int
+        #         Number of samples to generate.
+                
+        #     method : str, optional
+        #         Sampling method to use (default is 'MC' for Monte Carlo).
+            
+        #     **params : dict
+        #         Additional parameters for the sampling method.
+                
+        #     Returns
+        #     -------
+        #     samples : array_like
+        #         Generated samples from the normal distribution.'''
+        
+        # from .UniformDistribution import UniformDistribution
+        # if method == "MC":
+        #     xi = np.random.randn(n)
+        # else:
+        #     xi = UniformDistribution().sample(n, method, **params)
+        # samples = (xi * self.sigma) + self.mu
+        # return samples
+
+        """Generate random samples from the distribution using the specified sampling method.
 
             Parameters
             ----------
             n : int
                 Number of samples to generate.
-                
             method : str, optional
-                Sampling method to use (default is 'MC' for Monte Carlo).
-            
+                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
+                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
+                Default is "MC".
+            seed : int, optional
+                Seed for the random number generator. Default is None.
             **params : dict
                 Additional parameters for the sampling method.
-                
+
             Returns
             -------
             samples : array_like
-                Generated samples from the normal distribution.'''
-        
-        from .UniformDistribution import UniformDistribution
-        if method == "MC":
-            xi = np.random.randn(n)
-        else:
-            xi = UniformDistribution().sample(n, method, **params)
-        samples = (xi * self.sigma) + self.mu
-        return samples
+                Generated random samples from the distribution. """
 
+        from .UniformDistribution import UniformDistribution
+        xi = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        samples = self.invcdf(xi)
+        return samples
+    
     def mean(self):
         """ Return the mean of the normal distribution.
 
@@ -196,7 +270,7 @@ class NormalDistribution(Distribution):
             var : float
                 Variance of the normal distribution."""
 
-        var = self.sigma * self.sigma
+        var = self.sigma ** 2
         return var
 
     def skew(self):
@@ -211,12 +285,12 @@ class NormalDistribution(Distribution):
         return skew
 
     def kurt(self):
-        """ Return the kurtosis of the normal distribution.
+        """ Return the excess kurtosis of the normal distribution.
 
             Returns
             -------
             kurt : float
-                Kurtosis of the normal distribution."""
+                Excess kurtosis of the normal distribution."""
 
         kurt = 0
         return kurt
@@ -291,13 +365,20 @@ class NormalDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the normal distribution.'''
         
-        from polysys import HermitePolynomials
+        # from polysys import HermitePolynomials
+
+        # if self.mu == 0 and self.sigma == 1:
+        #     polysys = HermitePolynomials()
+        # else:
+        #     polysys = Distribution.orth_polysys(self)
+        # return polysys
+
+        from ..polysys import HermitePolynomials
 
         if self.mu == 0 and self.sigma == 1:
-            polysys = HermitePolynomials()
+            return HermitePolynomials()
         else:
-            polysys = Distribution.orth_polysys(self)
-        return polysys
+            raise Exception(f"No polynomial system for this distribution ({self})")
 
     def orth_polysys_syschar(self, normalized):
         ''' Return the GPC polynomial system characteristic string for the normal distribution.
@@ -312,11 +393,20 @@ class NormalDistribution(Distribution):
             polysys_char : str
                 GPC polynomial system characteristic string for the normal distribution.'''
         
-        if self.mu == 0 and self.sigma == 1:
-            if normalized:
-                polysys_char = "h"
-            else:
-                polysys_char = "H"
+        # if self.mu == 0 and self.sigma == 1:
+        #     if normalized:
+        #         polysys_char = "h"
+        #     else:
+        #         polysys_char = "H"
+        # else:
+        #     polysys_char = []
+        # return polysys_char
+
+        if not (self.mu == 0 and self.sigma == 1):
+            raise Exception(f"No polynomial system for this distribution ({self})")
+            # OR return []
+
+        if normalized == True:
+            return "h"
         else:
-            polysys_char = []
-        return polysys_char
+            return "H"
