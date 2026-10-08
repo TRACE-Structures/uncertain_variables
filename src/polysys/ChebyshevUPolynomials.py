@@ -4,7 +4,7 @@ from ..distributions import SemiCircleDistribution
 
 class ChebyshevUPolynomials(PolynomialSystem):
     @classmethod
-    def normalized(self):
+    def normalized(cls):
         """ Return normalized version of second kind Chebyshev polynomial system.
 
             Returns
@@ -12,7 +12,7 @@ class ChebyshevUPolynomials(PolynomialSystem):
             polysys: NormalizedPolynomials
                 Wrapped normalized second kind Chebyshev polynomial system."""
         
-        return self
+        return cls
 
     @staticmethod
     def recur_coeff(deg):

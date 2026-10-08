@@ -9,13 +9,16 @@ class ExponentialDistribution(Distribution):
         lambda_ : float
             Rate parameter of the exponential distribution."""
     
-    def __init__(self, lambda_):
+    def __init__(self, lambda_=1):
         """ Initialize the exponential distribution with rate parameter lambda_.
 
             Parameters
             ----------
             lambda_ : float
                 Rate parameter of the exponential distribution."""
+
+        if not (isinstance(lambda_, (int, float, np.number)) and lambda_ > 0):
+            raise ValueError("lambda_ must be a positive number.")
 
         self.lambda_ = lambda_
 
@@ -45,6 +48,7 @@ class ExponentialDistribution(Distribution):
         
         if not isinstance(other, ExponentialDistribution):
             return False
+        
         is_equal = self.lambda_ == other.lambda_
         return is_equal
     
@@ -83,10 +87,11 @@ class ExponentialDistribution(Distribution):
             y : array_like
                 Probability density function values at x."""
 
-        x = np.array(x)
+        x = np.asarray(x)
+        lambda_ = self.lambda_
         y = np.zeros(x.shape)
         ind = x >= 0
-        y[ind] = self.lambda_ * np.exp(-self.lambda_ * x[ind])
+        y[ind] = lambda_ * np.exp(-lambda_ * x[ind])
         y = unwrap_if_scalar(y)
         return y
 
@@ -103,11 +108,11 @@ class ExponentialDistribution(Distribution):
             y : array_like
                 Cumulative distribution function values at x."""
         
-        x = np.array(x)
+        x = np.asarray(x)
+        lambda_ = self.lambda_
         y = np.zeros(x.shape)
-        # y = np.zeros(np.size(x))
         ind = x >= 0
-        y[ind] = 1 - np.exp(-self.lambda_ * x[ind])
+        y[ind] = 1 - np.exp(-lambda_ * x[ind])
         y = unwrap_if_scalar(y)
         return y
 
@@ -124,12 +129,13 @@ class ExponentialDistribution(Distribution):
             x : array_like
                 Inverse cumulative distribution function values at y."""
         
-        y = np.array(y)
+        y = np.asarray(y)
+        lambda_ = self.lambda_
         x = np.full(np.size(y), np.nan)
         ind = (y >= 0) & (y <= 1)
         # ignore RuntimeWarning in case x == 0
         with np.errstate(divide="ignore", invalid="ignore"):
-            x[ind] = -np.log(1 - y[ind]) / self.lambda_
+            x[ind] = -np.log(1 - y[ind]) / lambda_
         x = unwrap_if_scalar(x)
         return x
 
@@ -175,29 +181,31 @@ class ExponentialDistribution(Distribution):
         
         return 6
 
-    def sample(self, n, method="MC", **params):
-        """ Return n samples from the exponential distribution.
-
-            Parameters
-            ----------
-            n : int
-                Number of samples to generate.
-
-            method : str, optional
-                Sampling method to use (default is 'MC' for Monte Carlo).
-            
-            **params : dict
-                Additional parameters for the sampling method.
-
-            Returns
-            -------
-            samples : array_like
-                Generated samples from the exponential distribution."""
+    def sample(self, n, method="MC", seed=None, **params):
+        """Return n samples from the exponential distribution.
+        
+                    Parameters
+                    ----------
+                    n : int
+                        Number of samples to generate.
+                    method : str, optional
+                        Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
+                        "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
+                        Default is "MC".
+                    seed : int, optional
+                        Seed for the random number generator. Default is None.
+                    **params : dict
+                        Additional parameters for the sampling method.
+        
+                    Returns
+                    -------
+                    samples : array_like
+                        Generated samples from the exponential distribution."""
         
         from .UniformDistribution import UniformDistribution
-        yi = UniformDistribution().sample(n, method, **params)
-        xi = self.invcdf(yi)
-        return xi
+        xi = UniformDistribution().sample(n, method, seed=seed, **params)
+        samples = self.invcdf(xi)
+        return samples
 
     def orth_polysys(self):
         """ Return the GPC polynomial system for the exponential distribution.
@@ -207,14 +215,21 @@ class ExponentialDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the exponential distribution."""
             
-        if self.lambda_:
-            from polysys import LaguerrePolynomials
+        # if self.lambda_:
+        #     from polysys import LaguerrePolynomials
 
-            polysys = LaguerrePolynomials()
+        #     polysys = LaguerrePolynomials()
+        # else:
+        #     Distribution.orth_polysys()
+        # return polysys
+
+        from ..polysys import LaguerrePolynomials
+
+        if self.lambda_ == 1:
+            return LaguerrePolynomials()
         else:
-            Distribution.orth_polysys()
-        return polysys
-    
+            raise Exception(f"No polynomial system for this distribution ({self})")
+
     def orth_polysys_syschar(self, normalized):
         """ Return the GPC polynomial system characteristic string for the exponential distribution.
 
@@ -227,16 +242,25 @@ class ExponentialDistribution(Distribution):
             -------
             polysys_char : str
                 GPC polynomial system characteristic string for the exponential distribution."""
-        
-        if self.a == -1 and self.b == 1:
-            if normalized:
-                polysys_char = 'L'
-            else:
-                polysys_char = 'l'
-        else:
-            polysys_char = []
-        return polysys_char
 
+        # if self.a == -1 and self.b == 1:
+        #     if normalized:
+        #         polysys_char = 'L'
+        #     else:
+        #         polysys_char = 'l'
+        # else:
+        #     polysys_char = []
+        # return polysys_char
+
+        if not self.lambda_ == 1:
+            raise Exception(f"No polynomial system for this distribution ({self})")
+            # OR return []
+
+        if normalized:
+            polysys_char = 'l'
+        else:
+            polysys_char = 'L'
+        return polysys_char
 
     def get_base_dist(self):
         """ Return the GPC base distribution.
@@ -261,7 +285,8 @@ class ExponentialDistribution(Distribution):
             -------
             x : array_like
                 Points in exponential distribution space."""
-            
+
+        y = np.asany    
         x = y / self.lambda_
         return x
 

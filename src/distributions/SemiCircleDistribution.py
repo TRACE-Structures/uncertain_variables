@@ -17,7 +17,9 @@ class SemiCircleDistribution(Distribution):
             radius : float
                 Radius of the semicircle."""
         
-        assert radius > 0
+        if not isinstance(radius, (int, float)) or radius <= 0:
+            raise ValueError("Radius must be a positive number.")
+        
         self.radius = radius
 
     def __repr__(self):
@@ -46,6 +48,7 @@ class SemiCircleDistribution(Distribution):
         
         if not isinstance(other, SemiCircleDistribution):
             return False
+        
         is_equal = self.radius == other.radius
         return is_equal
 
@@ -54,11 +57,11 @@ class SemiCircleDistribution(Distribution):
 
             Returns
             -------
-            type_string : str
+            dist_type : str
                 Type of the distribution."""
         
-        type_string = "wigner"
-        return type_string
+        dist_type = "semicircle"
+        return dist_type
     
     def get_dist_params(self):
         """ Return the parameters of the distribution.
@@ -84,12 +87,13 @@ class SemiCircleDistribution(Distribution):
             y : array_like
                 Probability density function values at x. """
         
-        x = np.array(x)
+        x = np.asarray(x)
         y = np.zeros(x.shape)
         ind = (x >= -self.radius) & (x <= self.radius)
         y[ind] = (2 / (np.pi * self.radius**2)) * np.sqrt(self.radius**2 - x[ind] ** 2)
         y = unwrap_if_scalar(y)
         return y
+
     
     def cdf(self, x):
         """ Return the cumulative distribution function of the Wigner semicircle distribution, evaluated at x.
@@ -104,7 +108,7 @@ class SemiCircleDistribution(Distribution):
             y : array_like
                 Cumulative distribution function values at x."""
         
-        x = np.array(x)
+        x = np.asarray(x)
         y = np.zeros(x.shape)
         ind1 = x < -self.radius
         ind2 = (x >= -self.radius) & (x <= self.radius)
@@ -130,7 +134,7 @@ class SemiCircleDistribution(Distribution):
             x : array_like
                 Inverse cumulative distribution function values at y. """
         
-        y = np.array(y)
+        y = np.asarray(y)
         x = np.full(y.shape, np.nan)
         ind = (y >= 0) & (y <= 1)
         x[ind] = self.radius * np.sin(np.pi * (y[ind] - 1 / 2))
@@ -179,7 +183,34 @@ class SemiCircleDistribution(Distribution):
         
         kurt = -1
         return kurt
-    
+
+    def sample(self, n, method="MC", seed=None, **params): 
+
+        """Return n samples from the Wigner semicircle distribution.
+
+            Parameters
+            ----------
+            n : int
+                Number of samples to generate.
+            method : str, optional
+                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
+                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
+                Default is "MC".
+            seed : int, optional
+                Seed for the random number generator. Default is None.
+            **params : dict
+                Additional parameters for the sampling method.
+
+            Returns
+            -------
+            samples : array_like
+                Generated samples from the Wigner semicircle distribution."""
+
+        from .UniformDistribution import UniformDistribution
+        xi = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        samples = self.invcdf(xi)
+        return samples
+
     def get_base_dist(self):
         ''' Return the GPC base distribution.
 
@@ -191,3 +222,73 @@ class SemiCircleDistribution(Distribution):
         dist_germ = SemiCircleDistribution(1)
         return dist_germ
 
+    def base2dist(self, y):
+        """ Convert from base (germ) space to Wigner semicircle distribution space.
+        
+            Parameters
+            ----------
+            y : array_like
+                Points in base (germ) space.
+
+            Returns
+            -------
+            x : array_like
+                Points in Wigner semicircle distribution space."""
+        
+        y = np.asarray(y)
+        x = y / self.radius
+        return x
+
+    def dist2base(self, x):
+        """ Convert from Wigner semicircle distribution space to base (germ) space.
+  
+              Parameters
+              ----------
+              x : array_like
+                  Points in Wigner semicircle distribution space.
+              
+              Returns
+              -------
+              y : array_like
+                  Points in base (germ) space."""
+        
+        x = np.asarray(x)
+        y = x * self.radius
+        return y
+
+    def orth_polysys(self):
+        ''' Return the GPC polynomial system for the Wigner semicircle distribution.
+                
+                    Returns
+                    -------
+                    polysys : PolynomialSystem object
+                        GPC polynomial system for the Wigner semicircle distribution.'''
+
+        from ..polysys.ChebyshevUPolynomials import ChebyshevUPolynomials
+
+        if self.radius == 1:
+            return ChebyshevUPolynomials()
+        else:  
+            raise Exception(f"No polynomial system for this distribution ({self})")
+
+    def orth_polysys_syschar(self, normalized):
+        ''' Return the GPC polynomial system characteristic string for the Wigner semicircle distribution.
+        
+            Parameters
+            ----------
+            normalized : bool
+                Flag indicating whether to return the normalized polynomial system characteristic string.
+                
+            Returns
+            -------
+            polysys_char : str
+                GPC polynomial system characteristic string for the Wigner semicircle distribution.'''
+
+        if not self.radius == 1:
+            raise Exception(f"No polynomial system for this distribution ({self})")
+
+        if normalized:
+            polysys_char = "u"
+        else:
+            polysys_char = "U"
+        return polysys_char

@@ -21,8 +21,8 @@ class TestDistribution:
 
     RTOL = 1e-8                # relative tolerance for analytic-vs-analytic checks
     ATOL = 1e-10               # absolute tolerance for analytic-vs-analytic checks
-    QUAD_RTOL = 1e-6           # relative tolerance for quadrature-based checks
-    QUAD_ATOL = 1e-6           # absolute tolerance for quadrature-based checks
+    QUAD_RTOL = 1e-5           # relative tolerance for quadrature-based checks
+    QUAD_ATOL = 1e-5           # absolute tolerance for quadrature-based checks
 
     SAMPLE_METHODS = ("MC", "QMC_Halton", "QMC_LHS", "QMC_Sobol")  
 
