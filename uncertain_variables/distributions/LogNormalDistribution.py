@@ -1,6 +1,6 @@
 from .Distribution import Distribution, unwrap_if_scalar
 import numpy as np
-import scipy.special as sc
+from scipy.stats import norm as sc_norm
 from .NormalDistribution import NormalDistribution
 
 class LogNormalDistribution(Distribution):
@@ -25,7 +25,15 @@ class LogNormalDistribution(Distribution):
             sigma : float, default = 1
                 Standard deviation of the underlying normal distribution.'''
         
-        assert sigma > 0
+        if not (isinstance(mu, (int, float, np.number))):
+            raise ValueError("Mean mu must be a number.")  
+        if not (isinstance(sigma, (int, float, np.number)) and sigma > 0):
+            raise ValueError("Standard deviation sigma must be a positive number.")
+        if not np.isfinite(mu):
+            raise ValueError("Mean mu must be a finite number.")
+        if not np.isfinite(sigma):
+            raise ValueError("Standard deviation sigma must be a finite number.")
+        
         self.mu = mu
         self.sigma = sigma
 
@@ -37,7 +45,7 @@ class LogNormalDistribution(Distribution):
             repr_string : str
                 String representation of the LogNormalDistribution object.'''
         
-        repr_string = "lnN({}, {})".format(self.mu, self.sigma**2)
+        repr_string = "lnN({}, {:.2f})".format(self.mu, self.sigma**2)
         return repr_string
     
     def __eq__(self, other):
@@ -55,6 +63,7 @@ class LogNormalDistribution(Distribution):
         
         if not isinstance(other, LogNormalDistribution):
             return False
+        
         is_equal = (self.mu == other.mu) and (self.sigma == other.sigma)
         return is_equal
     
@@ -63,11 +72,11 @@ class LogNormalDistribution(Distribution):
 
             Returns
             -------
-            type_string : str
+            dist_type : str
                 Type of the distribution."""
 
-        type_string = "lognorm"
-        return type_string
+        dist_type = "lognorm"
+        return dist_type
     
     def get_dist_params(self):
         """ Return the parameters of the distribution.
@@ -93,11 +102,11 @@ class LogNormalDistribution(Distribution):
             y : array_like
                 Probability density function values at x.'''
         
-        x = np.array(x)
+        x = np.asarray(x)
         y = np.zeros(x.shape)
-        ind = x > 0
         mu = self.mu
         sigma = self.sigma
+        ind = x > 0
         root = (np.log(x[ind]) - mu) / sigma
         y_exp = root**2
         y_exp = -1 / 2 * y_exp
@@ -105,26 +114,26 @@ class LogNormalDistribution(Distribution):
         y = unwrap_if_scalar(y)
         return y
 
-    def logpdf(self, x):
-        ''' Return the log of the probability density function of the log-normal distribution, evaluated at x.
+    # def logpdf(self, x):
+    #     ''' Return the log of the probability density function of the log-normal distribution, evaluated at x.
         
-            Parameters
-            ----------
-            x : array_like
-                Points at which to evaluate the logpdf.
+    #         Parameters
+    #         ----------
+    #         x : array_like
+    #             Points at which to evaluate the logpdf.
                 
-            Returns
-            -------
-            y : array_like
-                Log probability density function values at x.'''
+    #         Returns
+    #         -------
+    #         y : array_like
+    #             Log probability density function values at x.'''
         
-        y = np.zeros(x.shape)
-        ind = x > 0
-        mu = self.mu
-        sigma = self.sigma
-        root = (np.log(x[ind]) - mu) / sigma
-        y = -1 / 2 * (root**2) - x[ind] * sigma * np.sqrt(2 * np.pi)
-        return y
+    #     y = np.zeros(x.shape)
+    #     ind = x > 0
+    #     mu = self.mu
+    #     sigma = self.sigma
+    #     root = (np.log(x[ind]) - mu) / sigma
+    #     y = -1 / 2 * (root**2) - x[ind] * sigma * np.sqrt(2 * np.pi)
+    #     return y
 
     def cdf(self, x):
         ''' Return the cumulative distribution function of the log-normal distribution, evaluated at x.
@@ -139,12 +148,13 @@ class LogNormalDistribution(Distribution):
             y : array_like
                 Cumulative distribution function values at x.'''
         
-        x = np.array(x)
+        x = np.asarray(x)
         y = np.zeros(x.shape)
         ind = x > 0
         mu = self.mu
         sigma = self.sigma
-        y[ind] = 1 / 2 * (1 + sc.erf((np.log(x[ind]) - mu) / (sigma * np.sqrt(2))))
+        # y[ind] = 1 / 2 * (1 + sc.erf((np.log(x[ind]) - mu) / (sigma * np.sqrt(2))))
+        y[ind] = sc_norm.cdf((np.log(x[ind]) - mu) / sigma)
         y = unwrap_if_scalar(y)
         return y
 
@@ -161,25 +171,29 @@ class LogNormalDistribution(Distribution):
             x : array_like
                 Inverse cumulative distribution function values at y.'''
         
-        y = np.array(y)
+        y = np.asarray(y)
         x = np.full(y.shape, np.nan)
         ind = (y >= 0) & (y <= 1)
         mu = self.mu
         sigma = self.sigma
-        x[ind] = np.exp(mu + sigma * np.sqrt(2) * sc.erfinv(2 * y[ind] - 1))
+        # x[ind] = np.exp(mu + sigma * np.sqrt(2) * sc.erfinv(2 * y[ind] - 1))
+        x[ind] = np.exp(mu + sigma * sc_norm.ppf(y[ind]))
+        x = unwrap_if_scalar(x)
         return x
 
-    def sample(self, n, method="MC", **params):
+    def sample(self, n, method="MC", seed=None, **params):
         ''' Return n samples from the log-normal distribution.
         
             Parameters
             ----------
             n : int
                 Number of samples to generate.
-                
             method : str, optional
-                Sampling method to use (default is 'MC' for Monte Carlo).
-                
+                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
+                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
+                Default is "MC".
+            seed : int, optional
+                Seed for the random number generator. Default is None.
             **params : dict
                 Additional parameters for the sampling method.
                 
@@ -189,11 +203,8 @@ class LogNormalDistribution(Distribution):
                 Generated samples from the log-normal distribution.'''
         
         from .UniformDistribution import UniformDistribution
-        if method == "MC":
-            xi = np.random.randn(n)
-        else:
-            xi = UniformDistribution().sample(n, method, **params)
-        samples = np.exp((xi * self.sigma) + self.mu)
+        xi = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        samples = self.invcdf(xi)
         return samples
 
     def mean(self):
@@ -252,7 +263,7 @@ class LogNormalDistribution(Distribution):
             -------
             dist_germ : Distribution object
                 GPC base distribution.'''
-        
+
         base = NormalDistribution(0, 1)
         return base
 
@@ -268,7 +279,8 @@ class LogNormalDistribution(Distribution):
             -------
             x : array_like
                 Points in log-normal distribution space.'''
-        
+
+        y = np.asarray(y)
         x = np.exp(y * self.sigma + self.mu)
         return x
 
@@ -284,11 +296,12 @@ class LogNormalDistribution(Distribution):
             -------
             y : array_like
                 Points in base (germ) space.'''
-        
+
+        x = np.asarray(x)
         # ignore RuntimeWarning in case x == 0
-        with np.errstate(divide="ignore", invalid="ignore"): #TODO ???
+        with np.errstate(divide="ignore", invalid="ignore"): 
             y = (np.log(x) - self.mu) / self.sigma
-            return y
+        return y
 
     def stdnor2base(self, y):  # same as base2dist??
         ''' Convert from standard normal space to log-normal distribution space.
@@ -303,10 +316,11 @@ class LogNormalDistribution(Distribution):
             x : array_like
                 Points in log-normal distribution space.'''
         
+        y = np.asarray(y)
         x = np.exp(y * self.sigma + self.mu)
         return x
 
-    def base2stdnor(self, x):  # same as dist2base??
+    def base2stdnor(self, x):  # same as dist2base?
         ''' Convert from log-normal distribution space to standard normal space.
         
             Parameters
@@ -318,8 +332,10 @@ class LogNormalDistribution(Distribution):
             -------
             y : array_like
                 Points in standard normal space.'''
-        
-        y = (np.log(x) - self.mu) / self.sigma
+
+        x = np.asarray(x)
+        with np.errstate(divide="ignore", invalid="ignore"): 
+            y = (np.log(x) - self.mu) / self.sigma
         return y
 
     def orth_polysys(self):
@@ -330,13 +346,20 @@ class LogNormalDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the log-normal distribution.'''
         
-        from polysys import HermitePolynomials
+        # from polysys import HermitePolynomials
+
+        # if self.mu == 0 and self.sigma == 1:
+        #     polysys = HermitePolynomials()
+        # else:
+        #     polysys = Distribution.orth_polysys(self)
+        # return polysys
+
+        from ..polysys import HermitePolynomials
 
         if self.mu == 0 and self.sigma == 1:
-            polysys = HermitePolynomials()
+            return HermitePolynomials()
         else:
-            polysys = Distribution.orth_polysys(self)
-        return polysys
+            raise Exception(f"No polynomial system for this distribution ({self})")
 
     def orth_polysys_syschar(self, normalized):
         ''' Return the GPC polynomial system characteristic string for the log-normal distribution.
@@ -351,11 +374,20 @@ class LogNormalDistribution(Distribution):
             polysys_char : str
                 GPC polynomial system characteristic string for the log-normal distribution.'''
         
-        if self.mu == 0 and self.sigma == 1:
-            if normalized:
-                polysys_char = "h"
-            else:
-                polysys_char = "H"
+        # if self.mu == 0 and self.sigma == 1:
+        #     if normalized:
+        #         polysys_char = "h"
+        #     else:
+        #         polysys_char = "H"
+        # else:
+        #     polysys_char = []
+        # return polysys_char
+
+        if not self.mu == 0 or not self.sigma == 1:
+            raise Exception(f"No polynomial system characteristic for this distribution ({self})")
+            # OR return []
+            
+        if normalized:
+            return "h"
         else:
-            polysys_char = []
-        return polysys_char
+            return "H"

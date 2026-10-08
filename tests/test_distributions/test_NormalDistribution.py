@@ -146,6 +146,8 @@ class TestNormalDistribution(DistributionTestClass):
         assert d1.orth_polysys_syschar(False) == "H"
         assert d1.orth_polysys_syschar(True) == "h"
         with pytest.raises(Exception):
+            d2.orth_polysys_syschar(True)
+        with pytest.raises(Exception):
             d2.orth_polysys_syschar(False)
 
     # =====================================================================

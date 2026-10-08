@@ -11,6 +11,7 @@ Distributions
    :maxdepth: 0
 
    uncertain_variables.distributions.Distribution
+   uncertain_variables.distributions.ArcsineDistribution
    uncertain_variables.distributions.BetaDistribution
    uncertain_variables.distributions.ExponentialDistribution
    uncertain_variables.distributions.LogNormalDistribution

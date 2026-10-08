@@ -28,6 +28,7 @@
         Utility function to unwrap single-element arrays.'''
 
 from .Distribution import *
+from .ArcsineDistribution import *
 from .NormalDistribution import *
 from .TranslatedDistribution import *
 from .BetaDistribution import *

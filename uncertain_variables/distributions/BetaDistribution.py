@@ -2,9 +2,10 @@ from .Distribution import Distribution, unwrap_if_scalar
 import numpy as np
 import scipy.special as sc
 from .TranslatedDistribution import TranslatedDistribution
+from scipy.stats import beta as sc_beta
 
 class BetaDistribution(Distribution):
-    ''' Class for beta distribution.
+    ''' Class for beta distribution on the interval [-1, 1].
     
         Attributes
         ----------
@@ -24,7 +25,12 @@ class BetaDistribution(Distribution):
                 
             b : float
                 Second shape parameter of the beta distribution.'''
-        
+
+        if not (isinstance(a, (int, float, np.number)) and a > 0):
+            raise ValueError("Parameter 'a' must be a positive number.")
+        if not (isinstance(b, (int, float, np.number)) and b > 0):
+            raise ValueError("Parameter 'b' must be a positive number.")
+
         self.a = a
         self.b = b
 
@@ -54,6 +60,7 @@ class BetaDistribution(Distribution):
         
         if not isinstance(other, BetaDistribution):
             return False
+        
         is_equal = (self.a == other.a) and (self.b == other.b)
         return is_equal
     
@@ -92,16 +99,20 @@ class BetaDistribution(Distribution):
             y : array_like
                 Probability density function values at x.'''
         
-        x = TranslatedDistribution.translate_points_backwards(x, -1, 2, 0)
-        x = np.array(x)
-        y = np.zeros(x.shape)
-        ind = (x >= 0) & (x <= 1)
-        y[ind] = (
-            x[ind] ** (self.a - 1)
-            * (1 - x[ind]) ** (self.b - 1)
-            / sc.beta(self.a, self.b)
-        )
-        y = unwrap_if_scalar(y)
+        # x = TranslatedDistribution.translate_points_backwards(x, -1, 2, 0)
+        # x = np.array(x)
+        # y = np.zeros(x.shape)
+        # ind = (x >= 0) & (x <= 1)
+        # y[ind] = (
+        #     x[ind] ** (self.a - 1)
+        #     * (1 - x[ind]) ** (self.b - 1)
+        #     / sc.beta(self.a, self.b)
+        # )
+        # y = unwrap_if_scalar(y)
+        # return y
+
+        x = np.asarray(x)
+        y = sc_beta.pdf(x, self.a, self.b, loc=-1, scale=2)
         return y
 
     def cdf(self, x):
@@ -117,13 +128,17 @@ class BetaDistribution(Distribution):
             y : array_like
                 Cumulative distribution function values at x.'''
         
-        x = TranslatedDistribution.translate_points_backwards(x, -1, 2, 0)
-        x = np.array(x)
-        y = np.zeros(x.shape)
-        ind = (x >= 0) & (x <= 1)
-        y[ind] = sc.betainc(self.a, self.b, x[ind])
-        y[x > 1] = 1
-        y = unwrap_if_scalar(y)
+        # x = TranslatedDistribution.translate_points_backwards(x, -1, 2, 0)
+        # x = np.array(x)
+        # y = np.zeros(x.shape)
+        # ind = (x >= 0) & (x <= 1)
+        # y[ind] = sc.betainc(self.a, self.b, x[ind])
+        # y[x > 1] = 1
+        # y = unwrap_if_scalar(y)
+        # return y
+
+        x = np.asarray(x)
+        y = sc_beta.cdf(x, self.a, self.b, loc=-1, scale=2)
         return y
 
     def invcdf(self, y):
@@ -140,12 +155,16 @@ class BetaDistribution(Distribution):
                 Inverse cumulative distribution function values at y.'''
         
         # TODO implementing the Matlab code
-        y = np.array(y)
-        x = np.full(y.shape, np.nan)
-        ind = (y >= 0) & (y <= 1)
-        x[ind] = sc.betaincinv(self.a, self.b, y[ind])
-        x = TranslatedDistribution.translate_points_forward(x, -1, 2, 0)
-        x = unwrap_if_scalar(x)
+        # y = np.array(y)
+        # x = np.full(y.shape, np.nan)
+        # ind = (y >= 0) & (y <= 1)
+        # x[ind] = sc.betaincinv(self.a, self.b, y[ind])
+        # x = TranslatedDistribution.translate_points_forward(x, -1, 2, 0)
+        # x = unwrap_if_scalar(x)
+        # return x
+
+        y = np.asarray(y)
+        x = sc_beta.ppf(y, self.a, self.b, loc=-1, scale=2)
         return x
 
     def moments(self):
@@ -161,8 +180,10 @@ class BetaDistribution(Distribution):
         skew = self.skew()
         kurt = self.kurt()
 
-        moments = [mean, var, skew, kurt]
-        moments = TranslatedDistribution.translate_moments(moments, -1, 2, 0)
+        # moments = [mean, var, skew, kurt]
+        # moments = TranslatedDistribution.translate_moments(moments, -1, 2, 0)
+
+        moments = np.array([mean, var, skew, kurt])
         return moments
 
     def mean(self):
@@ -173,7 +194,8 @@ class BetaDistribution(Distribution):
             mean : float
                 Mean of the beta distribution."""
         
-        mean = self.a / (self.a + self.b)
+        # mean = self.a / (self.a + self.b)
+        mean = sc_beta.mean(self.a, self.b, loc=-1, scale=2)
         return mean
 
     def var(self):
@@ -184,7 +206,8 @@ class BetaDistribution(Distribution):
             var : float
                 Variance of the beta distribution."""
         
-        var = self.a * self.b / (((self.a + self.b) ** 2) * (self.a + self.b + 1))
+        # var = self.a * self.b / (((self.a + self.b) ** 2) * (self.a + self.b + 1))
+        var = sc_beta.var(self.a, self.b, loc=-1, scale=2)
         return var
 
     def skew(self):
@@ -195,12 +218,14 @@ class BetaDistribution(Distribution):
             skew : float
                 Skewness of the beta distribution."""
         
-        skew = (
-            2
-            * (self.b - self.a)
-            * np.sqrt(self.a + self.b + 1)
-            / ((self.a + self.b + 2) * np.sqrt(self.a * self.b))
-        )
+        # skew = (
+        #     2
+        #     * (self.b - self.a)
+        #     * np.sqrt(self.a + self.b + 1)
+        #     / ((self.a + self.b + 2) * np.sqrt(self.a * self.b))
+        # )
+
+        skew = sc_beta.stats(self.a, self.b, loc=-1, scale=2, moments='s')
         return skew
 
     def kurt(self):
@@ -211,17 +236,46 @@ class BetaDistribution(Distribution):
             kurt : float
                 Kurtosis of the beta distribution."""
         
-        kurt = (
-            6
-            * (
-                self.a**3
-                - (self.a**2) * (2 * self.b - 1)
-                + (self.b**2) * (self.b + 1)
-                - 2 * self.a * self.b * (self.b + 2)
-            )
-            / (self.a * self.b * (self.a + self.b + 2) * (self.a + self.b + 3))
-        )
+        # kurt = (
+        #     6
+        #     * (
+        #         self.a**3
+        #         - (self.a**2) * (2 * self.b - 1)
+        #         + (self.b**2) * (self.b + 1)
+        #         - 2 * self.a * self.b * (self.b + 2)
+        #     )
+        #     / (self.a * self.b * (self.a + self.b + 2) * (self.a + self.b + 3))
+        # )
+
+        kurt = sc_beta.stats(self.a, self.b, loc=-1, scale=2, moments='k')
         return kurt
+
+    def sample(self, n, method="MC", seed=None, **params): 
+    
+        """Return n samples from the beta distribution.
+
+            Parameters
+            ----------
+            n : int
+                Number of samples to generate.
+            method : str, optional
+                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
+                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
+                Default is "MC".
+            seed : int, optional
+                Seed for the random number generator. Default is None.
+            **params : dict
+                Additional parameters for the sampling method.
+
+            Returns
+            -------
+            samples : array_like
+                Generated samples from the beta distribution."""
+
+        from .UniformDistribution import UniformDistribution
+        xi = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        samples = self.invcdf(xi)
+        return samples
 
     def get_base_dist(self):
         """ Return the GPC base distribution.
@@ -274,7 +328,12 @@ class BetaDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the beta distribution."""
         
-        from polysys import JacobiPolynomials
+        # from polysys import JacobiPolynomials
+
+        # polysys = JacobiPolynomials(self.b - 1, self.a - 1)
+        # return polysys
+
+        from ..polysys import JacobiPolynomials
 
         polysys = JacobiPolynomials(self.b - 1, self.a - 1)
         return polysys
