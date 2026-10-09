@@ -1,7 +1,7 @@
 import numpy as np
 
-from Distribution import Distribution
-from UniformDistribution import UniformDistribution
+from uncertain_variables.distributions.Distribution import Distribution
+from uncertain_variables.distributions.UniformDistribution import UniformDistribution
 from scipy.stats import norm
 
 
@@ -20,7 +20,7 @@ class NormalDistribution(Distribution):
             Location parameter of the uniform distribution (same as mu).
 
         scale : float
-                Scale parameter of the uniform distribution (same as sigma)."""
+            Scale parameter of the uniform distribution (same as sigma)."""
     
     def __init__(self, mu=0, sigma=1):
         """ Initialize the normal distribution with mean mu and standard deviation sigma.
@@ -280,7 +280,14 @@ class NormalDistribution(Distribution):
         return samples
 
     def translate(self, shift, scale):
-        """ Return a translated and scaled version of the normal distribution.
+        """ Return a translated and scaled normal distribution.
+
+            The transformation is defined as
+
+            Y = scale * X + shift,
+
+            where X is the original random variable.
+        
         
             Parameters
             ----------
@@ -307,9 +314,9 @@ class NormalDistribution(Distribution):
         if not np.isfinite(scale):
             raise ValueError("Scale must be a finite value.")
         
-        new_loc = self.loc + shift
-        new_scale = self.scale * scale
-        return NormalDistribution(new_loc, new_scale)
+        new_mu = scale * self.mu + shift
+        new_sigma = self.scale * scale
+        return NormalDistribution(new_mu, new_sigma)
 
     def get_shift(self):
         """ Return the shift (location) parameter of the normal distribution.
