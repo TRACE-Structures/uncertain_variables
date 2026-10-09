@@ -1,6 +1,5 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from NormalDistribution import NormalDistribution
 # from scipy.stats.qmc import Halton
 # from scipy.stats.qmc import LatinHypercube as LHS
 # from scipy.stats.qmc import Sobol
@@ -297,10 +296,11 @@ class Distribution(ABC):
     #     new_dist = self.translate(self.shift, self.scale)
     #     return new_dist
 
-    @abstractmethod
     def fix_bounds(self, new_min, new_max, q0=0, q1=1):
         """ Abstract method to fix the distribution to have specified bounds.
             Subclasses must implement this method."""
+
+        pass
 
     def stdnor2base(self, x):
         """ Convert from standard normal space to distribution space.
@@ -315,10 +315,8 @@ class Distribution(ABC):
             y : array_like
                 Points in distribution space.""" 
 
-        # from .NormalDistribution import NormalDistribution
-        # y = self.invcdf(NormalDistribution().cdf(x))
-        # return y
-
+        # Imported lazily to avoid a circular import with NormalDistribution.
+        from uncertain_variables.distributions.NormalDistribution import NormalDistribution
         y = self.invcdf(NormalDistribution().cdf(x))
         return y
 
@@ -335,10 +333,8 @@ class Distribution(ABC):
             x : array_like
                 Points in standard normal space."""
 
-        # from .NormalDistribution import NormalDistribution
-        # x = NormalDistribution().invcdf(self.cdf(y))
-        # return x
-
+        # Imported lazily to avoid a circular import with NormalDistribution.
+        from uncertain_variables.distributions.NormalDistribution import NormalDistribution
         x = NormalDistribution().invcdf(self.cdf(y))
         return x
 

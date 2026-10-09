@@ -1,6 +1,6 @@
 import numpy as np
 
-from Distribution import Distribution
+from uncertain_variables.distributions.Distribution import Distribution
 from scipy.stats import uniform
 
 from scipy.stats.qmc import Halton
@@ -287,16 +287,23 @@ class UniformDistribution(Distribution):
             raise ValueError(f"Unknown sampling method: {method}")
         return self.invcdf(y)
 
-    def translate(self, shift, scale):
-        """ Return a translated and scaled version of the uniform distribution.
+    def translate(self, shift=0, scale=1):
+        """ Return a translated and scaled uniform distribution.
 
+            The transformation is defined as
+
+            Y = scale * X + shift,
+
+            where X is the original random variable.
+        
             Parameters
             ----------
             shift : float
                 Shift to apply to the distribution.
-            scale : float
-                Scale to apply to the distribution. Must be a positive numeric value.
 
+            scale : float
+                Scale to apply to the distribution.
+            
             Returns
             -------
             new_dist : UniformDistribution
@@ -311,19 +318,23 @@ class UniformDistribution(Distribution):
         if not np.isfinite(scale):
             raise ValueError("Scale must be a finite value.")
 
-        center = (self.a + self.b) / 2 + shift
-        half_width = scale * (self.b - self.a) / 2
-        return UniformDistribution(center - half_width, center + half_width)
+        new_loc = scale * self.loc + shift
+        new_scale = self.scale * scale
+        new_a = new_loc
+        new_b = new_loc + new_scale
+
+        new_dist = UniformDistribution(new_a, new_b)
+        return new_dist
 
     def get_shift(self):
-        """ Return the shift of the uniform distribution from the (-1, 1) base form.
+        """ Return the shift of the uniform distribution from the (0, 1) base form.
             
             Returns
             -------
             shift : float
                 Shift of the uniform distribution."""
 
-        shift = self.loc + self.scale / 2
+        shift = self.loc + self.scale / 2 
         return shift
 
     def get_scale(self):

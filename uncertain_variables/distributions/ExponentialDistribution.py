@@ -1,5 +1,8 @@
-from .Distribution import Distribution, unwrap_if_scalar
 import numpy as np
+
+from uncertain_variables.distributions.Distribution import Distribution
+from uncertain_variables.distributions.UniformDistribution import UniformDistribution
+from scipy.stats import expon
 
 class ExponentialDistribution(Distribution):
     """ Class for exponential distribution.
@@ -7,9 +10,15 @@ class ExponentialDistribution(Distribution):
         Attributes
         ----------
         lambda_ : float
-            Rate parameter of the exponential distribution."""
+            Rate parameter of the exponential distribution.
+            
+        scale : float
+            Scale parameter of the exponential distribution (1/lambda_).
+            
+        loc : float
+            Location parameter of the exponential distribution, typically set to 0."""
     
-    def __init__(self, lambda_=1):
+    def __init__(self, lambda_=1, loc=0):
         """ Initialize the exponential distribution with rate parameter lambda_.
 
             Parameters
@@ -22,6 +31,9 @@ class ExponentialDistribution(Distribution):
 
         self.lambda_ = lambda_
 
+        self.scale = 1 / lambda_
+        self.loc = loc
+
     def __repr__(self):
         """ Returns the string representation of the ExponentialDistribution object.
 
@@ -30,7 +42,7 @@ class ExponentialDistribution(Distribution):
             repr_string : str
                 String representation of the ExponentialDistribution object."""
         
-        repr_string = "Exp({})".format(self.lambda_)
+        repr_string = "Exp({:.2f}), loc={:.2f}".format(self.lambda_, self.loc)
         return repr_string
     
     def __eq__(self, other):
@@ -49,11 +61,11 @@ class ExponentialDistribution(Distribution):
         if not isinstance(other, ExponentialDistribution):
             return False
         
-        is_equal = self.lambda_ == other.lambda_
+        is_equal = (self.lambda_ == other.lambda_) and (self.loc == other.loc)
         return is_equal
     
     def get_dist_type(self):
-        """ Return the type of the distribution.
+        """ Return the type of the exponential distribution.
 
             Returns
             -------
@@ -64,14 +76,15 @@ class ExponentialDistribution(Distribution):
         return type_string
     
     def get_dist_params(self):
-        """ Return the parameters of the distribution.
+        """ Return the parameters of the exponential distribution.
 
             Returns
             -------
-            params : float
-                Parameters of the distribution (lambda_)."""
+            params : array_like of shape (2,)
+                Distribution parameters [lambda_, loc], where lambda_ is 
+                the rate parameter and loc is the location parameter."""
         
-        params = self.lambda_
+        params = np.array([self.lambda_, self.loc])
         return params
 
     def pdf(self, x):
@@ -87,12 +100,14 @@ class ExponentialDistribution(Distribution):
             y : array_like
                 Probability density function values at x."""
 
-        x = np.asarray(x)
-        lambda_ = self.lambda_
-        y = np.zeros(x.shape)
-        ind = x >= 0
-        y[ind] = lambda_ * np.exp(-lambda_ * x[ind])
-        y = unwrap_if_scalar(y)
+        # x = np.asarray(x)
+        # lambda_ = self.lambda_
+        # y = np.zeros(x.shape)
+        # ind = x >= 0
+        # y[ind] = lambda_ * np.exp(-lambda_ * x[ind])
+        # y = unwrap_if_scalar(y)
+        # return y
+        y = expon.pdf(x, scale=self.scale, loc=self.loc)
         return y
 
     def cdf(self, x):
@@ -108,12 +123,15 @@ class ExponentialDistribution(Distribution):
             y : array_like
                 Cumulative distribution function values at x."""
         
-        x = np.asarray(x)
-        lambda_ = self.lambda_
-        y = np.zeros(x.shape)
-        ind = x >= 0
-        y[ind] = 1 - np.exp(-lambda_ * x[ind])
-        y = unwrap_if_scalar(y)
+        # x = np.asarray(x)
+        # lambda_ = self.lambda_
+        # y = np.zeros(x.shape)
+        # ind = x >= 0
+        # y[ind] = 1 - np.exp(-lambda_ * x[ind])
+        # y = unwrap_if_scalar(y)
+        # return y
+
+        y = expon.cdf(x, scale=self.scale, loc=self.loc)
         return y
 
     def invcdf(self, y):
@@ -129,14 +147,17 @@ class ExponentialDistribution(Distribution):
             x : array_like
                 Inverse cumulative distribution function values at y."""
         
-        y = np.asarray(y)
-        lambda_ = self.lambda_
-        x = np.full(np.size(y), np.nan)
-        ind = (y >= 0) & (y <= 1)
-        # ignore RuntimeWarning in case x == 0
-        with np.errstate(divide="ignore", invalid="ignore"):
-            x[ind] = -np.log(1 - y[ind]) / lambda_
-        x = unwrap_if_scalar(x)
+        # y = np.asarray(y)
+        # lambda_ = self.lambda_
+        # x = np.full(np.size(y), np.nan)
+        # ind = (y >= 0) & (y <= 1)
+        # # ignore RuntimeWarning in case x == 0
+        # with np.errstate(divide="ignore", invalid="ignore"):
+        #     x[ind] = -np.log(1 - y[ind]) / lambda_
+        # x = unwrap_if_scalar(x)
+        # return x
+
+        x = expon.ppf(y, scale=self.scale, loc=self.loc)
         return x
 
     def mean(self):
@@ -147,7 +168,7 @@ class ExponentialDistribution(Distribution):
             mean : float
                 Mean of the exponential distribution."""
         
-        mean = 1 / self.lambda_
+        mean = expon.mean(scale=self.scale, loc=self.loc)
         return mean
 
     def var(self):
@@ -158,7 +179,7 @@ class ExponentialDistribution(Distribution):
             var : float
                 Variance of the exponential distribution."""
             
-        var = 1 / self.lambda_**2
+        var = expon.var(scale=self.scale, loc=self.loc)
         return var
 
     def skew(self):
@@ -202,10 +223,128 @@ class ExponentialDistribution(Distribution):
                     samples : array_like
                         Generated samples from the exponential distribution."""
         
-        from .UniformDistribution import UniformDistribution
-        xi = UniformDistribution().sample(n, method, seed=seed, **params)
-        samples = self.invcdf(xi)
+        if not isinstance(n, (int, np.integer)) or n <= 0:
+            raise ValueError("Number of samples must be a positive integer.")
+        if seed is not None and not isinstance(seed, (int, np.integer)):
+            raise ValueError("seed must be an integer or None.")
+        if not np.isfinite(n):
+            raise ValueError("Number of samples must be a finite value.")
+
+        y = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        samples = self.invcdf(y)
         return samples
+
+    def translate(self, shift, scale):
+        """ Return a translated and scaled exponential distribution.
+
+            The transformation is defined as
+
+            Y = scale * X + shift,
+
+            where X is the original random variable.
+
+            Parameters
+            ----------
+            shift : float
+                Shift to apply to the distribution.
+
+            scale : float
+                Scale to apply to the distribution.
+            
+            Returns
+            -------
+            new_dist : ExponentialDistribution
+                Translated and scaled exponential distribution."""
+
+        if not (isinstance(shift, (int, float, np.number))):
+            raise ValueError("Shift must be a numeric value.")
+        if not (isinstance(scale, (int, float, np.number)) and scale > 0):
+            raise ValueError("Scale must be a positive numeric value.")
+        if not np.isfinite(shift):
+            raise ValueError("Shift must be a finite value.")
+        if not np.isfinite(scale):
+            raise ValueError("Scale must be a finite value.")
+
+        new_loc = scale * self.loc + shift
+        new_lambda = self.lambda_ / scale
+        return ExponentialDistribution(lambda_=new_lambda, loc=new_loc)
+
+    def get_shift(self):
+        """ Return the shift (location) parameter of the exponential distribution.
+
+            Returns
+            -------
+            shift : float
+                Shift (location) parameter of the exponential distribution."""
+
+        shift = self.loc
+        return shift
+
+    def get_scale(self):
+        """ Return the scale 1/lambda_ parameter of the exponential distribution.
+
+            Returns
+            -------
+            scale : float
+                Scale (1/lambda_) parameter of the exponential distribution."""
+
+        scale = self.scale
+        return scale
+
+    def fix_moments(self, mean, var, loc=0):
+        """ Fix the exponential distribution to have specified mean, variance, and location.
+
+            Parameters
+            ----------
+            mean : float
+                Desired mean of the distribution.
+            var : float
+                Desired variance of the distribution.
+            loc : float, default=0
+                Location parameter of the distribution.
+
+            Returns
+            -------
+            new_dist : ExponentialDistribution
+                Exponential distribution with the specified mean, variance, and location."""
+        
+        if not isinstance(mean, (int, float, np.number)):
+            raise ValueError("Mean must be a numeric value.")
+        if not isinstance(var, (int, float, np.number)) and var is not None:
+            raise ValueError("Variance must be a numeric value or None.")
+        if not isinstance(loc, (int, float, np.number)):
+            raise ValueError("Location must be a numeric value.")
+
+        if not np.isfinite(mean):
+            raise ValueError("Mean must be a finite value.")
+        if var is not None and not np.isfinite(var):
+            raise ValueError("Variance must be a finite value.")
+        if not np.isfinite(loc):
+            raise ValueError("Location must be a finite value.")
+
+        if mean <= loc:
+            raise ValueError("Mean must be greater than loc.")
+
+        if var is None:
+            var = (mean - loc)**2
+        elif not isinstance(var, (int, float, np.number)) or not np.isfinite(var) or var <= 0:
+            raise ValueError("Variance must be a positive finite number.")
+        elif not np.isclose(var, (mean - loc)**2):
+            raise ValueError("Mean and variance are incompatible with the specified location.")
+
+        new_lambda = 1 / (mean - loc)
+        return ExponentialDistribution(new_lambda, loc)
+
+    def get_base_dist(self):
+        """ Return the GPC base distribution.
+
+            Returns
+            -------
+            dist_germ : Distribution object
+                GPC base distribution."""
+            
+        base = ExponentialDistribution(1)
+        return base
 
     def orth_polysys(self):
         """ Return the GPC polynomial system for the exponential distribution.
@@ -262,46 +401,35 @@ class ExponentialDistribution(Distribution):
             polysys_char = 'L'
         return polysys_char
 
-    def get_base_dist(self):
-        """ Return the GPC base distribution.
+    # def base2dist(self, y):
+    #     """ Convert from base (germ) space to exponential distribution space.
 
-            Returns
-            -------
-            dist_germ : Distribution object
-                GPC base distribution."""
+    #         Parameters
+    #         ----------
+    #         y : array_like
+    #             Points in base (germ) space.
+
+    #         Returns
+    #         -------
+    #         x : array_like
+    #             Points in exponential distribution space."""
+
+    #     y = np.asarray(y)
+    #     x = y / self.lambda_
+    #     return x
+
+    # def dist2base(self, x):
+    #     """ Convert from exponential distribution space to base (germ) space.
+
+    #         Parameters
+    #         ----------
+    #         x : array_like
+    #             Points in exponential distribution space.
             
-        base = ExponentialDistribution(1)
-        return base
-
-    def base2dist(self, y):
-        """ Convert from base (germ) space to exponential distribution space.
-
-            Parameters
-            ----------
-            y : array_like
-                Points in base (germ) space.
-
-            Returns
-            -------
-            x : array_like
-                Points in exponential distribution space."""
-
-        y = np.asany    
-        x = y / self.lambda_
-        return x
-
-    def dist2base(self, x):
-        """ Convert from exponential distribution space to base (germ) space.
-
-            Parameters
-            ----------
-            x : array_like
-                Points in exponential distribution space.
-            
-            Returns
-            -------
-            y : array_like
-                Points in base (germ) space."""
+    #         Returns
+    #         -------
+    #         y : array_like
+    #             Points in base (germ) space."""
         
-        y = x * self.lambda_
-        return y
+    #     y = x * self.lambda_
+    #     return y
