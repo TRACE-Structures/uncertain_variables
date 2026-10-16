@@ -1,39 +1,40 @@
 from .Distribution import Distribution
 
 class TranslatedDistribution(Distribution):
-    ''' Distribution obtained by applying an affine 
-        transformation to another base distribution.
+    """Distribution obtained by applying an affine transformation to a base distribution.
         
         Attributes
         ----------
-        dist: Distribution
+        dist : Distribution
             Underlying base distribution.
 
-        shift: float
+        shift : float
             Additive translation applied after scaling.
 
-        scale: float
-            Scaling factor applied to centered values.
+        scale : float
+            Positive scaling factor applied to centered values.
 
-        center: float
-            Center point for scaling transformation.'''
+        center : float
+            Center point for scaling transformation. If omitted, the base
+            distribution's mean is used."""
     
     def __init__(self, dist, shift, scale, center=None):
-        ''' Initialize the translated distribution.
+        """Initialize a translated distribution.
         
             Parameters
             ----------
-            dist: Distribution
-                Underlying base distribution
+            dist : Distribution
+                Underlying base distribution.
                 
-            shift: float
+            shift : float
                 Additive translation applied after scaling.
             
-            scale: float
-                Scaling factor applied to centered values.
+            scale : float
+                Positive scaling factor applied to centered values.
             
-            center: float
-                Center point for scaling transformation.'''
+            center : float or None, default: None
+                Center point for scaling transformation. If ``None``, use the
+                mean of the base distribution."""
         
         self.dist = dist
         self.shift = shift
@@ -75,7 +76,7 @@ class TranslatedDistribution(Distribution):
         return is_equal
     
     def get_dist_type(self):
-        """ Return the type identifier of this distribution.
+        """ Return the type of the distribution.
 
         Returns
         -------

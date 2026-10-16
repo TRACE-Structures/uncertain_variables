@@ -135,7 +135,7 @@ class Distribution(ABC):
     #     # elif method == 'Sobol_saltelli': # It's not
 
     @abstractmethod
-    def sample(self, n, method, seed, **params):
+    def sample(self, n, method, seed):
         """ Abstract method to generate random samples from the distribution.
             Subclasses must implement this method."""
 
@@ -200,7 +200,7 @@ class Distribution(ABC):
             bounds : array_like
                 Bounds of the distribution as [lower_bound, upper_bound]."""
 
-        if not (isinstance(delta, (int, float, np.number)) and 0 < delta < 0.5):
+        if not (isinstance(delta, (int, float, np.number)) and 0 <= delta <= 0.5):
             raise ValueError("Delta must be a float between 0 and 0.5.")
         
         bounds = self.invcdf(np.array([delta, 1 - delta]))
@@ -241,66 +241,59 @@ class Distribution(ABC):
         
         pass
 
-    # def fix_bounds(self, min, max, q0=0, q1=1):
-    #     """ Fix the distribution to have specified bounds.
-        
-    #         Parameters
-    #         ----------
-    #         min : float
-    #             Desired minimum of the distribution.
-                
-    #         max : float
-    #             Desired maximum of the distribution.
-                
-    #         q0 : float, optional
-    #             Quantile corresponding to the minimum (default is 0).
-                
-    #         q1 : float, optional
-    #             Quantile corresponding to the maximum (default is 1).
-                
-    #         Returns
-    #         -------
-    #         new_dist : TranslatedDistribution
-    #             Translated and scaled distribution with specified bounds."""
-
-    #     if not (isinstance(min, (int, float))):
-    #         raise ValueError("Minimum must be a numeric value.")
-    #     if not (isinstance(max, (int, float))):
-    #         raise ValueError("Maximum must be a numeric value.")
-    #     if min >= max:
-    #         raise ValueError("Minimum must be less than maximum.")
-    #     if not (0 <= q0 <= 1):
-    #         raise ValueError(f"q0 must be between 0 and 1, got {q0}")
-    #     if not (q0 <= q1 <= 1):
-    #         raise ValueError(f"q1 must be between q0 and 1, got {q1}")
-
-    #     old_min = self.invcdf(q0)
-    #     old_max = self.invcdf(q1)
-
-    #     if not np.isfinite(old_min):
-    #         # raise ValueError(f"Lower quantile (q0) gives infinity (unbounded distribution?)")
-    #         print(
-    #             f"Lower quantile (q0) gives infinity (unbounded distribution?). Using new q0=0.02"
-    #         )
-    #         old_min, _ = self.get_bounds()
-    #     if not np.isfinite(old_max):
-    #         # raise ValueError(f"Upper quantile (q1) gives infinity (unbounded distribution?)")
-    #         print(
-    #             f"Upper quantile (q1) gives infinity (unbounded distribution?). Using new q1=0.98"
-    #         )
-    #         _, old_max = self.get_bounds()
-
-    #     center = self.mean()
-    #     self.scale = (max - min) / (old_max - old_min)
-    #     self.shift = min - ((old_min - center) * self.scale + center)
-    #     new_dist = self.translate(self.shift, self.scale)
-    #     return new_dist
-
     def fix_bounds(self, new_min, new_max, q0=0, q1=1):
-        """ Abstract method to fix the distribution to have specified bounds.
-            Subclasses must implement this method."""
+        """ Fix the distribution to have specified bounds.
+        
+            Parameters
+            ----------
+            new_min : float
+                Desired minimum of the distribution.
+                
+            new_max : float
+                Desired maximum of the distribution.
+                
+            q0 : float, optional
+                Quantile corresponding to the minimum (default is 0).
+                
+            q1 : float, optional
+                Quantile corresponding to the maximum (default is 1).
+                
+            Returns
+            -------
+            new_dist : Distribution
+                Translated and scaled distribution with specified bounds."""
 
-        pass
+        if not (isinstance(new_min, (int, float))):
+            raise ValueError("Minimum must be a numeric value.")
+        if not (isinstance(new_max, (int, float))):
+            raise ValueError("Maximum must be a numeric value.")
+        if new_min >= new_max:
+            raise ValueError("Minimum must be less than maximum.")
+        if not (0 <= q0 <= 1):
+            raise ValueError(f"q0 must be between 0 and 1, got {q0}")
+        if not (q0 <= q1 <= 1):
+            raise ValueError(f"q1 must be between q0 and 1, got {q1}")
+
+        old_min = self.invcdf(q0)
+        old_max = self.invcdf(q1)
+
+        if not np.isfinite(old_min):
+            # raise ValueError(f"Lower quantile (q0) gives infinity (unbounded distribution?)")
+            print(
+                f"Lower quantile (q0) gives infinity (unbounded distribution?). Using new q0=0.02"
+            )
+            old_min, _ = self.get_bounds()
+        if not np.isfinite(old_max):
+            # raise ValueError(f"Upper quantile (q1) gives infinity (unbounded distribution?)")
+            print(
+                f"Upper quantile (q1) gives infinity (unbounded distribution?). Using new q1=0.98"
+            )
+            _, old_max = self.get_bounds()
+
+        new_scale = (new_max - new_min) / (old_max - old_min)
+        new_shift = new_min - old_min * new_scale
+        new_dist = self.translate(shift=new_shift, scale=new_scale)
+        return new_dist
 
     def stdnor2base(self, x):
         """ Convert from standard normal space to distribution space.

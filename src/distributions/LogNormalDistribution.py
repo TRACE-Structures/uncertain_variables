@@ -6,40 +6,39 @@ from scipy.stats import lognorm
 
 
 class LogNormalDistribution(Distribution):
-    """ Class for log-normal distribution.
+    """Shifted log-normal probability distribution.
     
         Attributes
         ----------
         mu : float
-            Mean of the underlying normal distribution.
+            Mean of the underlying normal distribution (default: 0).
             
         sigma : float
-            Standard deviation of the underlying normal distribution.
+            Positive standard deviation of the underlying normal distribution (default: 1).
             
         s : float
-            Shape parameter of the log-normal distribution, equivalent to 
-            sigma of the underlying normal distribution.
+            Shape parameter used by SciPy, equal to ``sigma``.
 
         scale : float
-            Scale parameter of the log-normal distribution, equivalent to 
-            exp(mu) of the underlying normal distribution.
+            Scale parameter used by SciPy, equal to ``exp(mu)``.
 
         loc : float
-            Location parameter of the log-normal distribution, typically set to 0."""
+            Location parameter (default: 0); the distribution is supported on
+            ``[loc, inf)``."""
     
     def __init__(self, mu=0, sigma=1, loc=0):
-        """ Initialize the log-normal distribution with parameters mu and sigma.
+        """Initialize a log-normal distribution from underlying normal parameters.
         
             Parameters
             ----------
-            mu : float, default = 0
+            mu : float, default: 0
                 Mean of the underlying normal distribution.
                 
-            sigma : float, default = 1
-                Standard deviation of the underlying normal distribution.
+            sigma : float, default: 1
+                Positive standard deviation of the underlying normal distribution.
                 
-            loc : float, default = 0
-                Location parameter of the log-normal distribution, typically set to 0."""
+            loc : float, default: 0
+                Location parameter of the distribution."""
 
         # assert sigma > 0
         
@@ -94,7 +93,7 @@ class LogNormalDistribution(Distribution):
         return is_equal
     
     def get_dist_type(self):
-        """ Return the type of the log-normal distribution.
+        """ Return the type of the distribution.
 
             Returns
             -------
@@ -259,22 +258,21 @@ class LogNormalDistribution(Distribution):
         kurt = lognorm.stats(s=self.sigma, scale=self.scale, loc=self.loc, moments='k')
         return kurt
 
-    def sample(self, n, method="MC", seed=None, **params):
+    def sample(self, n, method="MC", seed=None):
         """ Return n samples from the log-normal distribution.
         
             Parameters
             ----------
             n : int
                 Number of samples to generate.
-            method : str, optional
+
+            method : str, default: "MC"
                 Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
                 "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
-                Default is "MC".
-            seed : int, optional
-                Seed for the random number generator. Default is None.
-            **params : dict
-                Additional parameters for the sampling method.
-                
+
+            seed : int or None, default: None
+                Seed for the random number generator.
+
             Returns
             -------
             samples : array_like
@@ -295,11 +293,11 @@ class LogNormalDistribution(Distribution):
         if not np.isfinite(n):
             raise ValueError("Number of samples must be a finite value.")
 
-        y = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        y = UniformDistribution(0, 1).sample(n, method, seed=seed)
         samples = self.invcdf(y)
         return samples
 
-    def translate(self, shift, scale):
+    def translate(self, shift=0, scale=1):
         """ Return a translated and scaled log-normal distribution.
 
             The transformation is defined as
@@ -310,11 +308,11 @@ class LogNormalDistribution(Distribution):
         
             Parameters
             ----------
-            shift : float
+            shift : float, default: 0
                 Shift to apply to the distribution.
 
-            scale : float
-                Scale to apply to the distribution.
+            scale : float, default: 1
+                Positive scale factor to apply to the distribution.
             
             Returns
             -------
@@ -357,16 +355,18 @@ class LogNormalDistribution(Distribution):
         scale = self.sigma
         return scale
 
-    def fix_moments(self, mean, var, loc=0):
+    def fix_moments(self, mean=1, var=(np.exp(1) * (np.exp(1) - 1)), loc=0):
         """ Fix the log-normal distribution to have specified mean, variance, and location.
 
             Parameters
             ----------
-            mean : float
+            mean : float, default: 1
                 Desired mean of the distribution.
-            var : float
-                Desired variance of the distribution.
-            loc : float, default=0
+
+            var : float, default: exp(1) * (exp(1) - 1)
+                Desired positive variance of the distribution.
+                
+            loc : float, default: 0
                 Location parameter of the distribution.
 
             Returns

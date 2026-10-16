@@ -5,26 +5,29 @@ from uncertain_variables.distributions.UniformDistribution import UniformDistrib
 from scipy.stats import expon
 
 class ExponentialDistribution(Distribution):
-    """ Class for exponential distribution.
+    """Shifted exponential probability distribution.
 
         Attributes
         ----------
         lambda_ : float
-            Rate parameter of the exponential distribution.
+            Positive rate parameter of the exponential distribution (default: 1).
             
         scale : float
             Scale parameter of the exponential distribution (1/lambda_).
             
         loc : float
-            Location parameter of the exponential distribution, typically set to 0."""
+            Location parameter (default: 0); support is ``[loc, inf)``."""
     
     def __init__(self, lambda_=1, loc=0):
-        """ Initialize the exponential distribution with rate parameter lambda_.
+        """Initialize an exponential distribution with rate ``lambda_`` and location ``loc``.
 
             Parameters
             ----------
-            lambda_ : float
-                Rate parameter of the exponential distribution."""
+            lambda_ : float, default: 1
+                Positive rate parameter of the exponential distribution.
+
+            loc : float, default: 0
+                Location parameter of the distribution."""
 
         if not (isinstance(lambda_, (int, float, np.number)) and lambda_ > 0):
             raise ValueError("lambda_ must be a positive number.")
@@ -65,7 +68,7 @@ class ExponentialDistribution(Distribution):
         return is_equal
     
     def get_dist_type(self):
-        """ Return the type of the exponential distribution.
+        """ Return the type of the distribution.
 
             Returns
             -------
@@ -202,26 +205,25 @@ class ExponentialDistribution(Distribution):
         
         return 6
 
-    def sample(self, n, method="MC", seed=None, **params):
-        """Return n samples from the exponential distribution.
+    def sample(self, n, method="MC", seed=None):
+        """Draw ``n`` samples from the exponential distribution.
         
-                    Parameters
-                    ----------
-                    n : int
-                        Number of samples to generate.
-                    method : str, optional
-                        Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
-                        "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
-                        Default is "MC".
-                    seed : int, optional
-                        Seed for the random number generator. Default is None.
-                    **params : dict
-                        Additional parameters for the sampling method.
-        
-                    Returns
-                    -------
-                    samples : array_like
-                        Generated samples from the exponential distribution."""
+            Parameters
+            ----------
+            n : int
+                Number of samples to generate.
+
+            method : str, default: "MC"
+                Sampling method: "MC" (Monte Carlo), "QMC_Halton" (Halton sequence),
+                "QMC_LHS" (Latin hypercube sampling), or "QMC_Sobol" (Sobol sequence).
+
+            seed : int or None, default: None
+                Seed for the random number generator.
+
+            Returns
+            -------
+            samples : array_like
+                Generated samples from the exponential distribution."""
         
         if not isinstance(n, (int, np.integer)) or n <= 0:
             raise ValueError("Number of samples must be a positive integer.")
@@ -230,11 +232,11 @@ class ExponentialDistribution(Distribution):
         if not np.isfinite(n):
             raise ValueError("Number of samples must be a finite value.")
 
-        y = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        y = UniformDistribution(0, 1).sample(n, method, seed=seed)
         samples = self.invcdf(y)
         return samples
 
-    def translate(self, shift, scale):
+    def translate(self, shift=0, scale=1):
         """ Return a translated and scaled exponential distribution.
 
             The transformation is defined as
@@ -245,11 +247,11 @@ class ExponentialDistribution(Distribution):
 
             Parameters
             ----------
-            shift : float
+            shift : float, default: 0
                 Shift to apply to the distribution.
 
-            scale : float
-                Scale to apply to the distribution.
+            scale : float, default: 1
+                Positive scale factor to apply to the distribution.
             
             Returns
             -------
@@ -291,17 +293,20 @@ class ExponentialDistribution(Distribution):
         scale = self.scale
         return scale
 
-    def fix_moments(self, mean, var, loc=0):
+    def fix_moments(self, mean=1, var=1, loc=0):
         """ Fix the exponential distribution to have specified mean, variance, and location.
 
             Parameters
             ----------
-            mean : float
-                Desired mean of the distribution.
-            var : float
-                Desired variance of the distribution.
+            mean : float, default: 1
+                Desired mean of the distribution; must exceed ``loc``.
+
+            var : float or None, default: 1
+                Desired variance. It must equal ``(mean - loc) ** 2``; use ``None``
+                to infer that variance from ``mean`` and ``loc``.
+                
             loc : float, default=0
-                Location parameter of the distribution.
+                Location parameter of the distribution. Default is 0.
 
             Returns
             -------
@@ -391,15 +396,10 @@ class ExponentialDistribution(Distribution):
         #     polysys_char = []
         # return polysys_char
 
-        if not self.lambda_ == 1:
-            raise Exception(f"No polynomial system for this distribution ({self})")
-            # OR return []
+        if self.lambda_ == 1:
+            return "l" if normalized else "L"
 
-        if normalized:
-            polysys_char = 'l'
-        else:
-            polysys_char = 'L'
-        return polysys_char
+        raise Exception(f"No polynomial system for this distribution ({self})")
 
     # def base2dist(self, y):
     #     """ Convert from base (germ) space to exponential distribution space.

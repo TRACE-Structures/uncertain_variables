@@ -6,7 +6,7 @@ from uncertain_variables.distributions.UniformDistribution import UniformDistrib
 from scipy.stats import beta
 
 class BetaDistribution(Distribution):
-    """ Class for beta distribution.
+    """Beta probability distribution on a finite interval.
     
         Attributes
         ----------
@@ -17,28 +17,27 @@ class BetaDistribution(Distribution):
             Second shape parameter of the beta distribution.
         
         scale : float
-            Scale parameter of the beta distribution. The length of the interval, default is 1.
+            Length of the interval (default: 1).
 
         loc : float
-            Location parameter of the beta distribution. The starting point of the interval, default is 0."""
+            Starting point of the interval (default: 0)."""
         
     def __init__(self, a, b, scale=1, loc=0):
-        """ Initialize the beta distribution with shape parameters a and b 
-            and optional scale and loc parameters.
+        """Initialize a beta distribution with shape parameters ``a`` and ``b``.
         
             Parameters
             ----------
             a : float
-                First shape parameter of the beta distribution.
+                Positive first shape parameter.
                 
             b : float
-                Second shape parameter of the beta distribution.
+                Positive second shape parameter.
                 
-            scale : float, default = 1
-                Scale parameter of the beta distribution. The length of the interval, default is 1.
+            scale : float, default: 1
+                Positive length of the interval.
 
-            loc : float, default = 0
-                Location parameter of the beta distribution. The start of the interval, default is 0."""
+            loc : float, default: 0
+                Starting point of the interval."""
 
         if not (isinstance(a, (int, float, np.number)) and a > 0):
             raise ValueError("Parameter 'a' must be a positive number.")
@@ -93,7 +92,7 @@ class BetaDistribution(Distribution):
         return is_equal
     
     def get_dist_type(self):
-        """ Return the type of the beta distribution.
+        """ Return the type of the distribution.
         
             Returns
             -------
@@ -275,21 +274,20 @@ class BetaDistribution(Distribution):
         kurt = beta.stats(self.a, self.b, scale=self.scale, loc=self.loc, moments='k')
         return kurt
 
-    def sample(self, n, method="MC", seed=None, **params): 
+    def sample(self, n, method="MC", seed=None): 
         """Return n samples from the beta distribution.
 
             Parameters
             ----------
             n : int
                 Number of samples to generate.
-            method : str, optional
-                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
-                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
-                Default is "MC".
-            seed : int, optional
-                Seed for the random number generator. Default is None.
-            **params : dict
-                Additional parameters for the sampling method.
+
+            method : str, default: "MC"
+                Sampling method: "MC" (Monte Carlo), "QMC_Halton" (Halton sequence),
+                "QMC_LHS" (Latin hypercube sampling), or "QMC_Sobol" (Sobol sequence).
+
+            seed : int or None, default: None
+                Seed for the random number generator.
 
             Returns
             -------
@@ -303,11 +301,11 @@ class BetaDistribution(Distribution):
         if not np.isfinite(n):
             raise ValueError("Number of samples must be a finite value.")
 
-        y = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        y = UniformDistribution(0, 1).sample(n, method, seed=seed)
         samples = self.invcdf(y)
         return samples
 
-    def translate(self, shift, scale):
+    def translate(self, shift=0, scale=1):
         """ Return a translated and scaled beta distribution.
 
             The transformation is defined as
@@ -318,11 +316,11 @@ class BetaDistribution(Distribution):
         
             Parameters
             ----------
-            shift : float
+            shift : float, default: 0
                 Shift to apply to the distribution.
 
-            scale : float
-                Scale to apply to the distribution.
+            scale : float, default: 1
+                Positive scale factor to apply to the distribution.
             
             Returns
             -------
@@ -369,18 +367,21 @@ class BetaDistribution(Distribution):
         return scale
 
     def fix_moments(self, mean, var, scale=1, loc=0):
-        """Return a beta distribution with the specified moments and support.
+        """Return a beta distribution with the requested moments and support.
 
         Parameters
         ----------
         mean : float
             Desired mean of the distribution.
+
         var : float
             Desired variance of the distribution.
-        scale : float, default=1
-            The length of the interval, default is 1.
-        loc : float, default=0
-             The start of the interval, default is 0.
+
+        scale : float, default: 1
+            Length of the interval.
+            
+        loc : float, default: 0
+            Starting point of the interval.
 
         Returns
         -------
@@ -414,10 +415,19 @@ class BetaDistribution(Distribution):
     def get_base_dist(self, a, b):
         """ Return the GPC base distribution for the beta distribution.
 
+            Parameters
+            ----------
+            a : float
+                First positive shape parameter of the base beta distribution.
+
+            b : float
+                Second positive shape parameter of the base beta distribution.
+
             Returns
             -------
             dist_germ : BetaDistribution
-                GPC base distribution."""
+                Beta distribution with shape parameters ``a`` and ``b`` on
+                the standard interval ``[-1, 1]``."""
         
         dist_germ = BetaDistribution(a, b, scale=2, loc=-1)
         return dist_germ
@@ -496,10 +506,7 @@ class BetaDistribution(Distribution):
         #     polysys_char = []
         # return polysys_char
 
-        if not (self.scale == 2 and self.loc == -1):
-            raise Exception(f"No polynomial system for this distribution ({self})")
+        if self.scale == 2 and self.loc == -1:
+            return "j" if normalized else "J"
 
-        if normalized == True:
-            return "j"
-        else:
-            return "J"
+        raise Exception(f"No polynomial system for this distribution ({self})")

@@ -1,10 +1,10 @@
-''' This module implements the Variable class for uncertainty quantification.'''
+""" This module implements the Variable class for uncertainty quantification."""
 
 from .polysys import syschar_to_polysys
 import pint
 
 class Variable():
-    ''' Variable class for uncertanty quantification.
+    """ Variable class for uncertainty quantification.
             
         Attributes
         ----------
@@ -21,10 +21,10 @@ class Variable():
             Flag showing whether the variable is fixed.
 
         unit: str, optional
-            Variable unit.'''
+            Variable unit."""
         
     def __init__(self, name :str, dist_or_num, unit=None, *args, **kwargs):
-        ''' Variable constructor.
+        """ Variable constructor.
             
             Parameters
             ----------
@@ -38,7 +38,7 @@ class Variable():
                 Variable unit.
                 
             args, kwargs
-                Additional arguments.'''
+                Additional arguments."""
         
         self.name = name
         self.dist = dist_or_num if hasattr(dist_or_num, 'pdf') else None
@@ -47,51 +47,51 @@ class Variable():
         self.unit = unit
 
     def __repr__(self):
-        ''' Returns the string representation of the Variable object.
+        """ Returns the string representation of the Variable object.
         
             Returns
             -------
             repr_string : str
-                String representation of the Variable object.'''
+                String representation of the Variable object."""
         
         repr_string = 'Variable({}, {})'.format(self.name, self.dist.__repr__())
         return repr_string
 
     def mean(self):
-        ''' Return mean value of the distribution.
+        """ Return mean value of the distribution.
 
             Returns
             -------
             mean : float
-                Mean value of the distribution.'''
+                Mean value of the distribution."""
         
         mean = self.dist.mean()
         return mean
 
     def var(self):
-        ''' Return variance of the distribution.
+        """ Return variance of the distribution.
 
             Returns
             -------
             var : float
-                Variance of the distribution.'''
+                Variance of the distribution."""
         
         var = self.dist.var()
         return var
 
     def moments(self):
-        ''' Return the moments of the distribution.
+        """ Return the moments of the distribution.
 
             Returns
             -------
             moments : list
-                Moments of the distribution ([mean, var, skew, kurt]).'''
+                Moments of the distribution ([mean, var, skew, kurt])."""
         
         moments = self.dist.moments()
         return moments
 
     def pdf(self, x):
-        ''' Return the probability density function of the variable, evaluated at x.
+        """ Return the probability density function of the variable, evaluated at x.
 
             Parameters
             ----------
@@ -101,13 +101,13 @@ class Variable():
             Returns
             -------
             pdf_values : array_like
-                Probability density function values at x.'''
+                Probability density function values at x."""
         
         pdf_values = self.dist.pdf(x)
         return pdf_values
 
     def cdf(self, p):
-        ''' Return the cumulative distribution function of the variable, evaluated at p.
+        """ Return the cumulative distribution function of the variable, evaluated at p.
 
             Parameters
             ----------
@@ -117,13 +117,13 @@ class Variable():
             Returns
             -------
             cdf_values : array_like
-                Cumulative distribution function values at p.'''
+                Cumulative distribution function values at p."""
         
         cdf_values = self.dist.cdf(p)
         return cdf_values
     
     def ppf(self, q):
-        ''' Return the percentage point function (inverse of cdf) of the variable, evaluated at q.
+        """ Return the percentage point function (inverse of cdf) of the variable, evaluated at q.
 
             Parameters
             ----------
@@ -133,7 +133,7 @@ class Variable():
             Returns
             -------
             ppf_values : array_like
-                Percentage point function values at q.'''
+                Percentage point function values at q."""
         
         ppf_values = self.dist.invcdf(q)
         return ppf_values
@@ -142,12 +142,12 @@ class Variable():
         return self.dist.sample(n)
 
     def get_gpc_dist(self):
-        ''' Return the GPC base distribution.
+        """ Return the GPC base distribution.
 
             Returns
             -------
             dist : Distribution object
-                GPC base distribution.'''
+                GPC base distribution."""   
         
         dist = self.dist.get_base_dist()
         return dist
@@ -157,7 +157,7 @@ class Variable():
         return syschar_to_polysys(syschar)
 
     def get_gpc_syschar(self, normalized):
-        ''' Return the GPC polynomial system characteristic string.
+        """ Return the GPC polynomial system characteristic string.
 
             Parameters
             ----------
@@ -167,13 +167,13 @@ class Variable():
             Returns
             -------
             syschar : str
-                GPC polynomial system characteristic string.'''
+                GPC polynomial system characteristic string."""
         
         syschar = self.dist.get_base_dist().orth_polysys_syschar(normalized)
         return syschar
 
     def germ2variable(self,x):
-        ''' Convert from germ to variable space.
+        """ Convert from germ to variable space.
 
             Parameters
             ----------
@@ -183,13 +183,13 @@ class Variable():
             Returns
             -------
             q : array_like
-                Points in variable space.'''
+                Points in variable space."""
         
         q = self.dist.base2dist(x)
         return q
 
     def variable2germ(self, q):
-        ''' Convert from variable to germ space.
+        """ Convert from variable to germ space.
 
             Parameters
             ----------
@@ -199,18 +199,18 @@ class Variable():
             Returns
             -------
             x : array_like
-                Points in germ space.'''
+                Points in germ space."""
         
         x = self.dist.dist2base(q)
         return x
     
     def convert_to(self, to_unit: str):
-        ''' Convert the variable and its distribution parameters to a different unit.
+        """ Convert the variable and its distribution parameters to a different unit.
             
             Parameters
             ----------
             to_unit : str
-                Target unit for conversion.'''
+                Target unit for conversion."""
         ureg = pint.UnitRegistry()
 
         if self.unit is None:
@@ -226,5 +226,5 @@ class Variable():
                 if isinstance(value, (int, float)) and not isinstance(value, bool):
                     q = value * ureg(self.unit)
                     setattr(self.dist, attr, q.to(to_unit).magnitude)
+            self.unit = to_unit
 
-        self.unit = to_unit

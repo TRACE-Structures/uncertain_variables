@@ -9,32 +9,32 @@ from scipy.stats.qmc import Sobol
 
 
 class UniformDistribution(Distribution):
-    """ Class for uniform distribution.
+    """Continuous uniform distribution on a finite interval.
     
         Attributes
         ----------
         a : float
-            Lower bound of the uniform distribution.
+            Lower endpoint of the interval (default: 0).
             
         b : float
-            Upper bound of the uniform distribution.
+            Upper endpoint of the interval (default: 1).
             
         loc : float
-            Location parameter of the uniform distribution (same as a).
+            Lower endpoint of the interval (equal to ``a``).
         
         scale : float
-            Scale parameter of the uniform distribution (same as b - a)."""
+            Width of the interval (equal to ``b - a``)."""
     
     def __init__(self, a=0, b=1):
-        """ Initialize the uniform distribution with bounds a and b.
+        """Initialize a uniform distribution on the interval ``[a, b]``.
         
             Parameters
             ----------
-            a : float, default = -1
-                Lower bound of the uniform distribution.
+            a : float, default: 0
+                Lower endpoint of the interval.
                 
-            b : float, default = 1
-                Upper bound of the uniform distribution."""
+            b : float, default: 1
+                Upper endpoint of the interval."""
 
         # assert b > a
 
@@ -80,7 +80,7 @@ class UniformDistribution(Distribution):
         return is_equal
 
     def get_dist_type(self):
-        """ Return the type of the uniform distribution.
+        """ Return the type of the distribution.
         
             Returns
             -------
@@ -243,21 +243,20 @@ class UniformDistribution(Distribution):
         kurt = -6 / 5
         return kurt
 
-    def sample(self, n, method="MC", seed=None, **params):
+    def sample(self, n, method="MC", seed=None):
         """ Generate random samples from the uniform distribution using the specified sampling method.
 
             Parameters
             ----------
             n : int
                 Number of samples to generate.
-            method : str, optional
+
+            method : str, default: "MC"
                 Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
                 "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
-                Default is "MC".
-            seed : int, optional
-                Seed for the random number generator. Default is None.
-            **params : dict
-                Additional parameters for the sampling method.
+
+            seed : int or None, default: None
+                Seed for the random number generator.
 
             Returns
             -------
@@ -276,13 +275,13 @@ class UniformDistribution(Distribution):
             y = rng.random(n)
         elif method == "QMC_Halton":
             sampler = Halton(d=1, seed=seed)
-            y = sampler.random(n)
+            y = sampler.random(n).ravel()
         elif method == "QMC_LHS":
             sampler = LHS(d=1, seed=seed)
-            y = sampler.random(n)
+            y = sampler.random(n).ravel()
         elif method == "QMC_Sobol":
             sampler = Sobol(d=1, seed=seed)
-            y = sampler.random(n)
+            y = sampler.random(n).ravel()
         else:
             raise ValueError(f"Unknown sampling method: {method}")
         return self.invcdf(y)
@@ -298,11 +297,11 @@ class UniformDistribution(Distribution):
         
             Parameters
             ----------
-            shift : float
+            shift : float, default: 0
                 Shift to apply to the distribution.
 
-            scale : float
-                Scale to apply to the distribution.
+            scale : float, default: 1
+                Positive scale factor to apply to the distribution.
             
             Returns
             -------
@@ -348,16 +347,16 @@ class UniformDistribution(Distribution):
         scale = self.scale
         return scale
 
-    def fix_moments(self, mean, var):
+    def fix_moments(self, mean=0.5, var=1/12):
         """ Fix the uniform distribution to have specified mean and variance.
         
             Parameters
             ----------
-            mean : float
+            mean : float, default: 0.5
                 Desired mean of the distribution.
                 
-            var : float
-                Desired variance of the distribution.
+            var : float, default: 1/12
+                Desired positive variance of the distribution.
                 
             Returns
             -------
@@ -469,14 +468,10 @@ class UniformDistribution(Distribution):
         #     polysys_char = []
         # return polysys_char
 
-        if not (self.a == -1 and self.b == 1):
-            raise Exception(f"No polynomial system for this distribution ({self})")
-            # OR return []
+        if self.a == -1 and self.b == 1:
+            return "p" if normalized else "P"
 
-        if normalized == True:
-            return "p"
-        else:
-            return "P"
+        raise Exception(f"No polynomial system for this distribution ({self})")
 
     # def get_bounds(self, delta=0):
     #     """ Return the bounds of the uniform distribution.

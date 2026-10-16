@@ -5,29 +5,29 @@ from uncertain_variables.distributions.UniformDistribution import UniformDistrib
 from scipy.stats import semicircular
 
 class SemiCircleDistribution(Distribution):
-    """ Class for Wigner semicircle distribution.
+    """Wigner semicircle probability distribution.
 
         Attributes
         ----------
         radius : float
-            Radius of the semicircle."
+            Radius of the semicircle.
             
         scale : float
             Scale of the semicircle distribution, equivalent to the radius of the semicircle.
             
         loc : float
-            Location parameter of the semicircle distribution, the center of the semicircle."""
+            Center of the semicircle (default: 0)."""
 
     def __init__(self, radius, loc=0):
-        """ Initialize the Wigner semicircle distribution with radius.
+        """Initialize a Wigner semicircle distribution.
 
             Parameters
             ----------
             radius : float
-                Radius of the semicircle.
+                Positive radius of the semicircle.
             
-            loc : float, optional
-                Location parameter of the semicircle distribution, the center of the semicircle. Default is 0."""
+            loc : float, default: 0
+                Center of the semicircle."""
         
         if not isinstance(radius, (int, float)) or radius <= 0:
             raise ValueError("Radius must be a positive number.")
@@ -70,7 +70,7 @@ class SemiCircleDistribution(Distribution):
         return is_equal
 
     def get_dist_type(self):
-        """ Return the type of the Wigner semicircle distribution.
+        """ Return the type of the distribution.
 
             Returns
             -------
@@ -210,7 +210,7 @@ class SemiCircleDistribution(Distribution):
         kurt = semicircular.stats(scale=self.scale, loc=self.loc, moments='k')
         return kurt
 
-    def sample(self, n, method="MC", seed=None, **params): 
+    def sample(self, n, method="MC", seed=None): 
         """Return n samples from the Wigner semicircle distribution.
 
             Parameters
@@ -218,16 +218,12 @@ class SemiCircleDistribution(Distribution):
             n : int
                 Number of samples to generate.
 
-            method : str, optional
+            method : str, default: "MC"
                 Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
                 "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
-                Default is "MC".
 
-            seed : int, optional
-                Seed for the random number generator. Default is None.
-
-            **params : dict
-                Additional parameters for the sampling method.
+            seed : int or None, default: None
+                Seed for the random number generator.
 
             Returns
             -------
@@ -246,11 +242,11 @@ class SemiCircleDistribution(Distribution):
         if not np.isfinite(n):
             raise ValueError("Number of samples must be a finite value.")
 
-        y = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        y = UniformDistribution(0, 1).sample(n, method, seed=seed)
         samples = self.invcdf(y)
         return samples
 
-    def translate(self, shift, scale):
+    def translate(self, shift=0, scale=1):
         """ Return a translated and scaled Wigner semicircle distribution.
 
             The transformation is defined as
@@ -261,11 +257,11 @@ class SemiCircleDistribution(Distribution):
         
             Parameters
             ----------
-            shift : float
+            shift : float, default: 0
                 Shift to apply to the distribution.
 
-            scale : float
-                Scale to apply to the distribution.
+            scale : float, default: 1
+                Positive scale factor to apply to the distribution.
             
             Returns
             -------
@@ -307,15 +303,16 @@ class SemiCircleDistribution(Distribution):
         scale = self.radius
         return scale
 
-    def fix_moments(self, mean, var):
+    def fix_moments(self, mean=0, var=0.25):
         """ Fix the Wigner semicircle distribution to have specified mean and variance.
 
             Parameters
             ----------
-            mean : float
+            mean : float, default: 0
                 Desired mean of the distribution.
-            var : float
-                Desired variance of the distribution.
+                
+            var : float, default: 0.25
+                Desired positive variance of the distribution.
 
             Returns
             -------
@@ -399,10 +396,7 @@ class SemiCircleDistribution(Distribution):
             polysys_char : str
                 GPC polynomial system characteristic string for the Wigner semicircle distribution."""
 
-        if not (self.radius == 1 and self.loc == 0):
-            raise Exception(f"No polynomial system for this distribution ({self})")
+        if self.radius == 1 and self.loc == 0:
+            return "u" if normalized else "U"
 
-        if normalized == True:
-            return "u"
-        else:
-            return "U"
+        raise Exception(f"No polynomial system for this distribution ({self})")

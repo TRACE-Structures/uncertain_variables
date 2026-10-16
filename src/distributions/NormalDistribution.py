@@ -6,31 +6,31 @@ from scipy.stats import norm
 
 
 class NormalDistribution(Distribution):
-    """ Class for normal (Gaussian) distribution.
+    """Normal (Gaussian) probability distribution.
     
         Attributes
         ----------
         mu : float
-            Mean of the normal distribution.
+            Mean of the normal distribution (default: 0).
             
         sigma : float
-            Standard deviation of the normal distribution.
+            Positive standard deviation of the normal distribution (default: 1).
             
         loc : float
-            Location parameter of the uniform distribution (same as mu).
+            Location parameter (equal to ``mu``).
 
         scale : float
-            Scale parameter of the uniform distribution (same as sigma)."""
+            Scale parameter (equal to ``sigma``)."""
     
     def __init__(self, mu=0, sigma=1):
-        """ Initialize the normal distribution with mean mu and standard deviation sigma.
+        """Initialize a normal distribution with mean ``mu`` and standard deviation ``sigma``.
         
             Parameters
             ----------
-            mu : float, default = 0
+            mu : float, default: 0
                 Mean of the normal distribution.
 
-            sigma : float, default = 1
+            sigma : float, default: 1
                 Standard deviation of the normal distribution."""
 
         # assert sigma > 0
@@ -81,7 +81,7 @@ class NormalDistribution(Distribution):
         return is_equal
 
     def get_dist_type(self):
-        """ Return the type of the normal distribution.
+        """ Return the type of the distribution.
         
             Returns
             -------
@@ -238,21 +238,20 @@ class NormalDistribution(Distribution):
         kurt = 0
         return kurt
 
-    def sample(self, n, method="MC", seed=None, **params): 
+    def sample(self, n, method="MC", seed=None): 
         """ Generate random samples from the normal distribution using the specified sampling method.
 
             Parameters
             ----------
             n : int
                 Number of samples to generate.
-            method : str, optional
+
+            method : str, default: "MC"
                 Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
                 "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
-                Default is "MC".
-            seed : int, optional
-                Seed for the random number generator. Default is None.
-            **params : dict
-                Additional parameters for the sampling method.
+
+            seed : int or None, default: None
+                Seed for the random number generator.
 
             Returns
             -------
@@ -275,11 +274,11 @@ class NormalDistribution(Distribution):
         if not np.isfinite(n):
             raise ValueError("Number of samples must be a finite value.")
 
-        y = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        y = UniformDistribution(0, 1).sample(n, method, seed=seed)
         samples = self.invcdf(y)
         return samples
 
-    def translate(self, shift, scale):
+    def translate(self, shift=0, scale=1):
         """ Return a translated and scaled normal distribution.
 
             The transformation is defined as
@@ -291,11 +290,11 @@ class NormalDistribution(Distribution):
         
             Parameters
             ----------
-            shift : float
+            shift : float, default: 0
                 Shift to apply to the distribution.
 
-            scale : float
-                Scale to apply to the distribution.
+            scale : float, default: 1
+                Positive scale factor to apply to the distribution.
             
             Returns
             -------
@@ -340,16 +339,16 @@ class NormalDistribution(Distribution):
         scale = self.scale
         return scale
 
-    def fix_moments(self, mean, var):
+    def fix_moments(self, mean=0, var=1):
         """ Fix the normal distribution to have specified mean and variance.
                 
             Parameters
             ----------
-            mean : float
+            mean : float, default: 0
                 Desired mean of the distribution.
                 
-            var : float
-                Desired variance of the distribution.
+            var : float, default: 1
+                Desired positive variance of the distribution.
                 
             Returns
             -------
@@ -434,6 +433,7 @@ class NormalDistribution(Distribution):
 
         if self.mu == 0 and self.sigma == 1:
             return HermitePolynomials()
+
         else:
             raise Exception(f"No polynomial system for this distribution ({self})")
 
@@ -459,12 +459,7 @@ class NormalDistribution(Distribution):
         #     polysys_char = []
         # return polysys_char
 
-        if not (self.mu == 0 and self.sigma == 1):
-            raise Exception(f"No polynomial system for this distribution ({self})")
-            # OR return []
+        if self.mu == 0 and self.sigma == 1:
+            return "h" if normalized else "H"
 
-        if normalized:
-            polysys_char = "h"
-        else:
-            polysys_char = "H"
-        return polysys_char
+        raise Exception(f"No polynomial system for this distribution ({self})")

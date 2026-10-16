@@ -5,27 +5,26 @@ from uncertain_variables.distributions.UniformDistribution import UniformDistrib
 from scipy.stats import arcsine
 
 class ArcsineDistribution(Distribution):
-    """Class for arcsine distribution.
+    """Arcsine probability distribution on a finite interval.
     
         Attributes
         ----------
         scale : float
-            Scale parameter of the arcsine distribution. The length of the interval, default is 1.
+            Length of the interval (default: 1).
 
         loc : float
-            Location parameter of the arcsine distribution. The starting point of the interval, default is 0."""
+            Starting point of the interval (default: 0)."""
 
     def __init__(self, scale=1, loc=0):
-        """
-        Initialize the arcsine distribution with scale and location parameters.
+        """Initialize an arcsine distribution on ``[loc, loc + scale]``.
         
             Parameters
             ----------
-            scale : float, default = 1
-                Scale parameter of the arcsine distribution. The length of the interval, default is 1.
+            scale : float, default: 1
+                Positive length of the interval.
 
-            loc : float, default = 0
-                Location parameter of the arcsine distribution. The starting point of the interval, default is 0."""
+            loc : float, default: 0
+                Starting point of the interval."""
         
         if not (isinstance(scale, (int, float, np.number)) and scale > 0):
             raise ValueError("Parameter 'scale' must be a positive number.")
@@ -51,7 +50,7 @@ class ArcsineDistribution(Distribution):
         return repr_string
 
     def __eq__(self, other):
-        """Check if two ArcsineDistribution objects are equal.
+        """ Check if two ArcsineDistribution objects are equal.
         
             Parameters
             ----------
@@ -81,7 +80,7 @@ class ArcsineDistribution(Distribution):
         return dist_type
 
     def get_dist_params(self):
-        """Return the parameters of the arcsine distribution.
+        """ Return the parameters of the arcsine distribution.
 
             Returns
             -------
@@ -93,7 +92,7 @@ class ArcsineDistribution(Distribution):
         return params
     
     def pdf(self, x):
-        """Return the probability density function of the arcsine distribution, evaluated at x.
+        """ Return the probability density function of the arcsine distribution, evaluated at x.
         
             Parameters
             ----------
@@ -184,7 +183,7 @@ class ArcsineDistribution(Distribution):
         kurt = arcsine.stats(scale=self.scale, loc=self.loc, moments='k')
         return kurt
 
-    def sample(self, n, method="MC", seed=None, **params):
+    def sample(self, n, method="MC", seed=None):
         """Return n samples from the arcsine distribution.
         
             Parameters
@@ -192,16 +191,12 @@ class ArcsineDistribution(Distribution):
             n : int
                 Number of samples to generate.
 
-            method : str, optional
-                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
-                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
-                Default is "MC".
+            method : str, default: "MC"
+                Sampling method: "MC" (Monte Carlo), "QMC_Halton" (Halton sequence),
+                "QMC_LHS" (Latin hypercube sampling), or "QMC_Sobol" (Sobol sequence).
 
-            seed : int, optional
-                Seed for the random number generator. Default is None.
-
-            **params : dict
-                Additional parameters for the sampling method.
+            seed : int or None, default: None
+                Seed for the random number generator.
 
             Returns
             -------
@@ -215,12 +210,12 @@ class ArcsineDistribution(Distribution):
         if not np.isfinite(n):
             raise ValueError("Number of samples must be a finite value.")
 
-        y = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
+        y = UniformDistribution(0, 1).sample(n, method, seed=seed)
         samples = self.invcdf(y)
         return samples
 
-    def translate(self, shift, scale):
-        """ Return a translated and scaled beta distribution.
+    def translate(self, shift=0, scale=1):
+        """ Return a translated and scaled arcsine distribution.
 
             The transformation is defined as
 
@@ -230,16 +225,16 @@ class ArcsineDistribution(Distribution):
         
             Parameters
             ----------
-            shift : float
+            shift : float, default: 0
                 Shift to apply to the distribution.
 
-            scale : float
-                Scale to apply to the distribution.
+            scale : float, default: 1
+                Positive scale factor to apply to the distribution.
             
             Returns
             -------
-            new_dist : BetaDistribution
-                Translated and scaled beta distribution."""
+            new_dist : ArcsineDistribution
+                Translated and scaled arcsine distribution."""
 
         new_loc = scale * self.loc + shift
         new_scale = self.scale * scale
@@ -269,16 +264,16 @@ class ArcsineDistribution(Distribution):
         scale = self.scale
         return scale
 
-    def fix_moments(self, mean, var):
+    def fix_moments(self, mean=0.5, var=0.125):
         """ Fix the arcsine distribution to have specified mean and variance.
 
             Parameters
             ----------
-            mean : float
+            mean : float, default: 0.5
                 Desired mean of the distribution.
                 
-            var : float
-                Desired variance of the distribution.
+            var : float, default: 0.125
+                Desired positive variance of the distribution.
                 
             Returns
             -------
@@ -336,10 +331,7 @@ class ArcsineDistribution(Distribution):
             polysys_char : str
                 GPC polynomial system characteristic string for the arcsine distribution."""
         
-        if not (self.scale == 2 and self.loc == -1):
-            raise Exception(f"No polynomial system for this distribution ({self})")
+        if self.scale == 2 and self.loc == -1:
+            return "j" if normalized else "J"
 
-        if normalized == True:
-            return "j"
-        else:
-            return "J"
+        raise Exception(f"No polynomial system for this distribution ({self})")
