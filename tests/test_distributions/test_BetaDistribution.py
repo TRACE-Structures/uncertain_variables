@@ -4,14 +4,14 @@ import numpy as np
 import pytest
 from scipy.stats import beta as scipy_beta
 
-from uncertain_variables.polysys.JacobiPolynomials import JacobiPolynomials
+from src.polysys.JacobiPolynomials import JacobiPolynomials
 
 from .TestDistribution import TestDistribution as DistributionTestClass
-from uncertain_variables.distributions import NormalDistribution
+from src.distributions import NormalDistribution
 
-from uncertain_variables.distributions import UniformDistribution
+from src.distributions import UniformDistribution
 
-from uncertain_variables.distributions import BetaDistribution
+from src.distributions import BetaDistribution
 
 
 A, B, SCALE, LOC = 2, 3, 4, 1

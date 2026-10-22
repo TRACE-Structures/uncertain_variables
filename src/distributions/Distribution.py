@@ -309,7 +309,7 @@ class Distribution(ABC):
                 Points in distribution space.""" 
 
         # Imported lazily to avoid a circular import with NormalDistribution.
-        from uncertain_variables.distributions.NormalDistribution import NormalDistribution
+        from src.distributions.NormalDistribution import NormalDistribution
         y = self.invcdf(NormalDistribution().cdf(x))
         return y
 
@@ -327,7 +327,7 @@ class Distribution(ABC):
                 Points in standard normal space."""
 
         # Imported lazily to avoid a circular import with NormalDistribution.
-        from uncertain_variables.distributions.NormalDistribution import NormalDistribution
+        from src.distributions.NormalDistribution import NormalDistribution
         x = NormalDistribution().invcdf(self.cdf(y))
         return x
 

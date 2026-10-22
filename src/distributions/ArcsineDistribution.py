@@ -1,7 +1,7 @@
 import numpy as np
 
-from uncertain_variables.distributions.Distribution import Distribution
-from uncertain_variables.distributions.UniformDistribution import UniformDistribution
+from src.distributions.Distribution import Distribution
+from src.distributions.UniformDistribution import UniformDistribution
 from scipy.stats import arcsine
 
 class ArcsineDistribution(Distribution):

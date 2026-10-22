@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 from scipy.stats import expon
 
-from uncertain_variables.polysys.LaguerrePolynomials import LaguerrePolynomials
+from src.polysys.LaguerrePolynomials import LaguerrePolynomials
 
 from .TestDistribution import TestDistribution as DistributionTestClass
-from uncertain_variables.distributions import NormalDistribution
+from src.distributions import NormalDistribution
 
-from uncertain_variables.distributions import ExponentialDistribution
+from src.distributions import ExponentialDistribution
 
 
 LAMBDA, LOC = 2, 1

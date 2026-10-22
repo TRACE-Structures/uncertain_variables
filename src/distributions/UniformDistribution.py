@@ -1,6 +1,6 @@
 import numpy as np
 
-from uncertain_variables.distributions.Distribution import Distribution
+from src.distributions.Distribution import Distribution
 from scipy.stats import uniform
 
 from scipy.stats.qmc import Halton

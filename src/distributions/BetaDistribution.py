@@ -1,8 +1,7 @@
 import numpy as np
-from sklearn.preprocessing import scale
 
-from uncertain_variables.distributions.Distribution import Distribution
-from uncertain_variables.distributions.UniformDistribution import UniformDistribution
+from src.distributions.Distribution import Distribution
+from src.distributions.UniformDistribution import UniformDistribution
 from scipy.stats import beta
 
 class BetaDistribution(Distribution):

@@ -42,22 +42,22 @@ from .LogNormalDistribution import *
 from .SemiCircleDistribution import *
 from .UniformDistribution import *
 
-def get_mu_and_sigma_of_lognormal(mean, cov):
-    """Return underlying normal parameters for a log-normal mean and coefficient of variation.
+# def get_mu_and_sigma_of_lognormal(mean, cov):
+#     """Return underlying normal parameters for a log-normal mean and coefficient of variation.
 
-    Parameters
-    ----------
-    mean : float
-        Arithmetic mean of the log-normal distribution.
+#     Parameters
+#     ----------
+#     mean : float
+#         Arithmetic mean of the log-normal distribution.
 
-    cov : float
-        Coefficient of variation of the log-normal distribution.
+#     cov : float
+#         Coefficient of variation of the log-normal distribution.
 
-    Returns
-    -------
-    mu, sigma : tuple of float
-        Mean and standard deviation of the underlying normal distribution.
-    """
-    sigma = np.sqrt(np.log(1 + cov**2))
-    mu = np.log(mean) - 0.5 * sigma**2
-    return mu, sigma
+#     Returns
+#     -------
+#     mu, sigma : tuple of float
+#         Mean and standard deviation of the underlying normal distribution.
+#     """
+#     sigma = np.sqrt(np.log(1 + cov**2))
+#     mu = np.log(mean) - 0.5 * sigma**2
+#     return mu, sigma

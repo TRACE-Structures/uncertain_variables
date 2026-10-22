@@ -5,11 +5,11 @@ import pytest
 from scipy.stats import lognorm
 
 from .TestDistribution import TestDistribution as DistributionTestClass
-from uncertain_variables.distributions import NormalDistribution
+from src.distributions import NormalDistribution
 
-from uncertain_variables.distributions import UniformDistribution
+from src.distributions import UniformDistribution
 
-from uncertain_variables.distributions import LogNormalDistribution
+from src.distributions import LogNormalDistribution
 
 
 MU, SIGMA, LOC = 2, 0.5, 1

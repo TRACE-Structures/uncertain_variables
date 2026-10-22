@@ -3,12 +3,12 @@
 import numpy as np
 import pytest
 
-from uncertain_variables.polysys.ChebyshevUPolynomials import ChebyshevUPolynomials
+from src.polysys.ChebyshevUPolynomials import ChebyshevUPolynomials
 
 from .TestDistribution import TestDistribution as DistributionTestClass
-from uncertain_variables.distributions import NormalDistribution, UniformDistribution
+from src.distributions import NormalDistribution, UniformDistribution
 
-from uncertain_variables.distributions import SemiCircleDistribution
+from src.distributions import SemiCircleDistribution
 
 
 RADIUS, LOC = 2, 1

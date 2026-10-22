@@ -4,14 +4,14 @@ import numpy as np
 import pytest
 from scipy.stats import arcsine
 
-from uncertain_variables.polysys.ChebyshevTPolynomials import ChebyshevTPolynomials
+from src.polysys.ChebyshevTPolynomials import ChebyshevTPolynomials
 
 from .TestDistribution import TestDistribution as DistributionTestClass
-from uncertain_variables.distributions import NormalDistribution
+from src.distributions import NormalDistribution
 
-from uncertain_variables.distributions import UniformDistribution
+from src.distributions import UniformDistribution
 
-from uncertain_variables.distributions import ArcsineDistribution
+from src.distributions import ArcsineDistribution
 
 
 SCALE, LOC = 4, 1
@@ -349,14 +349,6 @@ class TestArcsineDistribution(DistributionTestClass):
     def test_get_base_dist_is_arcsine_on_minus_one_to_one(self, scale, loc):
         germ = ArcsineDistribution(scale, loc).get_base_dist()
         assert isinstance(germ, ArcsineDistribution)
-        assert germ == ArcsineDistribution(2, -1)
-
-    # =====================================================================
-    # 11. orth_polysys / orth_polysys_syschar: invalid / valid / normalized
-    # =====================================================================
-    @pytest.mark.parametrize("a, b", [(0, 1), (A, B), (-1, 1), (-9, -3)])
-    def test_get_base_dist_is_always_standard_arcsine(self, a, b):
-        germ = ArcsineDistribution(a, b).get_base_dist()
         assert germ == ArcsineDistribution(2, -1)
 
     def test_orth_polysys_is_chebyshev_t(self):

@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 from scipy.stats import norm
 
-from uncertain_variables.polysys.HermitePolynomials import HermitePolynomials
+from src.polysys.HermitePolynomials import HermitePolynomials
 
 from .TestDistribution import TestDistribution as DistributionTestClass
-from uncertain_variables.distributions import UniformDistribution
+from src.distributions import UniformDistribution
 
-from uncertain_variables.distributions import NormalDistribution
+from src.distributions import NormalDistribution
 
 
 MU, SIGMA = 2, 5

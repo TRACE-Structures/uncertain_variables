@@ -3,12 +3,12 @@
 import numpy as np
 import pytest
 
-from uncertain_variables.polysys.LegendrePolynomials import LegendrePolynomials
+from src.polysys.LegendrePolynomials import LegendrePolynomials
 
 from .TestDistribution import TestDistribution as DistributionTestClass
-from uncertain_variables.distributions import NormalDistribution
+from src.distributions import NormalDistribution
 
-from uncertain_variables.distributions import UniformDistribution
+from src.distributions import UniformDistribution
 
 
 A, B = 2, 5
