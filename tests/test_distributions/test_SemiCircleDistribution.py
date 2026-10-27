@@ -334,3 +334,21 @@ class TestSemiCircleDistribution(DistributionTestClass):
             d2.orth_polysys_syschar(False)
         with pytest.raises(Exception):
             d2.orth_polysys_syschar(True)
+
+    # =====================================================================
+    # 11. Unit conversions
+    # =====================================================================
+    def test_convert_to_round_trip(self):
+        dist = SemiCircleDistribution(RADIUS, LOC)
+        old_params = dist.get_dist_params()
+        dist.convert_to("m", "cm")
+        dist.convert_to("cm", "m")
+        new_params = dist.get_dist_params()
+        assert np.allclose(old_params, new_params)
+
+    def test_convert_to_exception(self):
+        d = SemiCircleDistribution(RADIUS, LOC)
+        d.convert_to("m", "cm")
+        expected_params = [100*RADIUS, 100*LOC]
+        new_params = d.get_dist_params()
+        assert np.allclose(new_params, expected_params)

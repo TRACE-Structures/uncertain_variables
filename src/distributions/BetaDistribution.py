@@ -1,3 +1,4 @@
+import pint
 import numpy as np
 
 from src.distributions.Distribution import Distribution
@@ -5,7 +6,7 @@ from src.distributions.UniformDistribution import UniformDistribution
 from scipy.stats import beta
 
 class BetaDistribution(Distribution):
-    """Beta probability distribution on a finite interval.
+    """ Beta probability distribution on a finite interval.
     
         Attributes
         ----------
@@ -22,7 +23,7 @@ class BetaDistribution(Distribution):
             Starting point of the interval (default: 0)."""
         
     def __init__(self, a, b, scale=1, loc=0):
-        """Initialize a beta distribution with shape parameters ``a`` and ``b``.
+        """ Initialize a beta distribution with shape parameters ``a`` and ``b``.
         
             Parameters
             ----------
@@ -509,3 +510,30 @@ class BetaDistribution(Distribution):
             return "j" if normalized else "J"
 
         raise Exception(f"No polynomial system for this distribution ({self})")
+
+    def convert_to(self, from_unit, to_unit):
+        """ Convert the distribution parameters to a different unit.
+
+            Parameters
+            ----------
+            from_unit : str
+                Source unit.
+                
+            to_unit : str
+                Target unit.
+
+            Returns
+            -------
+            report : str
+                Description of the conversion.
+
+            Raises
+            ------
+            pint.DimensionalityError
+                If the source and target units are incompatible."""
+
+        ureg = pint.UnitRegistry()
+        self.scale = ureg.Quantity(self.scale, from_unit).to(to_unit).magnitude
+        self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
+        report = f"Converted from {from_unit} to {to_unit}."
+        return report

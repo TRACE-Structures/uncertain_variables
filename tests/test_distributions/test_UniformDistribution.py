@@ -397,3 +397,21 @@ class TestUniformDistribution(DistributionTestClass):
             d2.orth_polysys_syschar(False)
         with pytest.raises(Exception):
             d2.orth_polysys_syschar(True)
+
+    # =====================================================================
+    # 11. Unit conversions
+    # =====================================================================
+    def test_convert_to_round_trip(self):
+        dist = UniformDistribution(A, B)
+        old_params = dist.get_dist_params()
+        dist.convert_to("m", "cm")
+        dist.convert_to("cm", "m")
+        new_params = dist.get_dist_params()
+        assert np.allclose(old_params, new_params)
+
+    def test_convert_to_exception(self):
+        d = UniformDistribution(A, B)
+        d.convert_to("m", "cm")
+        expected_params = [100*A, 100*B]
+        new_params = d.get_dist_params()
+        assert np.allclose(new_params, expected_params)

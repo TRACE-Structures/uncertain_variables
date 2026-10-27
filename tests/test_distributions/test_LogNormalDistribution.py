@@ -380,3 +380,21 @@ class TestLogNormalDistribution(DistributionTestClass):
     def test_orth_polysys_syschar_invalid_raises(self, normalized):
         with pytest.raises(Exception):
             LogNormalDistribution().orth_polysys_syschar(normalized)
+
+    # =====================================================================
+    # 11. Unit conversions
+    # =====================================================================
+    def test_convert_to_round_trip(self):
+        dist = LogNormalDistribution(MU, SIGMA, LOC)
+        old_params = dist.get_dist_params()
+        dist.convert_to("m", "cm")
+        dist.convert_to("cm", "m")
+        new_params = dist.get_dist_params()
+        assert np.allclose(old_params, new_params)
+
+    def test_convert_to_exception(self):
+        d = LogNormalDistribution(MU, SIGMA, LOC)
+        d.convert_to("m", "cm")
+        expected_params = [100*MU, 100*SIGMA, 100*LOC]
+        new_params = d.get_dist_params()
+        assert np.allclose(new_params, expected_params)

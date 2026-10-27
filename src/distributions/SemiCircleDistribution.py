@@ -1,3 +1,4 @@
+import pint
 import numpy as np
 
 from src.distributions.Distribution import Distribution
@@ -5,7 +6,7 @@ from src.distributions.UniformDistribution import UniformDistribution
 from scipy.stats import semicircular
 
 class SemiCircleDistribution(Distribution):
-    """Wigner semicircle probability distribution.
+    """ Wigner semicircle probability distribution.
 
         Attributes
         ----------
@@ -19,7 +20,7 @@ class SemiCircleDistribution(Distribution):
             Center of the semicircle (default: 0)."""
 
     def __init__(self, radius, loc=0):
-        """Initialize a Wigner semicircle distribution.
+        """ Initialize a Wigner semicircle distribution.
 
             Parameters
             ----------
@@ -400,3 +401,32 @@ class SemiCircleDistribution(Distribution):
             return "u" if normalized else "U"
 
         raise Exception(f"No polynomial system for this distribution ({self})")
+
+    def convert_to(self, from_unit, to_unit):
+        """ Convert the distribution parameters to a different unit.
+
+            Parameters
+            ----------
+            from_unit : str
+                Source unit.
+
+            to_unit : str
+                Target unit.
+
+            Returns
+            -------
+            report : str
+                Description of the conversion.
+
+            Raises
+            ------
+            pint.DimensionalityError
+                If the source and target units are incompatible."""
+
+        ureg = pint.UnitRegistry()
+        self.radius = ureg.Quantity(self.radius, from_unit).to(to_unit).magnitude
+        self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
+        self.scale = self.radius
+
+        report = f"Converted from {from_unit} to {to_unit}."
+        return report

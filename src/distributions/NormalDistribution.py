@@ -1,3 +1,4 @@
+import pint
 import numpy as np
 
 from src.distributions.Distribution import Distribution
@@ -6,7 +7,7 @@ from scipy.stats import norm
 
 
 class NormalDistribution(Distribution):
-    """Normal (Gaussian) probability distribution.
+    """ Normal (Gaussian) probability distribution.
     
         Attributes
         ----------
@@ -23,7 +24,7 @@ class NormalDistribution(Distribution):
             Scale parameter (equal to ``sigma``)."""
     
     def __init__(self, mu=0, sigma=1):
-        """Initialize a normal distribution with mean ``mu`` and standard deviation ``sigma``.
+        """ Initialize a normal distribution with mean ``mu`` and standard deviation ``sigma``.
         
             Parameters
             ----------
@@ -463,3 +464,35 @@ class NormalDistribution(Distribution):
             return "h" if normalized else "H"
 
         raise Exception(f"No polynomial system for this distribution ({self})")
+
+    def convert_to(self, from_unit, to_unit):
+        """ Convert the distribution parameters to a different unit.
+
+            Parameters
+            ----------
+            from_unit : str
+                Source unit.
+
+            to_unit : str
+                Target unit.
+
+            Returns
+            -------
+            report : str
+                Description of the conversion.
+
+            Raises
+            ------
+            pint.DimensionalityError
+                If the source and target units are incompatible."""
+
+        ureg = pint.UnitRegistry()
+        self.mu = ureg.Quantity(self.mu, from_unit).to(to_unit).magnitude
+        self.sigma = ureg.Quantity(self.sigma, from_unit).to(to_unit).magnitude
+        self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
+
+        self.s = self.sigma
+        self.scale = self.sigma
+
+        report = f"Converted from {from_unit} to {to_unit}."
+        return report

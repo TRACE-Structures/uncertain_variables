@@ -1,3 +1,4 @@
+import pint
 import numpy as np
 
 from src.distributions.Distribution import Distribution
@@ -33,7 +34,6 @@ class ExponentialDistribution(Distribution):
             raise ValueError("lambda_ must be a positive number.")
 
         self.lambda_ = lambda_
-
         self.scale = 1 / lambda_
         self.loc = loc
 
@@ -433,3 +433,31 @@ class ExponentialDistribution(Distribution):
         
     #     y = x * self.lambda_
     #     return y
+
+    def convert_to(self, from_unit, to_unit):
+        """ Convert the distribution parameters to a different unit.
+
+            Parameters
+            ----------
+            from_unit : str
+                Source unit.
+
+            to_unit : str
+                Target unit.
+
+            Returns
+            -------
+            report : str
+                Description of the conversion.
+
+            Raises
+            ------
+            pint.DimensionalityError
+                If the source and target units are incompatible."""
+
+        ureg = pint.UnitRegistry()
+        self.lambda_ = ureg.Quantity(self.lambda_, from_unit).to(to_unit).magnitude
+        self.scale = 1 / self.lambda_
+        self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
+        report = f"Converted from {from_unit} to {to_unit}."
+        return report

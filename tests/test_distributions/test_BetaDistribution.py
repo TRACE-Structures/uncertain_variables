@@ -436,3 +436,21 @@ class TestBetaDistribution(DistributionTestClass):
             BetaDistribution(A, B, scale=1, loc=0).orth_polysys_syschar(False)
         with pytest.raises(Exception):
             BetaDistribution(A, B, scale=1, loc=0).orth_polysys_syschar(True)
+
+    # =====================================================================
+    # 11. Unit conversions
+    # =====================================================================
+    def test_convert_to_round_trip(self):
+        dist = BetaDistribution(A, B, scale=2, loc=-1)
+        old_params = dist.get_dist_params()
+        dist.convert_to("m", "cm")
+        dist.convert_to("cm", "m")
+        new_params = dist.get_dist_params()
+        assert np.allclose(old_params, new_params)
+
+    def test_convert_to_exception(self):
+        d = BetaDistribution(A, B, scale=2, loc=-1)
+        d.convert_to("m", "cm")
+        expected_params = [A, B, 200, -100]
+        new_params = d.get_dist_params()
+        assert np.allclose(new_params, expected_params)

@@ -1,3 +1,4 @@
+import pint
 import numpy as np
 
 from src.distributions.Distribution import Distribution
@@ -9,7 +10,7 @@ from scipy.stats.qmc import Sobol
 
 
 class UniformDistribution(Distribution):
-    """Continuous uniform distribution on a finite interval.
+    """ Continuous uniform distribution on a finite interval.
     
         Attributes
         ----------
@@ -26,7 +27,7 @@ class UniformDistribution(Distribution):
             Width of the interval (equal to ``b - a``)."""
     
     def __init__(self, a=0, b=1):
-        """Initialize a uniform distribution on the interval ``[a, b]``.
+        """ Initialize a uniform distribution on the interval ``[a, b]``.
         
             Parameters
             ----------
@@ -498,3 +499,34 @@ class UniformDistribution(Distribution):
         
     #     bounds = np.array([a + ab * delta, b - ab * delta])
     #     return bounds
+
+    def convert_to(self, from_unit, to_unit):
+        """ Convert the distribution parameters to a different unit.
+
+            Parameters
+            ----------
+            from_unit : str
+                Source unit.
+
+            to_unit : str
+                Target unit.
+
+            Returns
+            -------
+            report : str
+                Description of the conversion.
+
+            Raises
+            ------
+            pint.DimensionalityError
+                If the source and target units are incompatible."""
+
+        ureg = pint.UnitRegistry()
+        self.a = ureg.Quantity(self.a, from_unit).to(to_unit).magnitude
+        self.b = ureg.Quantity(self.b, from_unit).to(to_unit).magnitude
+
+        self.loc = self.a
+        self.scale = self.b - self.a
+        
+        report = f"Converted from {from_unit} to {to_unit}."
+        return report

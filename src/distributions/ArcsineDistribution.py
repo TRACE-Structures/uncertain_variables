@@ -1,3 +1,4 @@
+import pint
 import numpy as np
 
 from src.distributions.Distribution import Distribution
@@ -5,7 +6,7 @@ from src.distributions.UniformDistribution import UniformDistribution
 from scipy.stats import arcsine
 
 class ArcsineDistribution(Distribution):
-    """Arcsine probability distribution on a finite interval.
+    """ Arcsine probability distribution on a finite interval.
     
         Attributes
         ----------
@@ -332,6 +333,34 @@ class ArcsineDistribution(Distribution):
                 GPC polynomial system characteristic string for the arcsine distribution."""
         
         if self.scale == 2 and self.loc == -1:
-            return "j" if normalized else "J"
+            return "t" if normalized else "T"
 
         raise Exception(f"No polynomial system for this distribution ({self})")
+
+    def convert_to(self, from_unit, to_unit):
+        """ Convert the distribution parameters to a different unit.
+
+            Parameters
+            ----------
+            from_unit : str
+                Source unit.
+                
+            to_unit : str
+                Target unit.
+
+            Returns
+            -------
+            report : str
+                Description of the conversion.
+
+            Raises
+            ------
+            pint.DimensionalityError
+                If the source and target units are incompatible."""
+
+        ureg = pint.UnitRegistry()
+        self.scale = ureg.Quantity(self.scale, from_unit).to(to_unit).magnitude
+        self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
+        report = f"Converted from {from_unit} to {to_unit}."
+        return report
+        

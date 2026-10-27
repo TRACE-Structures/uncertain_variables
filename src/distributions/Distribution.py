@@ -405,4 +405,10 @@ class Distribution(ABC):
             Subclasses must implement this method."""
 
         pass
-    
+
+    @abstractmethod
+    def convert_to(self, from_unit, to_unit):
+        """ Convert the distribution parameters to a different unit.
+            Subclasses must implement this method."""
+
+        pass
