@@ -63,12 +63,12 @@ class TestVariable:
     def test_equality_with_non_variable_is_false(self, random_variable):
         assert random_variable != object()
 
-    def test_get_var_type(self):
+    def test_get_dist_type(self):
         variable = Variable("x", NormalDistribution())
-        assert variable.get_var_type() == "norm"
+        assert variable.get_dist_type() == "norm"
 
-    def test_get_var_params_for_random_variable(self, random_variable):
-        assert np.allclose(random_variable.get_var_params(), [10, 2])
+    def test_get_dist_params_for_random_variable(self, random_variable):
+        assert np.allclose(random_variable.get_dist_params(), [10, 2])
 
     # =====================================================================
     # 2. Probability functions
@@ -82,7 +82,7 @@ class TestVariable:
         assert np.allclose(random_variable.cdf(points), random_variable.dist.cdf(points))
         assert np.allclose(
             random_variable.ppf(probabilities),
-            random_variable.dist.invcdf(probabilities),
+            random_variable.dist.ppf(probabilities),
         )
 
     # =====================================================================
@@ -120,8 +120,8 @@ class TestVariable:
 
     def test_germ_variable_transformations_are_inverse(self, arcsine_variable):
         germ_points = np.array([-0.8, -0.2, 0.0, 0.4, 0.9])
-        variable_points = arcsine_variable.germ2variable(germ_points)
-        recovered = arcsine_variable.variable2germ(variable_points)
+        variable_points = arcsine_variable.germ_to_dist(germ_points)
+        recovered = arcsine_variable.dist_to_germ(variable_points)
         assert np.allclose(recovered, germ_points)
 
     # =====================================================================

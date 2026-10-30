@@ -1,188 +1,160 @@
-''' This module implements the VariableSet class for managing a set of simulation variables
-    with associated probability distributions.'''
+""" Represent a set of simulation variables with associated probability distributions. """
 
 import numpy as np
+
+from src.variable import Variable
+
 from scipy.stats.qmc import Halton
 from scipy.stats.qmc import LatinHypercube as LHS
 from scipy.stats.qmc import Sobol
-from SALib.sample import saltelli
+# from SALib.sample import saltelli
 
 class VariableSet():
-    ''' VariableSet class for managing a set of simulation variables.
+    """ VariableSet class for managing a set of simulation variables.
         
         Attributes
         ----------
-        normalized: bool
+        normalized : bool
             Flag indicating whether the variables are normalized.
 
-        variables: dict
-            Dictionary of variable names and their corresponding Distribution objects.'''
+        variables : dict
+            Dictionary of variable names and their corresponding Variable objects."""
         
     def __init__(self, normalized=True):
-        ''' VariableSet constructor.
+        """ Initialize an empty VariableSet.
 
-            Parameter
-            ---------
-            normalized: bool
-                Flag indicating whether the variables are normalized. Default is True.'''
+            Parameters
+            ----------
+            normalized : bool
+                Flag indicating whether the variables are normalized. Default is True."""
+
+        if not isinstance(normalized, bool):
+            raise TypeError("normalized must be a boolean")
         
         self.normalized = normalized
         self.variables = {}
 
     def add(self, variable):
-        ''' Add a new Variable to the VariableSet.
+        """ Add a new Variable to the VariableSet.
 
-            Parameter
-            ---------
-            variable: Variable object
-                The Variable object to be added to the VariableSet.'''
-        
+            Parameters
+            ----------
+            variable : Variable 
+                The Variable object to be added to the VariableSet."""
+
+        if not isinstance(variable, Variable):
+            raise TypeError("variable must be an instance of Variable")
         if variable.name in self.variables.keys():
-            raise("Variable name {} already exists in VariableSet".format(variable.name))
-        self.variables[variable.name] = variable.dist
+            raise KeyError(f"Variable name {variable.name} already exists in VariableSet")
+
+        variable_name = variable.name
+        self.variables[variable_name] = variable
 
     def remove(self, variable_name):
-        ''' Remove a Variable from the VariableSet by name.
+        """ Remove a variable by name.
 
-            Parameter
-            ---------
-            variable_name: str
-                The name of the Variable to be removed from the VariableSet.'''
+            Parameters
+            ----------
+            variable_name : str
+                The name of the variable to be removed from the VariableSet."""
         
-        if variable_name not in self.variables.keys():
-            raise KeyError("Variable name {} not found in VariableSet".format(variable_name))
+        if variable_name not in self.variables:
+            raise KeyError(f"Variable name {variable_name} not found in VariableSet")
+
         del self.variables[variable_name]
 
-    def get_dist_types(self):
-        ''' Get the types of distributions for all variables in the VariableSet.
-        
+    def get_dist_types(self, array_like=True):
+        """ Get the distribution types for all variables in the VariableSet.
+
+            Parameters
+            ----------
+            array_like : bool
+                If True, return as a numpy array. 
+                If False, returns as a dictionary, where the keys are variable names and the values are distribution types.
+                Default is True.
+
             Returns
             -------
-            dist_types: list
-                List of distribution types for each variable in the VariableSet.'''
-        
-        dist_types = []
-        for dist in self.variables.values():
-            dist_types.append(dist.get_dist_type())
+            dist_types : array_like or dict
+                An array_like or dictionary of distribution types for each variable in the VariableSet."""
+
+        if array_like:
+            dist_types = [var.get_dist_type() for var in self.variables.values()]
+        else:
+            dist_types = {name: var.get_dist_type() for name, var in self.variables.items()}
         return dist_types
     
-    def get_dist_params(self):
-        ''' Get the parameters of distributions for all variables in the VariableSet.
+    def get_dist_params(self, array_like=True):
+        """ Get the parameters of distributions for all variables in the VariableSet.
+
+            Parameters
+            ----------
+            array_like : bool
+                If True, return as a numpy array. 
+                If False, returns as a dictionary, where the keys are variable names and the values are distribution parameters.
+                Default is True.
             
             Returns
             -------
-            dist_params: list
-                List of distribution parameters for each variable in the VariableSet.'''
+            dist_params: array_like or dict
+                An array_like or dictionary of distribution parameters for each variable in the VariableSet."""
         
-        dist_params = []
-        for dist in self.variables.values():
-            dist_params.append(dist.get_dist_params())
+        if array_like:
+            dist_params = [var.get_dist_params() for var in self.variables.values()]
+        else:
+            dist_params = {name: var.get_dist_params() for name, var in self.variables.items()}
         return dist_params
 
-    def filter(self, variable_names):
-        ''' Create a new VariableSet containing only the specified variables.
-            
-            Parameter
-            ---------
-            variable_names: list
-                List of variable names to include in the new VariableSet.
-                
-            Returns
-            -------
-            new_variable_set: VariableSet object
-                New VariableSet containing only the specified variables.'''
-        
-        new_variable_set = VariableSet(normalized=self.normalized)
-        new_variables = {}
-        # To avoid confusion, use a list of original names to map indices
-        original_names = list(self.variables.keys())
-        for name in variable_names:
-            if name not in self.variables:
-                raise KeyError(f"Variable {name} not found in VariableSet")
-            idx = original_names.index(name)
-            new_variables[name] = self.variables[name]
-        new_variable_set.variables = new_variables
-        return new_variable_set
-
-    def num_variables(self):
-        ''' Get the number of variables in the VariableSet.
+    # def num_variables(self):
+    def get_num_variables(self):
+        """ Get the number of variables in the VariableSet.
         
             Returns
             -------
             num_variables: int
-                Number of variables in the VariableSet.'''
+                Number of variables in the VariableSet."""
         
         num_variables = len(self.variables)
         return num_variables
 
-    def variable_names(self):
-        ''' Get the names of all variables in the VariableSet.
+    # def variable_names(self):
+    def get_variable_names(self):
+        """ Get the names of all variables in the VariableSet.
         
             Returns
             -------
             variable_names: list
-                List of variable names in the VariableSet.'''
+                List of variable names in the VariableSet."""
         
-        variable_names = list(self.variables.keys())
+        variable_names = np.array(self.variables.keys())
         return variable_names
     
     def get_variables(self):
-        ''' Get the dictionary of variables in the VariableSet.
+        """ Get the dictionary of variables in the VariableSet.
         
             Returns
             -------
             variables: dict
-                Dictionary of variable names and their corresponding Distribution objects.'''
+                Dictionary of variable names and their corresponding Variable objects."""
         
         variables = self.variables
         return variables
 
-    def mean(self):
-        ''' Get the mean values of all variables in the VariableSet.
-            
-            Returns
-            -------
-            
-            q_mean: numpy.ndarray
-                Array of mean values for each variable in the VariableSet.'''
-        
-        m = self.num_variables()
-        variables = self.variables
-        q_mean = np.zeros([m,1])
-        for i, dist in enumerate(variables.values()):
-            q_mean[i] = dist.mean()
-        return q_mean
-
-    def var(self):
-        ''' Get the variances of all variables in the VariableSet.
-            
-            Returns
-            -------
-            var: numpy.ndarray
-                Array of variances for each variable in the VariableSet.'''
-        
-        m = self.num_variables()
-        variables = self.variables
-        var = np.zeros([m, 1])
-        for i, dist in enumerate(variables.values()):
-            var[i] = dist.var()
-        return var
-
     def pdf(self, q):
-        ''' Get the probability density function values for all variables in the VariableSet at given points.
+        """ Get the probability density function values for all variables in the VariableSet at given points.
             
             Parameters
             ----------
-            q: numpy.ndarray
+            q: numpy.ndarray of shape (num_variables, num_points)
                 Array of points at which to evaluate the pdf. Shape should be (m, n) where m is the number of variables
                 and n is the number of points.
                 
             Returns
             -------
             p_q: numpy.ndarray
-                Array of pdf values at the given points. Shape is (1, n).'''
+                Array of pdf values at the given points. Shape is (1, n)."""   
         
-        m = self.num_variables()
+        m = self.get_num_variables()
         assert(q.shape[0] == m)
         n = q.shape[1]
 
@@ -193,7 +165,7 @@ class VariableSet():
         return p_q
     
     def logpdf(self, q):
-        ''' Get the log probability density function values for all variables in the VariableSet at given points.
+        """ Get the log probability density function values for all variables in the VariableSet at given points.
             
             Parameters
             ----------
@@ -204,9 +176,9 @@ class VariableSet():
             Returns
             -------
             p_q: numpy.ndarray
-                Array of logpdf values at the given points. Shape is (1, n).'''
+                Array of logpdf values at the given points. Shape is (1, n)."""
         
-        m = self.num_variables()
+        m = self.get_num_variables()
         assert(q.shape[0] == m)
         n = q.shape[1]
 
@@ -217,7 +189,7 @@ class VariableSet():
         return p_q
 
     def cdf(self, q):
-        ''' Get the cumulative distribution function values for all variables in the VariableSet at given points.
+        """ Get the cumulative distribution function values for all variables in the VariableSet at given points.
             
             Parameters
             ----------
@@ -228,7 +200,7 @@ class VariableSet():
             Returns
             -------
             p_q: numpy.ndarray
-                Array of cdf values at the given points. Shape is (m, n).'''
+                Array of cdf values at the given points. Shape is (m, n)."""
         
         m = self.num_variables()
         assert (q.shape[0] == m)
@@ -238,14 +210,113 @@ class VariableSet():
         p_q = np.empty([m, n])
         for i, dist in enumerate(variables.values()):
             p_q[i,:] = dist.cdf(q[i,:])
+        return p_q
+
+    def mean(self, array_like=True):
+        """ Get the mean values of all variables in the VariableSet.
+
+            Parameters
+            ----------
+            array_like : bool
+                If True, return as a numpy array. 
+                If False, returns as a dictionary, where the keys are variable names and the values are mean values.
+                Default is True.
+            
+            Returns
+            -------
+            means: array_like or dict
+                An array_like or dictionary of mean values for each variable in the VariableSet."""
+        
+        # m = self.get_num_variables()
+        # variables = self.variables
+        # q_mean = np.zeros([m,1])
+        # for i, dist in enumerate(variables.values()):
+        #     q_mean[i] = dist.mean()
+        # return q_mean
+
+        if array_like:
+            means = np.array([var.mean() for var in self.variables.values()])
+        else:
+            means = {name: var.mean() for name, var in self.variables.items()}
+        return means
+
+    def var(self, array_like=True):
+        """ Get the variances of all variables in the VariableSet.
+
+            Parameters
+            ----------
+            array_like : bool
+                If True, return as a numpy array. 
+                If False, returns as a dictionary, where the keys are variable names and the values are variances.
+                Default is True.
+
+            Returns
+            -------
+            vars: array_like or dict
+                An array_like or dictionary of variances for each variable in the VariableSet."""
+
+        # m = self.num_variables()
+        # variables = self.variables
+        # var = np.zeros([m, 1])
+        # for i, dist in enumerate(variables.values()):
+        #     var[i] = dist.var()
+        # return var
+    
+        if array_like:
+            vars = np.array([var.var() for var in self.variables.values()])
+        else:
+            vars = {name: var.var() for name, var in self.variables.items()}
+        return vars
+
+    def skew(self, array_like=True):
+        """ Get the skewness of all variables in the VariableSet.
+
+            Parameters
+            ----------
+            array_like : bool
+                If True, return as a numpy array. 
+                If False, returns as a dictionary, where the keys are variable names and the values are skewness values.
+                Default is True.
+
+            Returns
+            -------
+            skews: array_like or dict
+                An array_like or dictionary of skewness values for each variable in the VariableSet."""
+
+        if array_like:
+            skews = np.array([var.skew() for var in self.variables.values()])
+        else:
+            skews = {name: var.skew() for name, var in self.variables.items()}
+        return skews
+
+    def kurt(self, array_like=True):
+        """ Get the kurtosis of all variables in the VariableSet.
+
+            Parameters
+            ----------
+            array_like : bool
+                If True, return as a numpy array. 
+                If False, returns as a dictionary, where the keys are variable names and the values are kurtosis values.
+                Default is True.
+
+            Returns
+            -------
+            kurts: array_like or dict
+                An array_like or dictionary of kurtosis values for each variable in the VariableSet."""
+
+        if array_like:
+            kurts = np.array([var.kurt() for var in self.variables.values()])
+        else:
+            kurts = {name: var.kurt() for name, var in self.variables.items()}
+        return kurts
 
     def get_gpc_syschars(self):
-        ''' Get the GPC polynomial system characteristic string for all variables in the VariableSet.
+        """ Get the GPC polynomial system characteristic string for all variables in the VariableSet.
             
             Returns
             -------
             syschar: str
-                GPC polynomial system characteristic string for the VariableSet.'''
+                GPC polynomial system characteristic string for the VariableSet."""
         
         variables = self.variables
         syschar = ''
@@ -254,7 +325,7 @@ class VariableSet():
         return syschar
     
     def germ2variable(self, xi_k_i):
-        ''' Convert from germ space to variable space.
+        """ Convert from germ space to variable space.
             Parameters
             ----------
             xi_k_i : array_like
@@ -263,7 +334,7 @@ class VariableSet():
             Returns
             -------
             q_k_i : numpy.ndarray
-                Points in variable space. Shape is (n, m).'''
+                Points in variable space. Shape is (n, m)."""
         
         m = self.num_variables()
         assert (xi_k_i.shape[1] == m)
@@ -276,7 +347,7 @@ class VariableSet():
         return q_k_i
     
     def variable2germ(self, q_k_i):
-        ''' Convert from variable space to germ space.
+        """ Convert from variable space to germ space.
             Parameters
             ----------
             q_k_i : array_like
@@ -285,7 +356,7 @@ class VariableSet():
             Returns
             -------
             xi_k_i : numpy.ndarray
-                Points in germ space. Shape is (n, m).'''
+                Points in germ space. Shape is (n, m)."""
         
         m = self.num_variables()
         assert (q_k_i.shape[1] == m)
@@ -298,12 +369,12 @@ class VariableSet():
         return xi_k_i
     
     def get_bounds(self):
-        ''' Get the bounds of all variables in the VariableSet.
+        """ Get the bounds of all variables in the VariableSet.
             
             Returns
             -------
             bounds: numpy.ndarray
-                Array of shape (m, 2) containing the lower and upper bounds for each variable in the VariableSet.'''
+                Array of shape (m, 2) containing the lower and upper bounds for each variable in the VariableSet."""
         
         m = self.num_variables()
         bounds = np.zeros((m, 2))
@@ -312,7 +383,7 @@ class VariableSet():
         return bounds
 
     def sample(self, n, method='MC', random_seed=None, **kwargs):
-        ''' Generate samples from the VariableSet using specified sampling method.
+        """ Generate samples from the VariableSet using specified sampling method.
             
             Parameters
             ----------
@@ -333,7 +404,7 @@ class VariableSet():
             Returns
             -------
             q_i_k: numpy.ndarray
-                Array of shape (n, m) containing the generated samples in parameter space.'''
+                Array of shape (n, m) containing the generated samples in parameter space."""               
         
         m = self.num_variables()
         q_i_k = np.zeros([n, m])
@@ -361,8 +432,33 @@ class VariableSet():
             
         return q_i_k
     
+    def filter(self, variable_names):
+        """ Create a new VariableSet containing only the specified variables.
+            
+            Parameters
+            ----------  
+            variable_names: list
+                List of variable names to include in the new VariableSet.
+                
+            Returns
+            -------
+            new_variable_set: VariableSet object
+                New VariableSet containing only the specified variables."""
+        
+        new_variable_set = VariableSet(normalized=self.normalized)
+        new_variables = {}
+        # To avoid confusion, use a list of original names to map indices
+        original_names = list(self.variables.keys())
+        for name in variable_names:
+            if name not in self.variables:
+                raise KeyError(f"Variable {name} not found in VariableSet")
+            idx = original_names.index(name)
+            new_variables[name] = self.variables[name]
+        new_variable_set.variables = new_variables
+        return new_variable_set
+
     def diminished_variable_set(self, indices):
-        ''' Create a new VariableSet by selecting a subset of variables based on provided indices.
+        """ Create a new VariableSet by selecting a subset of variables based on provided indices.
             
             Parameters
             ----------
@@ -372,7 +468,7 @@ class VariableSet():
             Returns
             -------
             new_variable_set: VariableSet object
-                New VariableSet containing only the selected variables.'''
+                New VariableSet containing only the selected variables."""
         
         assert self.num_variables() >= len(indices)
 

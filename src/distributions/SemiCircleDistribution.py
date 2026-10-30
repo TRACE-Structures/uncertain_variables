@@ -145,18 +145,18 @@ class SemiCircleDistribution(Distribution):
         y = semicircular.cdf(x, scale=self.scale, loc=self.loc)
         return y
 
-    def invcdf(self, y):
-        """ Return the inverse cumulative distribution function of the Wigner semicircle distribution, evaluated at y.
+    def ppf(self, y):
+        """ Return the percentage point function (inverse of cdf) of the Wigner semicircle distribution, evaluated at y.
 
             Parameters
             ----------
             y : array_like
-                Points at which to evaluate the invcdf.
+                Points at which to evaluate the PPF.
 
             Returns
             -------
             x : array_like
-                Inverse cumulative distribution function values at y. """
+                PPF values evaluated at y. """
         
         # y = np.asarray(y)
         # x = np.full(y.shape, np.nan)
@@ -233,7 +233,7 @@ class SemiCircleDistribution(Distribution):
 
         # from .UniformDistribution import UniformDistribution
         # xi = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
-        # samples = self.invcdf(xi)
+        # samples = self.ppf(xi)
         # return samples
 
         if not isinstance(n, (int, np.integer)) or n <= 0:
@@ -244,10 +244,10 @@ class SemiCircleDistribution(Distribution):
             raise ValueError("Number of samples must be a finite value.")
 
         y = UniformDistribution(0, 1).sample(n, method, seed=seed)
-        samples = self.invcdf(y)
+        samples = self.ppf(y)
         return samples
 
-    def translate(self, shift=0, scale=1):
+    def transform(self, shift=0, scale=1):
         """ Return a translated and scaled Wigner semicircle distribution.
 
             The transformation is defined as
@@ -314,7 +314,7 @@ class SemiCircleDistribution(Distribution):
                 
             var : float, default: 0.25
                 Desired positive variance of the distribution.
-
+    
             Returns
             -------
             new_dist : SemiCircleDistribution
@@ -324,16 +324,16 @@ class SemiCircleDistribution(Distribution):
         new_loc = mean
         return SemiCircleDistribution(new_radius, new_loc)
 
-    def get_base_dist(self):
-        """ Return the GPC base distribution for the Wigner semicircle distribution.
+    def gpc_dist(self):
+        """ Return the GPC germ distribution for the Wigner semicircle distribution.
 
             Returns
             -------
-            dist_germ : SemiCircleDistribution object
-                GPC base distribution."""
+            germ_dist : SemiCircleDistribution object
+                GPC germ distribution."""
         
-        dist_germ = SemiCircleDistribution(radius=1)
-        return dist_germ
+        germ_dist = SemiCircleDistribution(radius=1)
+        return germ_dist
 
     # def base2dist(self, y):
     #     """ Convert from base (germ) space to Wigner semicircle distribution space.
@@ -369,7 +369,7 @@ class SemiCircleDistribution(Distribution):
     #     y = x * self.radius
     #     return y
 
-    def orth_polysys(self):
+    def gpc_polysys(self):
         """ Return the GPC polynomial system for the Wigner semicircle distribution.
                 
             Returns
@@ -384,7 +384,7 @@ class SemiCircleDistribution(Distribution):
         else:  
             raise Exception(f"No polynomial system for this distribution ({self})")
 
-    def orth_polysys_syschar(self, normalized):
+    def gpc_syschar(self, normalized):
         """ Return the GPC polynomial system characteristic string for the Wigner semicircle distribution.
         
             Parameters

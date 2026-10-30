@@ -124,18 +124,18 @@ class ArcsineDistribution(Distribution):
         y = arcsine.cdf(x, scale=self.scale, loc=self.loc)
         return y
 
-    def invcdf(self, y):
-        """ Return the inverse cumulative distribution function of the arcsine distribution, evaluated at y.
+    def ppf(self, y):
+        """ Return the percentage point function (inverse of cdf) of the arcsine distribution, evaluated at y.
         
             Parameters
             ----------
             y : array_like
-                Points at which to evaluate the invcdf.
+                Points at which to evaluate the PPF.
 
             Returns
             -------
             x : array_like
-                Inverse cumulative distribution function values at y."""
+                PPF values evaluated at y."""
 
         x = arcsine.ppf(y, scale=self.scale, loc=self.loc)
         return x
@@ -212,10 +212,10 @@ class ArcsineDistribution(Distribution):
             raise ValueError("Number of samples must be a finite value.")
 
         y = UniformDistribution(0, 1).sample(n, method, seed=seed)
-        samples = self.invcdf(y)
+        samples = self.ppf(y)
         return samples
 
-    def translate(self, shift=0, scale=1):
+    def transform(self, shift=0, scale=1):
         """ Return a translated and scaled arcsine distribution.
 
             The transformation is defined as
@@ -294,17 +294,18 @@ class ArcsineDistribution(Distribution):
         loc = mean - scale / 2
         return ArcsineDistribution(scale=scale, loc=loc)
 
-    def get_base_dist(self):
-        """ Return the GPC base distribution for the arcsine distribution.
+    def gpc_dist(self):
+        """ Return the GPC germ distribution for the arcsine distribution.
         
             Returns
             -------
-            dist_germ : Distribution object
-                GPC base distribution."""
+            germ_dist : ArcsineDistribution
+                GPC germ distribution."""
                     
-        return ArcsineDistribution(scale=2, loc=-1)
+        germ_dist = ArcsineDistribution(scale=2, loc=-1)
+        return germ_dist
     
-    def orth_polysys(self):
+    def gpc_polysys(self):
         """ Return the GPC polynomial system for the arcsine distribution.
         
             Returns
@@ -319,7 +320,7 @@ class ArcsineDistribution(Distribution):
         else:
             raise Exception(f"No polynomial system for this distribution ({self})") 
 
-    def orth_polysys_syschar(self, normalized):
+    def gpc_syschar(self, normalized):
         """ Return the GPC polynomial system characteristic string for the arcsine distribution.
 
             Parameters

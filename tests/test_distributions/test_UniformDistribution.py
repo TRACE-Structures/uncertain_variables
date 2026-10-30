@@ -70,8 +70,8 @@ class TestUniformDistribution(DistributionTestClass):
     def test_repr(self, a, b, expected):
         assert repr(UniformDistribution(a, b)) == expected
 
-    def test_translate_returns_uniform(self, dist):
-        translated = dist.translate(1, 2)
+    def test_transform_returns_uniform(self, dist):
+        translated = dist.transform(1, 2)
         assert isinstance(translated, UniformDistribution)
         assert np.allclose((translated.a, translated.b), (1, 3), atol=self.ATOL, rtol=self.RTOL)
 
@@ -114,21 +114,21 @@ class TestUniformDistribution(DistributionTestClass):
         expected_value = ((dist.b - dist.a) ** 2) / 12
         assert np.isclose(variance_value, expected_value, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_base_distribution_is_uniform_on_minus_one_to_one(self, dist):
-        germ = dist.get_base_dist()
+    def test_gpc_distribution_is_uniform_on_minus_one_to_one(self, dist):
+        germ = dist.gpc_dist()
         assert isinstance(germ, UniformDistribution)
         assert np.allclose((germ.a, germ.b), (-1, 1), atol=self.ATOL, rtol=self.RTOL)
 
-    def test_base2dist(self, dist):
-        germ = dist.get_base_dist()
+    def test_germ_to_dist(self, dist):
+        germ = dist.gpc_dist()
         y = np.linspace(germ.a, germ.b, 50)
         x = np.linspace(dist.a, dist.b, 50)
-        assert np.allclose(dist.base2dist(y), x, atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(dist.germ_to_dist(y), x, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_dist2base(self, dist):
-        germ = dist.get_base_dist()
+    def test_dist_to_germ(self, dist):
+        germ = dist.gpc_dist()
         x = np.linspace(dist.a, dist.b, 50)
-        y = dist.dist2base(x)
+        y = dist.dist_to_germ(x)
         expected_y = np.linspace(germ.a, germ.b, 50)
         assert np.allclose(y, expected_y, atol=self.ATOL, rtol=self.RTOL)
 
@@ -155,9 +155,9 @@ class TestUniformDistribution(DistributionTestClass):
         "x, expected",
         [(0.0, 2.0), (0.25, 2.75), (0.5, 3.5), (1.0, 5.0)],
     )
-    def test_invcdf_reference_values(self, x, expected):
+    def test_ppf_reference_values(self, x, expected):
         dist = UniformDistribution(A, B)
-        assert np.allclose(dist.invcdf(x), expected, atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(dist.ppf(x), expected, atol=self.ATOL, rtol=self.RTOL)
 
     def test_moments_reference_values(self):
         dist = UniformDistribution(A, B)
@@ -259,37 +259,37 @@ class TestUniformDistribution(DistributionTestClass):
             UniformDistribution(A, B).sample(8, method="unknown")
 
     # =====================================================================
-    # 7. translate / get_shift / get_scale
+    # 7. transform / get_shift / get_scale
     # =====================================================================
     @pytest.mark.parametrize(
         "shift, scale",
         [(0, 1), (1, 2), (-3, 0.5), (2.5, 4), (0, 10), (-1, 1)],
     )
-    def test_translate_maps_bounds_affinely(self, shift, scale):
+    def test_transform_maps_bounds_affinely(self, shift, scale):
         d = UniformDistribution(A, B)
-        t = d.translate(shift, scale)
+        t = d.transform(shift, scale)
         assert isinstance(t, UniformDistribution)
         assert np.allclose((t.a, t.b), (scale * A + shift, scale * B + shift), atol=self.ATOL, rtol=self.RTOL)
 
-    def test_translate_default_is_identity(self):
+    def test_transform_default_is_identity(self):
         d = UniformDistribution(A, B)
-        assert d.translate() == d
+        assert d.transform() == d
 
-    def test_translate_does_not_modify_original(self):
+    def test_transform_does_not_modify_original(self):
         d = UniformDistribution(A, B)
-        d.translate(3, 2)
+        d.transform(3, 2)
         assert (d.a, d.b) == (A, B)
 
-    def test_translate_composition(self):
+    def test_transform_composition(self):
         d = UniformDistribution(A, B)
-        t = d.translate(1, 2).translate(-3, 0.5)
-        expected = d.translate(0.5 * 1 - 3, 0.5 * 2)
+        t = d.transform(1, 2).transform(-3, 0.5)
+        expected = d.transform(0.5 * 1 - 3, 0.5 * 2)
         assert np.allclose(t.get_dist_params(), expected.get_dist_params(), atol=self.ATOL, rtol=self.RTOL)
 
     @pytest.mark.parametrize("shift, scale", [(0, 0), (0, -1), (np.inf, 1), (0, np.inf), ("a", 1), (0, "b"), (None, 1)])
-    def test_translate_invalid_raises(self, shift, scale):
+    def test_transform_invalid_raises(self, shift, scale):
         with pytest.raises(ValueError):
-            UniformDistribution(A, B).translate(shift, scale)
+            UniformDistribution(A, B).transform(shift, scale)
 
     @pytest.mark.parametrize("a, b", [(0, 1), (A, B), (-1, 1), (-7.5, -2.5)])
     def test_get_shift_and_scale(self, a, b):
@@ -298,9 +298,9 @@ class TestUniformDistribution(DistributionTestClass):
         assert np.isclose(d.get_scale(), b - a, atol=self.ATOL, rtol=self.RTOL)
 
     @pytest.mark.parametrize("shift, scale", [(1, 2), (-3, 0.5), (2.5, 4)])
-    def test_get_scale_after_translate(self, shift, scale):
+    def test_get_scale_after_transform(self, shift, scale):
         d = UniformDistribution(A, B)
-        t = d.translate(shift, scale)
+        t = d.transform(shift, scale)
         assert np.isclose(t.get_scale(), scale * d.get_scale(), atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(t.get_shift(), scale * d.get_shift() + shift, atol=self.ATOL, rtol=self.RTOL)
 
@@ -348,8 +348,8 @@ class TestUniformDistribution(DistributionTestClass):
     @pytest.mark.parametrize("q0, q1", [(0.1, 0.9), (0.25, 0.75), (0, 0.5), (0.5, 1)])
     def test_fix_bounds_with_quantiles(self, q0, q1):
         new = UniformDistribution(A, B).fix_bounds(10, 20, q0, q1)
-        assert np.isclose(new.invcdf(q0), 10, atol=1e-8)
-        assert np.isclose(new.invcdf(q1), 20, atol=1e-8)
+        assert np.isclose(new.ppf(q0), 10, atol=1e-8)
+        assert np.isclose(new.ppf(q1), 20, atol=1e-8)
 
     @pytest.mark.parametrize(
         "args, kwargs",
@@ -377,26 +377,26 @@ class TestUniformDistribution(DistributionTestClass):
     # 10. GPC related functions
     # =====================================================================    
     @pytest.mark.parametrize("a, b", [(0, 1), (A, B), (-1, 1), (-9, -3)])
-    def test_get_base_dist_is_always_standard_uniform(self, a, b):
-        germ = UniformDistribution(a, b).get_base_dist()
+    def test_gpc_dist_is_always_standard_uniform(self, a, b):
+        germ = UniformDistribution(a, b).gpc_dist()
         assert germ == UniformDistribution(-1, 1)
 
-    def test_orth_polysys_is_legendre(self):
+    def test_gpc_polysys_is_legendre(self):
         d1 = UniformDistribution(-1, 1)
         d2 = UniformDistribution(A, B)
-        assert isinstance(d1.orth_polysys(), LegendrePolynomials)
+        assert isinstance(d1.gpc_polysys(), LegendrePolynomials)
         with pytest.raises(Exception):
-            d2.orth_polysys()
+            d2.gpc_polysys()
 
-    def test_orth_polysys_syschar(self):
+    def test_gpc_syschar(self):
         d1 = UniformDistribution(-1, 1)
         d2 = UniformDistribution(A, B)
-        assert d1.orth_polysys_syschar(False) == "P"
-        assert d1.orth_polysys_syschar(True) == "p"
+        assert d1.gpc_syschar(False) == "P"
+        assert d1.gpc_syschar(True) == "p"
         with pytest.raises(Exception):
-            d2.orth_polysys_syschar(False)
+            d2.gpc_syschar(False)
         with pytest.raises(Exception):
-            d2.orth_polysys_syschar(True)
+            d2.gpc_syschar(True)
 
     # =====================================================================
     # 11. Unit conversions

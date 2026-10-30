@@ -53,8 +53,8 @@ class Distribution(ABC):
         pass
 
     @abstractmethod
-    def invcdf(self, y):
-        """ Abstract method to return the inverse cumulative distribution function of the distribution, evaluated at y.
+    def ppf(self, y):
+        """ Abstract method to return the percentage point function (inverse of cdf) of the distribution, evaluated at y.
             Subclasses must implement this method."""
         
         pass
@@ -167,7 +167,7 @@ class Distribution(ABC):
     #     return tdist
 
     @abstractmethod
-    def translate(self, shift, scale):
+    def transform(self, shift, scale):
         """ Abstract method to translate the distribution by a shift and scale.
             Subclasses must implement this method."""
         
@@ -192,8 +192,8 @@ class Distribution(ABC):
             
             Parameters
             ----------
-            delta : float, optional
-                Small probability to define the bounds (default is 0.02).
+            delta : float, optional, default: 0.02
+                Small probability to define the bounds.
             
             Returns
             -------
@@ -203,7 +203,7 @@ class Distribution(ABC):
         if not (isinstance(delta, (int, float, np.number)) and 0 <= delta <= 0.5):
             raise ValueError("Delta must be a float between 0 and 0.5.")
         
-        bounds = self.invcdf(np.array([delta, 1 - delta]))
+        bounds = np.array([self.ppf(delta), self.ppf(1 - delta)])
         return bounds
     
 
@@ -274,8 +274,8 @@ class Distribution(ABC):
         if not (q0 <= q1 <= 1):
             raise ValueError(f"q1 must be between q0 and 1, got {q1}")
 
-        old_min = self.invcdf(q0)
-        old_max = self.invcdf(q1)
+        old_min = self.ppf(q0)
+        old_max = self.ppf(q1)
 
         if not np.isfinite(old_min):
             # raise ValueError(f"Lower quantile (q0) gives infinity (unbounded distribution?)")
@@ -292,10 +292,10 @@ class Distribution(ABC):
 
         new_scale = (new_max - new_min) / (old_max - old_min)
         new_shift = new_min - old_min * new_scale
-        new_dist = self.translate(shift=new_shift, scale=new_scale)
+        new_dist = self.transform(shift=new_shift, scale=new_scale)
         return new_dist
 
-    def stdnor2base(self, x):
+    def stdnor_to_dist(self, x):
         """ Convert from standard normal space to distribution space.
         
             Parameters
@@ -310,10 +310,10 @@ class Distribution(ABC):
 
         # Imported lazily to avoid a circular import with NormalDistribution.
         from src.distributions.NormalDistribution import NormalDistribution
-        y = self.invcdf(NormalDistribution().cdf(x))
+        y = self.ppf(NormalDistribution().gpc_dist().cdf(x))
         return y
 
-    def base2stdnor(self, y):
+    def dist_to_stdnor(self, y):
         """ Convert from distribution space to standard normal space.
         
             Parameters
@@ -328,46 +328,46 @@ class Distribution(ABC):
 
         # Imported lazily to avoid a circular import with NormalDistribution.
         from src.distributions.NormalDistribution import NormalDistribution
-        x = NormalDistribution().invcdf(self.cdf(y))
+        x = NormalDistribution().ppf(self.cdf(y))
         return x
 
-    # def get_base_dist(self):
-    #     """ Return the GPC base distribution.
+    # def get_germ_dist(self):
+    #     """ Return the GPC germ distribution.
             
     #         Returns
     #         -------
-    #         dist_germ : Distribution object
-    #             GPC base distribution."""
+    #         germ_dist : Distribution object
+    #             GPC germ distribution."""
         
-    #     from .NormalDistribution import NormalDistribution
-    #     dist_germ = NormalDistribution(0, 1)
-    #     return dist_germ
+    #     from src.distributions.NormalDistribution import NormalDistribution
+    #     germ_dist = NormalDistribution(0, 1)
+    #     return germ_dist
 
     @abstractmethod
-    def get_base_dist(self):
-        """ Return the GPC base distribution.
+    def gpc_dist(self):
+        """ Return the GPC germ distribution.
             Subclasses must implement this method."""
 
         pass
 
-    def base2dist(self, y):
-        """ Convert from base (germ) space to distribution space.
+    def germ_to_dist(self, y):
+        """ Convert from germ space to distribution space.
             
             Parameters
             ----------
             y : array_like
-                Points in base (germ) space.
+                Points in germ space.
                 
             Returns
             -------
             x : array_like
                 Points in distribution space."""
 
-        x = self.invcdf(self.get_base_dist().cdf(y))
+        x = self.ppf(self.gpc_dist().cdf(y))
         return x
 
-    def dist2base(self, x):
-        """ Convert from distribution space to base (germ) space.
+    def dist_to_germ(self, x):
+        """ Convert from distribution space to germ space.
             
             Parameters
             ----------
@@ -377,9 +377,9 @@ class Distribution(ABC):
             Returns
             -------
             y : array_like
-                Points in base (germ) space."""
+                Points in germ space."""
         
-        y = self.get_base_dist().invcdf(self.cdf(x))
+        y = self.gpc_dist().ppf(self.cdf(x))
         return y
 
     # def orth_polysys(self):
@@ -393,15 +393,15 @@ class Distribution(ABC):
     #     raise Exception(f"No polynomial system for this distribution ({self})")
 
     @abstractmethod
-    def orth_polysys(self):
+    def gpc_polysys(self):
         """ Return the GPC polynomial system.
             Subclasses must implement this method."""
 
         pass
 
     @abstractmethod
-    def orth_polysys_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the normal distribution.
+    def gpc_syschar(self, normalized):
+        """ Return the GPC polynomial system characteristic string for the distribution.
             Subclasses must implement this method."""
 
         pass

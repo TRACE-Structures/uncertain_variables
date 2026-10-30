@@ -137,18 +137,18 @@ class ExponentialDistribution(Distribution):
         y = expon.cdf(x, scale=self.scale, loc=self.loc)
         return y
 
-    def invcdf(self, y):
-        """ Return the inverse cumulative distribution function of the exponential distribution, evaluated at y.
+    def ppf(self, y):
+        """ Return the percentage point function (inverse of cdf) of the exponential distribution, evaluated at y.
 
             Parameters
             ----------
             y : array_like
-                Points at which to evaluate the invcdf.
+                Points at which to evaluate the PPF.
 
             Returns
             -------
             x : array_like
-                Inverse cumulative distribution function values at y."""
+                PPF values evaluated at y."""
         
         # y = np.asarray(y)
         # lambda_ = self.lambda_
@@ -233,10 +233,10 @@ class ExponentialDistribution(Distribution):
             raise ValueError("Number of samples must be a finite value.")
 
         y = UniformDistribution(0, 1).sample(n, method, seed=seed)
-        samples = self.invcdf(y)
+        samples = self.ppf(y)
         return samples
 
-    def translate(self, shift=0, scale=1):
+    def transform(self, shift=0, scale=1):
         """ Return a translated and scaled exponential distribution.
 
             The transformation is defined as
@@ -340,18 +340,18 @@ class ExponentialDistribution(Distribution):
         new_lambda = 1 / (mean - loc)
         return ExponentialDistribution(new_lambda, loc)
 
-    def get_base_dist(self):
-        """ Return the GPC base distribution.
+    def gpc_dist(self):
+        """ Return the GPC germ distribution.
 
             Returns
             -------
-            dist_germ : Distribution object
-                GPC base distribution."""
+            germ_dist : Distribution object
+                GPC germ distribution."""
             
-        base = ExponentialDistribution(1)
-        return base
+        germ_dist = ExponentialDistribution(1)
+        return germ_dist
 
-    def orth_polysys(self):
+    def gpc_polysys(self):
         """ Return the GPC polynomial system for the exponential distribution.
 
             Returns
@@ -374,7 +374,7 @@ class ExponentialDistribution(Distribution):
         else:
             raise Exception(f"No polynomial system for this distribution ({self})")
 
-    def orth_polysys_syschar(self, normalized):
+    def gpc_syschar(self, normalized):
         """ Return the GPC polynomial system characteristic string for the exponential distribution.
 
             Parameters

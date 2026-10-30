@@ -89,9 +89,9 @@ class TestExponentialDistribution(DistributionTestClass):
     def test_pdf_at_loc_equals_lambda(self, dist):
         assert np.isclose(dist.pdf(LOC), LAMBDA, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_invcdf_at_zero_is_loc_and_at_one_is_inf(self, dist):
-        assert np.isclose(dist.invcdf(0), LOC, atol=self.ATOL, rtol=self.RTOL)
-        assert dist.invcdf(1) == np.inf
+    def test_ppf_at_zero_is_loc_and_at_one_is_inf(self, dist):
+        assert np.isclose(dist.ppf(0), LOC, atol=self.ATOL, rtol=self.RTOL)
+        assert dist.ppf(1) == np.inf
 
     def test_memoryless_property(self, dist):
         s, t = 0.3, 0.8
@@ -99,20 +99,20 @@ class TestExponentialDistribution(DistributionTestClass):
         assert np.isclose(surv(LOC + s + t) / surv(LOC + s), surv(LOC + t), atol=self.ATOL, rtol=self.RTOL)
 
     def test_median(self, dist):
-        assert np.isclose(dist.invcdf(0.5), LOC + np.log(2) / LAMBDA, atol=self.ATOL, rtol=self.RTOL)
+        assert np.isclose(dist.ppf(0.5), LOC + np.log(2) / LAMBDA, atol=self.ATOL, rtol=self.RTOL)
 
     def test_get_bounds_default_delta(self, dist):
-        assert np.allclose(dist.get_bounds(), dist.invcdf([0.02, 0.98]), atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(dist.get_bounds(), dist.ppf([0.02, 0.98]), atol=self.ATOL, rtol=self.RTOL)
 
-    def test_base2dist(self):
+    def test_germ_to_dist(self):
         d = ExponentialDistribution(LAMBDA)
         y = np.linspace(0, 10, 50)
-        assert np.allclose(d.base2dist(y), y / LAMBDA, atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(d.germ_to_dist(y), y / LAMBDA, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_dist2base(self):
+    def test_dist_to_germ(self):
         d = ExponentialDistribution(LAMBDA)
         x = np.linspace(0, 10, 50)
-        assert np.allclose(d.dist2base(x), x * LAMBDA, atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(d.dist_to_germ(x), x * LAMBDA, atol=self.ATOL, rtol=self.RTOL)
 
     # =====================================================================
     # 3. Reference values
@@ -124,14 +124,14 @@ class TestExponentialDistribution(DistributionTestClass):
         q = np.linspace(0.01, 0.99, 50)
         assert np.allclose(d.pdf(x), expon.pdf(x, loc=loc, scale=1 / lambda_), atol=self.ATOL, rtol=self.RTOL)
         assert np.allclose(d.cdf(x), expon.cdf(x, loc=loc, scale=1 / lambda_), atol=self.ATOL, rtol=self.RTOL)
-        assert np.allclose(d.invcdf(q), expon.ppf(q, loc=loc, scale=1 / lambda_), atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(d.ppf(q), expon.ppf(q, loc=loc, scale=1 / lambda_), atol=self.ATOL, rtol=self.RTOL)
 
     def test_reference_values(self):
         d = ExponentialDistribution(2)
         x = np.array([0.0, 0.5, 1.0, 2.0])
         assert np.allclose(d.pdf(x), 2 * np.exp(-2 * x), atol=self.ATOL, rtol=self.RTOL)
         assert np.allclose(d.cdf(x), 1 - np.exp(-2 * x), atol=self.ATOL, rtol=self.RTOL)
-        assert np.allclose(d.invcdf([0.0, 0.5]), [0.0, np.log(2) / 2], atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(d.ppf([0.0, 0.5]), [0.0, np.log(2) / 2], atol=self.ATOL, rtol=self.RTOL)
 
     # =====================================================================
     # 4. Edge cases / invalid parameters
@@ -213,40 +213,40 @@ class TestExponentialDistribution(DistributionTestClass):
             dist.sample(8, method="unknown")
 
     # =====================================================================
-    # 7. translate / get_shift / get_scale
+    # 7. transform / get_shift / get_scale
     # =====================================================================
     @pytest.mark.parametrize("shift, scale", [(0, 1), (1, 2), (-3, 0.5), (2.5, 4), (0, 10), (-1, 1)])
-    def test_translate_maps_parameters_affinely(self, dist, shift, scale):
-        t = dist.translate(shift, scale)
+    def test_transform_maps_parameters_affinely(self, dist, shift, scale):
+        t = dist.transform(shift, scale)
         assert isinstance(t, ExponentialDistribution)
         assert np.isclose(t.lambda_, LAMBDA / scale, atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(t.loc, LOC * scale + shift, atol=self.ATOL, rtol=self.RTOL)
 
     @pytest.mark.parametrize("shift, scale", [(1, 2), (-3, 0.5), (2.5, 4)])
-    def test_translate_transforms_moments(self, dist, shift, scale):
-        t = dist.translate(shift, scale)
+    def test_transform_transforms_moments(self, dist, shift, scale):
+        t = dist.transform(shift, scale)
         assert np.isclose(t.mean(), scale * dist.mean() + shift, atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(t.var(), scale ** 2 * dist.var(), atol=self.ATOL, rtol=self.RTOL)
 
-    def test_translate_default_is_identity(self, dist):
-        assert dist.translate() == dist
+    def test_transform_default_is_identity(self, dist):
+        assert dist.transform() == dist
 
-    def test_translate_does_not_modify_original(self, dist):
-        dist.translate(3, 2)
+    def test_transform_does_not_modify_original(self, dist):
+        dist.transform(3, 2)
         assert (dist.lambda_, dist.loc) == (LAMBDA, LOC)
 
-    def test_translate_composition(self, dist):
-        t = dist.translate(1, 2).translate(-3, 0.5)
-        expected = dist.translate(0.5 * 1 - 3, 0.5 * 2)
+    def test_transform_composition(self, dist):
+        t = dist.transform(1, 2).transform(-3, 0.5)
+        expected = dist.transform(0.5 * 1 - 3, 0.5 * 2)
         assert np.allclose(t.get_dist_params(), expected.get_dist_params(), atol=self.ATOL, rtol=self.RTOL)
 
     @pytest.mark.parametrize(
         "shift, scale",
         [(0, 0), (0, -1), (np.inf, 1), (0, np.inf), ("a", 1), (0, "b"), (None, 1), (np.nan, 1)],
     )
-    def test_translate_invalid_raises(self, dist, shift, scale):
+    def test_transform_invalid_raises(self, dist, shift, scale):
         with pytest.raises(ValueError):
-            dist.translate(shift, scale)
+            dist.transform(shift, scale)
 
     @pytest.mark.parametrize("lambda_, loc", [(1, 0), (LAMBDA, LOC), (0.25, -3.5)])
     def test_get_shift_and_scale(self, lambda_, loc):
@@ -255,8 +255,8 @@ class TestExponentialDistribution(DistributionTestClass):
         assert np.isclose(d.get_scale(), 1 / lambda_, atol=self.ATOL, rtol=self.RTOL)
 
     @pytest.mark.parametrize("shift, scale", [(1, 2), (-3, 0.5), (2.5, 4)])
-    def test_get_shift_scale_after_translate(self, dist, shift, scale):
-        t = dist.translate(shift, scale)
+    def test_get_shift_scale_after_transform(self, dist, shift, scale):
+        t = dist.transform(shift, scale)
         assert np.isclose(t.get_scale(), scale * dist.get_scale(), atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(t.get_shift(), scale * dist.get_shift() + shift, atol=self.ATOL, rtol=self.RTOL)
 
@@ -331,14 +331,14 @@ class TestExponentialDistribution(DistributionTestClass):
     def test_fix_bounds_default_quantiles(self, dist, new_min, new_max):
         new = dist.fix_bounds(new_min, new_max)
         assert isinstance(new, ExponentialDistribution)
-        assert np.isclose(new.invcdf(0), new_min, atol=1e-8)
-        assert np.isclose(new.invcdf(0.98), new_max, atol=1e-8)
+        assert np.isclose(new.ppf(0), new_min, atol=1e-8)
+        assert np.isclose(new.ppf(0.98), new_max, atol=1e-8)
 
     @pytest.mark.parametrize("q0, q1", [(0.1, 0.9), (0.25, 0.75), (0, 0.5), (0.5, 0.99)])
     def test_fix_bounds_with_quantiles(self, dist, q0, q1):
         new = dist.fix_bounds(10, 20, q0, q1)
-        assert np.isclose(new.invcdf(q0), 10, atol=1e-8)
-        assert np.isclose(new.invcdf(q1), 20, atol=1e-8)
+        assert np.isclose(new.ppf(q0), 10, atol=1e-8)
+        assert np.isclose(new.ppf(q1), 20, atol=1e-8)
 
     @pytest.mark.parametrize(
         "args, kwargs",
@@ -361,27 +361,27 @@ class TestExponentialDistribution(DistributionTestClass):
     # 10. GPC related functions
     # =====================================================================
     @pytest.mark.parametrize("lambda_, loc", [(1, 0), (LAMBDA, LOC), (0.25, -3)])
-    def test_get_base_dist_is_unit_rate_exponential(self, lambda_, loc):
-        germ = ExponentialDistribution(lambda_, loc).get_base_dist()
+    def test_gpc_dist_is_unit_rate_exponential(self, lambda_, loc):
+        germ = ExponentialDistribution(lambda_, loc).gpc_dist()
         assert isinstance(germ, ExponentialDistribution)
         assert germ == ExponentialDistribution(1, 0)
 
-    def test_orth_polysys_is_laguerre(self):
+    def test_gpc_polysys_is_laguerre(self):
         d1 = ExponentialDistribution(1)
         d2 = ExponentialDistribution(LAMBDA)
-        assert isinstance(d1.orth_polysys(), LaguerrePolynomials)
+        assert isinstance(d1.gpc_polysys(), LaguerrePolynomials)
         with pytest.raises(Exception):
-            d2.orth_polysys()
+            d2.gpc_polysys()
 
-    def test_orth_polysys_syschar_is_l(self):
+    def test_gpc_syschar_is_l(self):
         d1 = ExponentialDistribution(1)
         d2 = ExponentialDistribution(LAMBDA)
-        assert d1.orth_polysys_syschar(False) == "L"
-        assert d1.orth_polysys_syschar(True) == "l"
+        assert d1.gpc_syschar(False) == "L"
+        assert d1.gpc_syschar(True) == "l"
         with pytest.raises(Exception):
-            d2.orth_polysys_syschar(False)
+            d2.gpc_syschar(False)
         with pytest.raises(Exception):
-            d2.orth_polysys_syschar(True)
+            d2.gpc_syschar(True)
 
     # =====================================================================
     # 11. Unit conversions

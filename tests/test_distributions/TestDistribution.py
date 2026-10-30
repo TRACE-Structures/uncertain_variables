@@ -50,18 +50,18 @@ class TestDistribution:
 
     @pytest.mark.parametrize("name", ["pdf", "cdf", "logpdf"])
     def test_vector_input_returns_vector_of_same_shape(self, dist, name):
-        x = dist.invcdf(np.array([0.1, 0.3, 0.5, 0.7, 0.9]))
+        x = dist.ppf(np.array([0.1, 0.3, 0.5, 0.7, 0.9]))
         out = np.asarray(getattr(dist, name)(x))
         assert out.shape == x.shape
 
-    def test_invcdf_scalar_input_returns_scalar(self, dist):
+    def test_ppf_scalar_input_returns_scalar(self, dist):
         y = 0.5
-        x = dist.invcdf(y)
+        x = dist.ppf(y)
         assert np.isscalar(x)
 
-    def test_invcdf_vector_input_returns_vector_of_same_shape(self, dist):
+    def test_ppf_vector_input_returns_vector_of_same_shape(self, dist):
         y = np.array([0.1, 0.3, 0.5, 0.7, 0.9])
-        x = dist.invcdf(y)
+        x = dist.ppf(y)
         out = np.asarray(x)
         assert out.shape == y.shape
 
@@ -83,7 +83,7 @@ class TestDistribution:
     # 2. Mathematical identities
     # =====================================================================
     def test_pdf_is_nonnegative(self, dist):
-        x = dist.invcdf(np.linspace(0.001, 0.999, 201))
+        x = dist.ppf(np.linspace(0.001, 0.999, 201))
         pdf_values = np.asarray(dist.pdf(x))
         assert np.all(np.isfinite(pdf_values))
         assert np.all(pdf_values >= 0)
@@ -95,11 +95,11 @@ class TestDistribution:
     def test_cdf_is_the_integral_of_the_pdf(self, dist, support):
         lo, _ = support
         for q in (0.25, 0.5, 0.9):
-            x = dist.invcdf(q)
+            x = dist.ppf(q)
             assert np.isclose(self._quad(dist.pdf, lo, x), float(dist.cdf(x)), rtol=self.QUAD_RTOL, atol=self.QUAD_ATOL)
 
     def test_cdf_is_monotone_and_in_unit_interval(self, dist):
-        x = dist.invcdf(np.linspace(0.001, 0.999, 201))
+        x = dist.ppf(np.linspace(0.001, 0.999, 201))
         F = np.asarray(dist.cdf(x))
         assert np.all(np.diff(F) >= -self.ATOL)
         assert np.all((F >= 0) & (F <= 1))
@@ -111,17 +111,17 @@ class TestDistribution:
         assert np.isclose(dist.cdf(-np.inf), 0.0, rtol=self.RTOL, atol=self.ATOL)
         assert np.isclose(dist.cdf(np.inf), 1.0, rtol=self.RTOL, atol=self.ATOL)
 
-    def test_invcdf_inverts_cdf(self, dist):
+    def test_ppf_inverts_cdf(self, dist):
         q = np.linspace(0.01, 0.99, 50)
-        assert np.allclose(dist.cdf(dist.invcdf(q)), q, atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(dist.cdf(dist.ppf(q)), q, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_cdf_inverts_invcdf(self, dist):
+    def test_cdf_inverts_ppf(self, dist):
         q = np.linspace(0.01, 0.99, 50)
-        points = dist.invcdf(q)
-        assert np.allclose(dist.invcdf(dist.cdf(points)), points, atol=self.ATOL, rtol=self.RTOL)
+        points = dist.ppf(q)
+        assert np.allclose(dist.ppf(dist.cdf(points)), points, atol=self.ATOL, rtol=self.RTOL)
 
     def test_logpdf_is_log_of_pdf(self, dist):
-        x = dist.invcdf(np.linspace(0.01, 0.99, 50))
+        x = dist.ppf(np.linspace(0.01, 0.99, 50))
         with np.errstate(divide="ignore"):
             assert np.allclose(
                 np.asarray(dist.logpdf(x)),
@@ -154,29 +154,29 @@ class TestDistribution:
     def test_fix_bounds(self, dist):
         q0, q1 = 0.01, 0.99
         new = dist.fix_bounds(-1.0, 1.0, q0=q0, q1=q1)
-        assert np.isclose(new.invcdf(q0), -1.0, rtol=self.RTOL, atol=self.ATOL)
-        assert np.isclose(new.invcdf(q1), 1.0, rtol=self.RTOL, atol=self.ATOL)
+        assert np.isclose(new.ppf(q0), -1.0, rtol=self.RTOL, atol=self.ATOL)
+        assert np.isclose(new.ppf(q1), 1.0, rtol=self.RTOL, atol=self.ATOL)
 
-    def test_stdnor_roundtrip(self, dist):
+    def test_stdnor_to_dist_roundtrip(self, dist):
         q = np.linspace(-2.5, 2.5, 50)
-        transformed = dist.stdnor2base(q)
-        assert np.allclose(dist.base2stdnor(transformed), q, atol=self.ATOL, rtol=self.RTOL)
+        transformed = dist.stdnor_to_dist(q)
+        assert np.allclose(dist.dist_to_stdnor(transformed), q, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_stdnor2base_matches_scipy(self, dist):
+    def test_stdnor_to_dist_matches_scipy(self, dist):
         q = np.linspace(-2.5, 2.5, 50)
-        transformed = dist.stdnor2base(q)
-        expected = dist.invcdf(norm.cdf(q))
+        transformed = dist.stdnor_to_dist(q)
+        expected = dist.ppf(norm.cdf(q))
         assert np.allclose(transformed, expected, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_base2stdnor_matches_scipy(self, dist):
-        q = dist.invcdf(np.linspace(0.001, 0.999, 50))
-        transformed = dist.base2stdnor(q)
+    def test_dist_to_stdnor_matches_scipy(self, dist):
+        q = dist.ppf(np.linspace(0.001, 0.999, 50))
+        transformed = dist.dist_to_stdnor(q)
         expected = norm.ppf(dist.cdf(q))
         assert np.allclose(transformed, expected, atol=self.ATOL, rtol=self.RTOL)
 
     def test_get_bounds_are_the_delta_quantiles(self, dist):
         delta = 0.01
-        expected = dist.invcdf([delta, 1 - delta])
+        expected = dist.ppf([delta, 1 - delta])
         assert np.allclose(dist.get_bounds(delta), expected, rtol=self.RTOL, atol=self.ATOL)
 
     @pytest.mark.parametrize("method", SAMPLE_METHODS)

@@ -170,18 +170,18 @@ class NormalDistribution(Distribution):
         y = norm.cdf(x, loc=self.loc, scale=self.scale)
         return y
 
-    def invcdf(self, y):
-        """ Return the inverse cumulative distribution function of the normal distribution, evaluated at y.
+    def ppf(self, y):
+        """ Return the percentage point function (inverse of cdf) of the normal distribution, evaluated at y.
         
             Parameters
             ----------
             y : array_like
-                Points at which to evaluate the invcdf.
+                Points at which to evaluate the PPF.
                 
             Returns
             -------
             x : array_like
-                Inverse cumulative distribution function values at y."""
+                PPF values evaluated at y."""
         
         # mu = self.mu
         # sigma = self.sigma
@@ -276,10 +276,10 @@ class NormalDistribution(Distribution):
             raise ValueError("Number of samples must be a finite value.")
 
         y = UniformDistribution(0, 1).sample(n, method, seed=seed)
-        samples = self.invcdf(y)
+        samples = self.ppf(y)
         return samples
 
-    def translate(self, shift=0, scale=1):
+    def transform(self, shift=0, scale=1):
         """ Return a translated and scaled normal distribution.
 
             The transformation is defined as
@@ -354,7 +354,7 @@ class NormalDistribution(Distribution):
             Returns
             -------
             new_dist : NormalDistribution
-                        Translated and scaled normal distribution with specified moments."""
+                Translated and scaled normal distribution with specified moments."""
 
         if not (isinstance(mean, (int, float, np.number))):
             raise ValueError("Mean must be a numeric value.")
@@ -369,16 +369,16 @@ class NormalDistribution(Distribution):
         new_scale = np.sqrt(var)
         return NormalDistribution(new_loc, new_scale)
     
-    def get_base_dist(self):
-        """ Return the GPC base distribution for the normal distribution.
+    def gpc_dist(self):
+        """ Return the GPC germ distribution for the normal distribution.
 
             Returns
             -------
-            dist_germ : NormalDistribution
-                GPC base distribution."""
+            germ_dist : NormalDistribution
+                GPC germ distribution."""
         
-        dist_germ = NormalDistribution(0, 1)
-        return dist_germ
+        germ_dist = NormalDistribution(0, 1)
+        return germ_dist
 
     # def base2dist(self, y):
     #     """ Convert from base (germ) space to normal distribution space.
@@ -414,7 +414,7 @@ class NormalDistribution(Distribution):
     #     y = (x - self.mu) / self.sigma
     #     return y
 
-    def orth_polysys(self):
+    def gpc_polysys(self):
         """ Return the GPC polynomial system for the normal distribution.
         
             Returns
@@ -438,7 +438,7 @@ class NormalDistribution(Distribution):
         else:
             raise Exception(f"No polynomial system for this distribution ({self})")
 
-    def orth_polysys_syschar(self, normalized):
+    def gpc_syschar(self, normalized):
         """ Return the GPC polynomial system characteristic string for the normal distribution.
         
             Parameters

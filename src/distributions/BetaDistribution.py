@@ -168,18 +168,18 @@ class BetaDistribution(Distribution):
         y = beta.cdf(x, self.a, self.b, scale=self.scale, loc=self.loc)
         return y
 
-    def invcdf(self, y):
-        """ Return the inverse cumulative distribution function of the beta distribution, evaluated at y.
+    def ppf(self, y):
+        """ Return the percentage point function (inverse of cdf) of the beta distribution, evaluated at y.
             
             Parameters
             ----------
             y : array_like
-                Points at which to evaluate the invcdf.
+                Points at which to evaluate the PPF.
                 
             Returns
             -------
             x : array_like
-                Inverse cumulative distribution function values at y."""
+                PPF values evaluated at y."""
         
         # TODO implementing the Matlab code
         # y = np.array(y)
@@ -275,7 +275,7 @@ class BetaDistribution(Distribution):
         return kurt
 
     def sample(self, n, method="MC", seed=None): 
-        """Return n samples from the beta distribution.
+        """ Return n samples from the beta distribution.
 
             Parameters
             ----------
@@ -302,10 +302,10 @@ class BetaDistribution(Distribution):
             raise ValueError("Number of samples must be a finite value.")
 
         y = UniformDistribution(0, 1).sample(n, method, seed=seed)
-        samples = self.invcdf(y)
+        samples = self.ppf(y)
         return samples
 
-    def translate(self, shift=0, scale=1):
+    def transform(self, shift=0, scale=1):
         """ Return a translated and scaled beta distribution.
 
             The transformation is defined as
@@ -412,25 +412,25 @@ class BetaDistribution(Distribution):
 
         return BetaDistribution(a, b, scale=scale, loc=loc)
 
-    def get_base_dist(self, a, b):
-        """ Return the GPC base distribution for the beta distribution.
+    def gpc_dist(self, a, b):
+        """ Return the GPC germ distribution for the beta distribution.
 
             Parameters
             ----------
             a : float
-                First positive shape parameter of the base beta distribution.
+                First positive shape parameter of the germ beta distribution.
 
             b : float
-                Second positive shape parameter of the base beta distribution.
+                Second positive shape parameter of the germ beta distribution.
 
             Returns
             -------
-            dist_germ : BetaDistribution
-                Beta distribution with shape parameters ``a`` and ``b`` on
+            germ_dist : BetaDistribution
+                Beta germ distribution with shape parameters ``a`` and ``b`` on
                 the standard interval ``[-1, 1]``."""
         
-        dist_germ = BetaDistribution(a, b, scale=2, loc=-1)
-        return dist_germ
+        germ_dist = BetaDistribution(a, b, scale=2, loc=-1)
+        return germ_dist
 
     # def base2dist(self, y):
     #     """ Convert from base (germ) space to beta distribution space.
@@ -464,7 +464,7 @@ class BetaDistribution(Distribution):
     #     y = x
     #     return y
 
-    def orth_polysys(self):
+    def gpc_polysys(self):
         """ Return the GPC polynomial system for the beta distribution.
 
             Returns
@@ -484,7 +484,7 @@ class BetaDistribution(Distribution):
         else:
             raise Exception(f"No polynomial system for this distribution ({self})") 
 
-    def orth_polysys_syschar(self, normalized):
+    def gpc_syschar(self, normalized):
         """ Return the GPC polynomial system characteristic string for the beta distribution.
 
             Parameters

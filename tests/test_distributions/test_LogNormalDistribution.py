@@ -88,19 +88,19 @@ class TestLogNormalDistribution(DistributionTestClass):
 
     def test_median_is_loc_plus_exp_mu(self):
         d = LogNormalDistribution(MU, SIGMA, LOC)
-        assert np.isclose(d.invcdf(0.5), LOC + np.exp(MU), atol=self.ATOL, rtol=self.RTOL)
+        assert np.isclose(d.ppf(0.5), LOC + np.exp(MU), atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(d.cdf(LOC + np.exp(MU)), 0.5, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_invcdf_endpoints(self, dist):
-        assert np.isclose(dist.invcdf(0), 0, atol=self.ATOL, rtol=self.RTOL)
-        assert dist.invcdf(1) == np.inf
+    def test_ppf_endpoints(self, dist):
+        assert np.isclose(dist.ppf(0), 0, atol=self.ATOL, rtol=self.RTOL)
+        assert dist.ppf(1) == np.inf
 
-    def test_invcdf_outside_unit_interval_is_nan(self, dist):
-        assert np.isnan(dist.invcdf(-0.1))
-        assert np.isnan(dist.invcdf(1.1))
+    def test_ppf_outside_unit_interval_is_nan(self, dist):
+        assert np.isnan(dist.ppf(-0.1))
+        assert np.isnan(dist.ppf(1.1))
 
     def test_get_bounds_default_delta(self, dist):
-        assert np.allclose(dist.get_bounds(), dist.invcdf([0.02, 0.98]), atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(dist.get_bounds(), dist.ppf([0.02, 0.98]), atol=self.ATOL, rtol=self.RTOL)
 
     def test_get_bounds_at_zero_and_one(self):
         bounds = LogNormalDistribution(0.4, 0.5, LOC).get_bounds(delta=0)
@@ -114,7 +114,7 @@ class TestLogNormalDistribution(DistributionTestClass):
         "mu, sigma, loc",
         [(0, 1, 0), (MU, SIGMA, LOC), (-1, 0.3, -2), (2, 0.8, 0)],
     )
-    def test_pdf_cdf_and_invcdf_match_scipy(self, mu, sigma, loc):
+    def test_pdf_cdf_and_ppf_match_scipy(self, mu, sigma, loc):
         d = LogNormalDistribution(mu, sigma, loc)
         x = loc + np.exp(np.linspace(mu - 1.5 * sigma, mu + 1.5 * sigma, 40))
         q = np.linspace(0.01, 0.99, 40)
@@ -127,7 +127,7 @@ class TestLogNormalDistribution(DistributionTestClass):
             atol=self.ATOL, rtol=self.RTOL,
         )
         assert np.allclose(
-            d.invcdf(q), lognorm.ppf(q, s=sigma, scale=np.exp(mu), loc=loc),
+            d.ppf(q), lognorm.ppf(q, s=sigma, scale=np.exp(mu), loc=loc),
             atol=self.ATOL, rtol=self.RTOL,
         )
 
@@ -233,48 +233,48 @@ class TestLogNormalDistribution(DistributionTestClass):
             LogNormalDistribution().sample(8, method="unknown")
 
     # =====================================================================
-    # 7. translate / get_shift / get_scale
+    # 7. transform / get_shift / get_scale
     # =====================================================================
     @pytest.mark.parametrize("shift, scale", [(0, 1), (1, 2), (-3, 0.5), (2.5, 4), (0, 10), (-1, 1)])
-    def test_translate_maps_parameters_affinely(self, shift, scale):
+    def test_transform_maps_parameters_affinely(self, shift, scale):
         d = LogNormalDistribution(MU, SIGMA, LOC)
-        translated = d.translate(shift, scale)
+        translated = d.transform(shift, scale)
         assert isinstance(translated, LogNormalDistribution)
         assert np.isclose(translated.mu, MU + np.log(scale), atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(translated.sigma, SIGMA, atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(translated.loc, LOC * scale + shift, atol=self.ATOL, rtol=self.RTOL)
 
     @pytest.mark.parametrize("shift, scale", [(1, 2), (-3, 0.5), (2.5, 4)])
-    def test_translate_transforms_moments(self, shift, scale):
+    def test_transform_transforms_moments(self, shift, scale):
         d = LogNormalDistribution(MU, SIGMA, LOC)
-        translated = d.translate(shift, scale)
+        translated = d.transform(shift, scale)
         assert np.isclose(translated.mean(), scale * d.mean() + shift, atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(translated.var(), scale ** 2 * d.var(), atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(translated.skew(), d.skew(), atol=self.ATOL, rtol=self.RTOL)
         assert np.isclose(translated.kurt(), d.kurt(), atol=self.ATOL, rtol=self.RTOL)
 
-    def test_translate_default_is_identity(self):
+    def test_transform_default_is_identity(self):
         d = LogNormalDistribution(MU, SIGMA, LOC)
-        assert d.translate() == d
+        assert d.transform() == d
 
-    def test_translate_does_not_modify_original(self):
+    def test_transform_does_not_modify_original(self):
         d = LogNormalDistribution(MU, SIGMA, LOC)
-        d.translate(3, 2)
+        d.transform(3, 2)
         assert (d.mu, d.sigma, d.loc) == (MU, SIGMA, LOC)
 
-    def test_translate_composition(self):
+    def test_transform_composition(self):
         d = LogNormalDistribution(MU, SIGMA, LOC)
-        translated = d.translate(1, 2).translate(-3, 0.5)
-        expected = d.translate(0.5 * 1 - 3, 0.5 * 2)
+        translated = d.transform(1, 2).transform(-3, 0.5)
+        expected = d.transform(0.5 * 1 - 3, 0.5 * 2)
         assert np.allclose(translated.get_dist_params(), expected.get_dist_params(), atol=self.ATOL, rtol=self.RTOL)
 
     @pytest.mark.parametrize(
         "shift, scale",
         [(0, 0), (0, -1), (np.inf, 1), (0, np.inf), ("a", 1), (0, "b"), (None, 1), (np.nan, 1)],
     )
-    def test_translate_invalid_raises(self, shift, scale):
+    def test_transform_invalid_raises(self, shift, scale):
         with pytest.raises(ValueError):
-            LogNormalDistribution(MU, SIGMA, LOC).translate(shift, scale)
+            LogNormalDistribution(MU, SIGMA, LOC).transform(shift, scale)
 
     @pytest.mark.parametrize("mu, sigma, loc", [(0, 1, 0), (MU, SIGMA, LOC), (-2, 0.25, -3.5)])
     def test_get_shift_and_scale(self, mu, sigma, loc):
@@ -337,14 +337,14 @@ class TestLogNormalDistribution(DistributionTestClass):
     def test_fix_bounds_default_quantiles(self, dist, new_min, new_max):
         new = dist.fix_bounds(new_min, new_max)
         assert isinstance(new, LogNormalDistribution)
-        assert np.isclose(new.invcdf(0), new_min, atol=1e-8)
-        assert np.isclose(new.invcdf(0.98), new_max, atol=1e-8)
+        assert np.isclose(new.ppf(0), new_min, atol=1e-8)
+        assert np.isclose(new.ppf(0.98), new_max, atol=1e-8)
 
     @pytest.mark.parametrize("q0, q1", [(0.1, 0.9), (0.25, 0.75), (0.01, 0.5), (0.5, 0.99)])
     def test_fix_bounds_with_quantiles(self, dist, q0, q1):
         new = dist.fix_bounds(10, 20, q0, q1)
-        assert np.isclose(new.invcdf(q0), 10, atol=1e-8)
-        assert np.isclose(new.invcdf(q1), 20, atol=1e-8)
+        assert np.isclose(new.ppf(q0), 10, atol=1e-8)
+        assert np.isclose(new.ppf(q1), 20, atol=1e-8)
 
     @pytest.mark.parametrize(
         "args, kwargs",
@@ -361,25 +361,25 @@ class TestLogNormalDistribution(DistributionTestClass):
     # =====================================================================
     # 10. GPC related functions
     # =====================================================================
-    def test_get_base_dist_is_not_available(self, dist):
+    def test_gpc_dist_is_not_available(self, dist):
         with pytest.raises(Exception):
-            dist.get_base_dist()
+            dist.gpc_dist()
 
-    def test_base2dist_and_dist2base_require_a_base_distribution(self, dist):
+    def test_germ_conversions_require_a_gpc_distribution(self, dist):
         with pytest.raises(Exception):
-            dist.base2dist(0.5)
+            dist.germ_to_dist(0.5)
         with pytest.raises(Exception):
-            dist.dist2base(1.0)
+            dist.dist_to_germ(1.0)
 
     @pytest.mark.parametrize("mu, sigma, loc", [(0, 1, 0), (MU, SIGMA, LOC), (-1, 0.25, -2)])
-    def test_orth_polysys_invalid_raises(self, mu, sigma, loc):
+    def test_gpc_polysys_invalid_raises(self, mu, sigma, loc):
         with pytest.raises(Exception):
-            LogNormalDistribution(mu, sigma, loc).orth_polysys()
+            LogNormalDistribution(mu, sigma, loc).gpc_polysys()
 
     @pytest.mark.parametrize("normalized", [False, True])
-    def test_orth_polysys_syschar_invalid_raises(self, normalized):
+    def test_gpc_syschar_invalid_raises(self, normalized):
         with pytest.raises(Exception):
-            LogNormalDistribution().orth_polysys_syschar(normalized)
+            LogNormalDistribution().gpc_syschar(normalized)
 
     # =====================================================================
     # 11. Unit conversions
