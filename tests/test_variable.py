@@ -22,6 +22,16 @@ class TestVariable:
         assert isinstance(random_variable.dist, NormalDistribution)
         assert random_variable.unit is None
 
+    @pytest.mark.parametrize("name", [None, 1, object()])
+    def test_init_rejects_non_string_name(self, name):
+        with pytest.raises(TypeError, match="name must be a string"):
+            Variable(name, NormalDistribution())
+
+    @pytest.mark.parametrize("unit", [1, object()])
+    def test_init_rejects_non_string_unit(self, unit):
+        with pytest.raises(TypeError, match="unit must be a string or None"):
+            Variable("x", NormalDistribution(), unit=unit)
+
     @pytest.mark.parametrize(
         "value",
         [
@@ -79,6 +89,9 @@ class TestVariable:
         points = np.array([6.0, 10.0, 14.0])
         probabilities = np.array([0.1, 0.5, 0.9])
         assert np.allclose(random_variable.pdf(points), random_variable.dist.pdf(points))
+        assert np.allclose(
+            random_variable.logpdf(points), random_variable.dist.logpdf(points)
+        )
         assert np.allclose(random_variable.cdf(points), random_variable.dist.cdf(points))
         assert np.allclose(
             random_variable.ppf(probabilities),
@@ -100,6 +113,61 @@ class TestVariable:
         second = random_variable.sample(20, method="MC", seed=42)
         assert np.asarray(first).shape == (20,)
         assert np.array_equal(first, second)
+
+    @pytest.mark.parametrize("method", ["MC", "QMC_Halton", "QMC_LHS", "QMC_Sobol"])
+    def test_sample_methods_return_requested_count(self, random_variable, method):
+        samples = random_variable.sample(7, method=method, seed=10)
+
+        assert np.asarray(samples).shape == (7,)
+        assert np.all(np.isfinite(samples))
+
+    @pytest.mark.parametrize("n", [0, -1, 1.5, True])
+    def test_sample_rejects_invalid_count(self, random_variable, n):
+        with pytest.raises(ValueError, match="positive integer"):
+            random_variable.sample(n)
+
+    def test_sample_rejects_invalid_seed(self, random_variable):
+        with pytest.raises(ValueError, match="seed must be an integer"):
+            random_variable.sample(2, seed="1")
+
+    def test_transform_returns_changed_distribution_without_mutating_variable(
+        self, random_variable
+    ):
+        transformed = random_variable.transform(shift=3, scale=2)
+
+        assert transformed.mean() == pytest.approx(23)
+        assert transformed.var() == pytest.approx(16)
+        assert random_variable.mean() == pytest.approx(10)
+
+    def test_fix_moments_returns_distribution_with_requested_moments(self):
+        variable = Variable("x", NormalDistribution())
+
+        fixed = variable.fix_moments(mean=5, var=9)
+
+        assert fixed.mean() == pytest.approx(5)
+        assert fixed.var() == pytest.approx(9)
+        assert variable.mean() == pytest.approx(0)
+
+    def test_get_shift_and_scale(self, random_variable):
+        assert random_variable.get_shift() == pytest.approx(10)
+        assert random_variable.get_scale() == pytest.approx(2)
+
+    def test_get_bounds_and_fix_bounds(self):
+        variable = Variable("x", ArcsineDistribution(scale=2, loc=-1))
+
+        np.testing.assert_allclose(variable.get_bounds(delta=0), [-1, 1])
+        fixed = variable.fix_bounds(new_min=0, new_max=4)
+        np.testing.assert_allclose(fixed.get_bounds(delta=0), [0, 4])
+
+    def test_get_gpc_polysys_and_germ_transforms(self):
+        variable = Variable("x", NormalDistribution())
+        germ_points = np.array([-1.0, 0.0, 1.0])
+
+        assert variable.get_gpc_polysys() is not None
+        np.testing.assert_allclose(
+            variable.germ_to_stdnor(variable.stdnor_to_germ(germ_points)),
+            germ_points,
+        )
 
     # =====================================================================
     # 4. Polynomial-chaos and germ-space helpers
@@ -124,6 +192,26 @@ class TestVariable:
         recovered = arcsine_variable.dist_to_germ(variable_points)
         assert np.allclose(recovered, germ_points)
 
+    def test_rename_and_add_unit(self, random_variable):
+        random_variable.rename("temperature_celsius")
+        random_variable.add_unit("degC")
+
+        assert random_variable.name == "temperature_celsius"
+        assert random_variable.unit == "degC"
+        with pytest.raises(ValueError, match="already has a unit"):
+            random_variable.add_unit("K")
+
+    def test_copy_is_independent_of_original(self, random_variable):
+        copied = random_variable.copy()
+        copied.rename("copied")
+        copied.dist.mu = -5
+        copied.dist.loc = -5
+
+        assert copied.name == "copied"
+        assert copied.mean() == -5
+        assert random_variable.name == "temperature"
+        assert random_variable.mean() == 10
+
     # =====================================================================
     # 5. Unit conversion
     # =====================================================================
@@ -144,9 +232,9 @@ class TestVariable:
 
     def test_convert_without_source_unit_raises(self):
         variable = Variable("x", NormalDistribution())
-        report = variable.convert_to("cm")
-        assert variable.unit == "cm"
-        assert report == "Converted from None to cm."
+        with pytest.raises(ValueError, match="no source unit"):
+            variable.convert_to("cm")
+        assert variable.unit is None
 
     def test_incompatible_random_unit_conversion_does_not_change_variable_unit(self):
         variable = Variable("x", ArcsineDistribution(scale=2, loc=-1), unit="m")

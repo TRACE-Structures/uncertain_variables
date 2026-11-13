@@ -8,7 +8,7 @@ from src.variable import Variable
 # from scipy.stats.qmc import LatinHypercube as LHS
 # from scipy.stats.qmc import Sobol
 # from SALib.sample import saltelli
-from SALib.sample import sobol
+from SALib.sample import sobol 
 
 class VariableSet():
     """ VariableSet class for managing a set of simulation variables.
@@ -21,19 +21,26 @@ class VariableSet():
         variables : dict
             Dictionary of variable names and their corresponding Variable objects."""
         
-    def __init__(self, normalized=True):
+    def __init__(self, variables=None, normalized=True):
         """ Initialize an empty VariableSet.
 
             Parameters
             ----------
-            normalized : bool
+            variables : list of Variable, optional
+                List of Variable objects to initialize the VariableSet with. Default is None.
+
+            normalized : bool, optional
                 Flag indicating whether the variables are normalized. Default is True."""
+        
 
         if not isinstance(normalized, bool):
             raise TypeError("normalized must be a boolean")
         
         self.normalized = normalized
         self.variables = {}
+        if variables is not None:
+            for variable in variables:
+                self.add(variable)
 
     def __repr__(self):
         """ Returns the string representation of the VariableSet object.
@@ -142,17 +149,22 @@ class VariableSet():
                 If a dictionary is provided, the keys should be variable names and the values should be Variable objects."""
 
         if isinstance(variables, Variable):
-            self.add(variable=variables)
+            updates = {variables.name: variables}
         elif isinstance(variables, VariableSet):
-            for var in variables.variables.values():
-                self.add(variable=var)
+            updates = {
+                variable.name: variable
+                for variable in variables.variables.values()
+            }
         elif isinstance(variables, dict):
-            for name, var in variables.items():
-                if not isinstance(var, Variable) or not isinstance(name, str):
+            updates = {}
+            for name, variable in variables.items():
+                if not isinstance(variable, Variable) or not isinstance(name, str):
                     raise TypeError("All keys must be strings and all values in the dictionary must be instances of Variable")
-                self.add(variable=var)
+                updates[variable.name] = variable
         else:
             raise TypeError("variables must be an instance of Variable, VariableSet or a dictionary")
+
+        self.variables.update(updates)
 
     def rename(self, old_names, new_names):
         """ Rename a variable or variables in the VariableSet.
@@ -178,6 +190,10 @@ class VariableSet():
 
         if len(old_names) != len(new_names):
             raise ValueError("old_names and new_names must have the same length")
+        if len(set(old_names)) != len(old_names):
+            raise ValueError("old_names must not contain duplicates")
+        if len(set(new_names)) != len(new_names):
+            raise ValueError("new_names must not contain duplicates")
 
         for old_name, new_name in zip(old_names, new_names):
             if old_name not in self.variables:
@@ -198,7 +214,7 @@ class VariableSet():
             VariableSet
                 A new VariableSet instance with copies of all variables in the current VariableSet."""
 
-        new_vs = VariableSet()
+        new_vs = VariableSet(normalized=self.normalized)
         for var in self.variables.values():
             new_vs.add(variable=var.copy())
         return new_vs
@@ -212,7 +228,7 @@ class VariableSet():
             variable_names: array_like
                 An array of variable names in the VariableSet."""
 
-        variable_names = np.array(self.variables.keys())
+        variable_names = list(self.variables.keys())
         return variable_names
 
     def get_variables(self):
@@ -279,6 +295,8 @@ class VariableSet():
 
         if not isinstance(x, np.ndarray):
             raise ValueError("x must be a numpy.ndarray")
+        if x.ndim != 2:
+            raise ValueError("x must have shape (num_variables, num_points)")
         if not isinstance(marginal, bool):
             raise ValueError("marginal must be a boolean")
 
@@ -317,6 +335,8 @@ class VariableSet():
 
         if not isinstance(x, np.ndarray):
             raise ValueError("x must be a numpy.ndarray")
+        if x.ndim != 2:
+            raise ValueError("x must have shape (num_variables, num_points)")
         if not isinstance(marginal, bool):
             raise ValueError("marginal must be a boolean")
 
@@ -355,6 +375,8 @@ class VariableSet():
 
         if not isinstance(x, np.ndarray):
             raise ValueError("x must be a numpy.ndarray")
+        if x.ndim != 2:
+            raise ValueError("x must have shape (num_variables, num_points)")
         if not isinstance(marginal, bool):
             raise ValueError("marginal must be a boolean")
 
@@ -392,6 +414,8 @@ class VariableSet():
                 Shape should be (m, n) where m is the number of variables and n is the number of points."""
         if not isinstance(y, np.ndarray):
             raise ValueError("y must be a numpy.ndarray")
+        if y.ndim != 2:
+            raise ValueError("y must have shape (num_variables, num_points)")
 
         m = len(self)
         n = y.shape[1]
@@ -453,55 +477,131 @@ class VariableSet():
         moments = {name: var.moments() for name, var in self.variables.items()}
         return moments
 
-    def sample(self, n, method='MC', random_seed=None, **kwargs):
-        """ Generate samples from the VariableSet using specified sampling method.
+    # def sample(self, n, method='MC', random_seed=None, **kwargs):
+    #     """ Generate samples from the VariableSet using specified sampling method.
             
+    #         Parameters
+    #         ----------
+    #         n: int
+    #             Number of samples to generate.
+
+    #         method: {'MC', 'QMC_Halton', 'QMC_LHS', 'QMC_Sobol', 'Sobol_saltelli'}, default='MC'
+    #             Sampling method to use. Options: 'MC' (Monte Carlo), 'QMC_Halton' (Quasi-Monte Carlo Halton), 
+    #             'QMC_LHS' (Quasi-Monte Carlo Latin Hypercube), 'QMC_Sobol' (Quasi-Monte Carlo Sobol), 
+    #             'Sobol_saltelli' (Sobol sampling using SALib Saltelli method). Default is 'MC'.
+
+    #         random_seed: int or None
+    #             Random seed for reproducibility. Default is None.
+
+    #         **kwargs:
+    #             Additional keyword arguments for specific sampling methods.
+                
+    #         Returns
+    #         -------
+    #         q_i_k: numpy.ndarray
+    #             Array of shape (n, m) containing the generated samples in parameter space."""               
+        
+    #     m = self.num_variables()
+    #     q_i_k = np.zeros([n, m])
+    #     variables = self.variables
+    #     if method == 'MC':
+    #         np.random.seed(random_seed)
+    #         xi = np.random.rand(n,m)
+    #     # QMC methods
+    #     elif method == 'QMC_Halton':
+    #         gen = Halton(n, seed=random_seed)
+    #         xi = gen.random(m).T
+    #     elif method == 'QMC_LHS':
+    #         sampler = LHS(d=n, seed=random_seed)
+    #         xi = sampler.random(m).T
+    #     elif method == 'QMC_Sobol':
+    #         sampler = Sobol(d=n, seed=random_seed)
+    #         xi = sampler.random(m).T
+    #     elif method == 'Sobol_saltelli':
+    #         problem = {'num_vars': m, 'names': self.variable_names(), 'dists': self.get_dist_types(), 'bounds': self.get_dist_params()}
+    #         xi = saltelli.sample(problem, n)
+    #         return xi
+            
+    #     for i, dist in enumerate(variables.values()):
+    #         q_i_k[:, i] = dist.invcdf(xi[:, i])
+            
+    #     return q_i_k
+
+    def sample(self, n, method="MC", seed=None): 
+        """ Generate random samples from the variable's distribution using the specified sampling method.
+
             Parameters
             ----------
-            n: int
+            n : int
                 Number of samples to generate.
 
-            method: {'MC', 'QMC_Halton', 'QMC_LHS', 'QMC_Sobol', 'Sobol_saltelli'}, default='MC'
-                Sampling method to use. Options: 'MC' (Monte Carlo), 'QMC_Halton' (Quasi-Monte Carlo Halton), 
-                'QMC_LHS' (Quasi-Monte Carlo Latin Hypercube), 'QMC_Sobol' (Quasi-Monte Carlo Sobol), 
-                'Sobol_saltelli' (Sobol sampling using SALib Saltelli method). Default is 'MC'.
+            method : str, default: "MC"
+                Sampling method to use. Options are "MC" (Monte Carlo), "QMC_Halton" (Quasi-Monte Carlo using Halton sequence),
+                "QMC_LHS" (Quasi-Monte Carlo using Latin Hypercube Sampling), and "QMC_Sobol" (Quasi-Monte Carlo using Sobol sequence).
 
-            random_seed: int or None
-                Random seed for reproducibility. Default is None.
+            seed : int or None, default: None
+                Seed for the random number generator.
 
-            **kwargs:
-                Additional keyword arguments for specific sampling methods.
-                
             Returns
             -------
-            q_i_k: numpy.ndarray
-                Array of shape (n, m) containing the generated samples in parameter space."""               
-        
-        m = self.num_variables()
-        q_i_k = np.zeros([n, m])
-        variables = self.variables
-        if method == 'MC':
-            np.random.seed(random_seed)
-            xi = np.random.rand(n,m)
-        # QMC methods
-        elif method == 'QMC_Halton':
-            gen = Halton(n, seed=random_seed)
-            xi = gen.random(m).T
-        elif method == 'QMC_LHS':
-            sampler = LHS(d=n, seed=random_seed)
-            xi = sampler.random(m).T
-        elif method == 'QMC_Sobol':
-            sampler = Sobol(d=n, seed=random_seed)
-            xi = sampler.random(m).T
-        elif method == 'Sobol_saltelli':
-            problem = {'num_vars': m, 'names': self.variable_names(), 'dists': self.get_dist_types(), 'bounds': self.get_dist_params()}
-            xi = saltelli.sample(problem, n)
-            return xi
-            
-        for i, dist in enumerate(variables.values()):
-            q_i_k[:, i] = dist.invcdf(xi[:, i])
-            
-        return q_i_k
+            samples : array_like
+                Generated random samples from the variable."""
+
+        m = len(self)
+        if (
+            isinstance(n, (bool, np.bool_))
+            or not isinstance(n, (int, np.integer))
+            or n <= 0
+        ):
+            raise ValueError("Number of samples must be a positive integer.")
+        if seed is not None and (
+            isinstance(seed, (bool, np.bool_))
+            or not isinstance(seed, (int, np.integer))
+        ):
+            raise ValueError("seed must be an integer or None.")
+        samples = np.zeros([m, n])
+        seeds = (
+            np.random.SeedSequence(seed).generate_state(m)
+            if seed is not None
+            else [None] * m
+        )
+        for i, var in enumerate(self.variables.values()):
+            samples[i, :] = var.sample(n, method=method, seed=seeds[i])
+        return samples
+
+    def sample_saltelli(self, n, calc_second_order=True, scramble=True, seed=None):
+        """ Generate random samples using the Saltelli sampling method.
+
+            Parameters
+            ----------
+            n : int
+                Number of samples to generate.
+
+            calc_second_order : bool, default: True
+                Whether to calculate second-order effects.
+
+            scramble : bool, default: True
+                Whether to scramble the Sobol sequence.
+
+            seed : int or None, default: None
+                Seed for the random number generator.
+
+            Returns
+            -------
+            samples : array_like
+                Generated random samples from the variable set using the Saltelli method."""
+
+        problem = {
+            "num_vars": len(self),
+            "names": self.get_variable_names(),
+            "bounds": [[0, 1]] * len(self)
+        }
+
+        unit_samples = sobol.sample(problem, n, calc_second_order=calc_second_order, scramble=scramble, seed=seed)
+        samples = np.zeros_like(unit_samples)
+        for i, var in enumerate(self.variables.values()):
+            samples[:, i] = var.ppf(unit_samples[:, i])
+        return samples
 
     def get_bounds(self):
         """ Return the bounds of all variables in the VariableSet.
@@ -533,7 +633,10 @@ class VariableSet():
             syschars : dict
                 Dictionary where keys are variable names and values are the GPC polynomial system characteristic strings for each variable."""
         
-        syschars = {name: dist.get_gpc_syschars() for name, dist in self.variables.items()}
+        syschars = {
+            name: variable.get_gpc_syschar(self.normalized)
+            for name, variable in self.variables.items()
+        }
         return syschars
 
     def stdnor_to_germ(self, x):
@@ -551,6 +654,8 @@ class VariableSet():
 
         if not isinstance(x, np.ndarray):
             raise ValueError("x must be a numpy.ndarray")
+        if x.ndim != 2:
+            raise ValueError("x must have shape (num_variables, num_points)")
 
         m = len(self)
         n = x.shape[1]
@@ -577,6 +682,8 @@ class VariableSet():
 
         if not isinstance(y, np.ndarray):
             raise ValueError("y must be a numpy.ndarray")
+        if y.ndim != 2:
+            raise ValueError("y must have shape (num_variables, num_points)")
 
         m = len(self)
         n = y.shape[1]
@@ -603,6 +710,8 @@ class VariableSet():
         
         if not isinstance(y, np.ndarray):
             raise ValueError("y must be a numpy.ndarray")
+        if y.ndim != 2:
+            raise ValueError("y must have shape (num_variables, num_points)")
 
         m = len(self)
         n = y.shape[1]
@@ -628,6 +737,8 @@ class VariableSet():
         
         if not isinstance(x, np.ndarray):
             raise ValueError("x must be a numpy.ndarray")
+        if x.ndim != 2:
+            raise ValueError("x must have shape (num_variables, num_points)")
 
         m = len(self)
         n = x.shape[1]
@@ -718,7 +829,11 @@ class VariableSet():
                     new_variables[name] = variable
         elif by == "index":
             original_names = list(self.variables.keys())
-            exclude_names = {original_names[idx] for idx in variables}
+            exclude_names = set()
+            for idx in variables:
+                if idx < 0 or idx >= len(original_names):
+                    raise IndexError(f"Index {idx} out of range")
+                exclude_names.add(original_names[idx])
             for name, variable in self.variables.items():
                 if name not in exclude_names:
                     new_variables[name] = variable

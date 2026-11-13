@@ -251,6 +251,18 @@ class Variable:
             -------
             samples : array_like
                 Generated random samples from the variable."""
+
+        if (
+            isinstance(n, (bool, np.bool_))
+            or not isinstance(n, (int, np.integer))
+            or n <= 0
+        ):
+            raise ValueError("Number of samples must be a positive integer.")
+        if seed is not None and (
+            isinstance(seed, (bool, np.bool_))
+            or not isinstance(seed, (int, np.integer))
+        ):
+            raise ValueError("seed must be an integer or None.")
         
         samples = self.dist.sample(n, method=method, seed=seed)
         return samples

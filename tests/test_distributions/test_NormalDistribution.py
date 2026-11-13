@@ -103,13 +103,13 @@ class TestNormalDistribution(DistributionTestClass):
     def test_variance_equals_sigma_squared(self, dist):
         assert np.isclose(dist.var(), SIGMA ** 2, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_stdnor_to_dist(self, dist):
+    def test_stdnor_to_germ(self, dist):
         y = np.linspace(-3, 3, 50)
-        assert np.allclose(dist.stdnor_to_dist(y), MU + SIGMA * y, atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(dist.stdnor_to_germ(y), MU + SIGMA * y, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_dist_to_stdnor(self, dist):
+    def test_germ_to_stdnor(self, dist):
         y = np.linspace(-3, 3, 50)
-        assert np.allclose(dist.dist_to_stdnor(dist.stdnor_to_dist(y)), y, atol=self.ATOL, rtol=self.RTOL)
+        assert np.allclose(dist.germ_to_stdnor(dist.stdnor_to_germ(y)), y, atol=self.ATOL, rtol=self.RTOL)
 
     # =====================================================================
     # 3. Reference values 

@@ -157,20 +157,20 @@ class TestDistribution:
         assert np.isclose(new.ppf(q0), -1.0, rtol=self.RTOL, atol=self.ATOL)
         assert np.isclose(new.ppf(q1), 1.0, rtol=self.RTOL, atol=self.ATOL)
 
-    def test_stdnor_to_dist_roundtrip(self, dist):
+    def test_stdnor_to_germ_roundtrip(self, dist):
         q = np.linspace(-2.5, 2.5, 50)
-        transformed = dist.stdnor_to_dist(q)
-        assert np.allclose(dist.dist_to_stdnor(transformed), q, atol=self.ATOL, rtol=self.RTOL)
+        transformed = dist.stdnor_to_germ(q)
+        assert np.allclose(dist.germ_to_stdnor(transformed), q, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_stdnor_to_dist_matches_scipy(self, dist):
+    def test_stdnor_to_germ_matches_scipy(self, dist):
         q = np.linspace(-2.5, 2.5, 50)
-        transformed = dist.stdnor_to_dist(q)
+        transformed = dist.stdnor_to_germ(q)
         expected = dist.ppf(norm.cdf(q))
         assert np.allclose(transformed, expected, atol=self.ATOL, rtol=self.RTOL)
 
-    def test_dist_to_stdnor_matches_scipy(self, dist):
+    def test_germ_to_stdnor_matches_scipy(self, dist):
         q = dist.ppf(np.linspace(0.001, 0.999, 50))
-        transformed = dist.dist_to_stdnor(q)
+        transformed = dist.germ_to_stdnor(q)
         expected = norm.ppf(dist.cdf(q))
         assert np.allclose(transformed, expected, atol=self.ATOL, rtol=self.RTOL)
 

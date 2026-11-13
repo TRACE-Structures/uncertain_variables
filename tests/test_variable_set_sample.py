@@ -25,7 +25,7 @@ def test_sobol_saltelli_returns_samples_for_each_variable():
     variables.add(Variable("x", UniformDistribution(0, 1)))
     variables.add(Variable("y", UniformDistribution(2, 4)))
 
-    samples = variables.sample(8, method="Sobol_saltelli", seed=123)
+    samples = variables.sample_saltelli(8, seed=123)
 
     assert samples.shape[1] == 2
     assert np.all((samples[:, 0] >= 0) & (samples[:, 0] <= 1))
@@ -45,5 +45,5 @@ def test_sample_rejects_invalid_seed():
     variables = VariableSet()
     variables.add(Variable("x", UniformDistribution()))
 
-    with pytest.raises(TypeError, match="seed must be an integer"):
+    with pytest.raises(ValueError, match="seed must be an integer"):
         variables.sample(2, seed="123")
