@@ -418,8 +418,8 @@ class Variable:
         syschar = self.dist.gpc_syschar(normalized)
         return syschar
 
-    def stdnor_to_dist(self, x):
-        """ Convert from standard normal space to the variable's distribution space.
+    def stdnor_to_germ(self, x):
+        """ Convert from standard normal space to germ space of the variable's distribution.
         
             Parameters
             ----------
@@ -429,29 +429,29 @@ class Variable:
             Returns
             -------
             y : array_like
-                Points in variable's distribution space."""
+                Points in germ space of the variable's distribution."""
         
-        y = self.dist.stdnor_to_dist(x)
+        y = self.dist.stdnor_to_germ(x)
         return y
 
-    def dist_to_stdnor(self, y):
-        """ Convert from variable's distribution space to standard normal space.
+    def germ_to_stdnor(self, y):
+        """ Convert from germ space of the variable's distribution to standard normal space.
         
             Parameters
             ----------
             y : array_like
-                Points in variable's distribution space.
+                Points in germ space of the variable's distribution.
                 
             Returns
             -------
             x : array_like
                 Points in standard normal space."""
 
-        x = self.dist.dist_to_stdnor(y)
+        x = self.dist.germ_to_stdnor(y)
         return x
 
     def germ_to_dist(self, y):
-        """ Convert from germ to variable space of the variable's distribution.
+        """ Convert from germ space to variable space of the variable's distribution.
 
             Parameters
             ----------
@@ -481,6 +481,15 @@ class Variable:
         
         y = self.dist.dist_to_germ(x)
         return y
+
+    def rename(self, new_name):
+        """ Rename the variable.
+
+            Parameters
+            ----------
+            new_name : str
+                New name for the variable."""
+        self.name = new_name
 
     def add_unit(self, unit):
         """ Add a unit to the variable if it doesn't have one.
@@ -545,3 +554,14 @@ class Variable:
         self.unit = to_unit
         report = f"Variable {self.name}: {report}"
         return report
+
+    def copy(self):
+        """ Create a deep copy of the Variable.
+
+            Returns
+            -------
+            Variable
+                A new Variable instance with the same attributes as the current Variable."""
+
+        new_var = Variable(name=self.name, dist=self.dist.copy(), unit=self.unit)
+        return new_var

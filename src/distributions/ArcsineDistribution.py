@@ -364,4 +364,13 @@ class ArcsineDistribution(Distribution):
         self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
         report = f"Converted from {from_unit} to {to_unit}."
         return report
-        
+
+    def copy(self):
+        """ Create a deep copy of the ArcsineDistribution.
+
+            Returns
+            -------
+            ArcsineDistribution
+                A new ArcsineDistribution instance with the same attributes as the current ArcsineDistribution."""
+
+        return ArcsineDistribution(scale=self.scale, loc=self.loc)

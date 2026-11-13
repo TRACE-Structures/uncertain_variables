@@ -461,3 +461,13 @@ class ExponentialDistribution(Distribution):
         self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
         report = f"Converted from {from_unit} to {to_unit}."
         return report
+
+    def copy(self):
+        """ Create a deep copy of the ExponentialDistribution.
+
+            Returns
+            -------
+            ExponentialDistribution
+                A new ExponentialDistribution instance with the same attributes as the current ExponentialDistribution."""
+
+        return ExponentialDistribution(lambda_=self.lambda_, loc=self.loc)

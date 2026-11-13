@@ -295,8 +295,8 @@ class Distribution(ABC):
         new_dist = self.transform(shift=new_shift, scale=new_scale)
         return new_dist
 
-    def stdnor_to_dist(self, x):
-        """ Convert from standard normal space to distribution space.
+    def stdnor_to_germ(self, x):
+        """ Convert from standard normal space to germ space.
         
             Parameters
             ----------
@@ -306,20 +306,20 @@ class Distribution(ABC):
             Returns
             -------
             y : array_like
-                Points in distribution space.""" 
+                Points in germ space.""" 
 
         # Imported lazily to avoid a circular import with NormalDistribution.
         from src.distributions.NormalDistribution import NormalDistribution
         y = self.ppf(NormalDistribution().gpc_dist().cdf(x))
         return y
 
-    def dist_to_stdnor(self, y):
-        """ Convert from distribution space to standard normal space.
+    def germ_to_stdnor(self, y):
+        """ Convert from germ space to standard normal space.
         
             Parameters
             ----------
             y : array_like
-                Points in distribution space.
+                Points in germ space.
                 
             Returns
             -------
@@ -410,5 +410,16 @@ class Distribution(ABC):
     def convert_to(self, from_unit, to_unit):
         """ Convert the distribution parameters to a different unit.
             Subclasses must implement this method."""
+
+        pass
+
+    @abstractmethod
+    def copy(self):
+        """ Create a deep copy of the Distribution.
+
+            Returns
+            -------
+            Distribution
+                A new Distribution instance with the same attributes as the current Distribution."""
 
         pass

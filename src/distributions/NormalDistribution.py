@@ -496,3 +496,13 @@ class NormalDistribution(Distribution):
 
         report = f"Converted from {from_unit} to {to_unit}."
         return report
+
+    def copy(self):
+        """ Create a deep copy of the NormalDistribution.
+
+            Returns
+            -------
+            NormalDistribution
+                A new NormalDistribution instance with the same attributes as the current NormalDistribution."""
+
+        return NormalDistribution(mu=self.mu, sigma=self.sigma)

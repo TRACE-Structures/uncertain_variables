@@ -537,3 +537,13 @@ class LogNormalDistribution(Distribution):
         
         report = f"Converted from {from_unit} to {to_unit}."
         return report
+
+    def copy(self):
+        """ Create a deep copy of the LogNormalDistribution.
+
+            Returns
+            -------
+            LogNormalDistribution
+                A new LogNormalDistribution instance with the same attributes as the current LogNormalDistribution."""
+
+        return LogNormalDistribution(mu=self.mu, sigma=self.sigma, loc=self.loc)

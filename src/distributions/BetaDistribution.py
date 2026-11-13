@@ -537,3 +537,13 @@ class BetaDistribution(Distribution):
         self.loc = ureg.Quantity(self.loc, from_unit).to(to_unit).magnitude
         report = f"Converted from {from_unit} to {to_unit}."
         return report
+
+    def copy(self):
+        """ Create a deep copy of the BetaDistribution.
+
+            Returns
+            -------
+            BetaDistribution
+                A new BetaDistribution instance with the same attributes as the current BetaDistribution."""
+
+        return BetaDistribution(a=self.a, b=self.b, scale=self.scale, loc=self.loc)

@@ -530,3 +530,13 @@ class UniformDistribution(Distribution):
         
         report = f"Converted from {from_unit} to {to_unit}."
         return report
+
+    def copy(self):
+        """ Create a deep copy of the UniformDistribution.
+
+            Returns
+            -------
+            UniformDistribution
+                A new UniformDistribution instance with the same attributes as the current UniformDistribution."""
+
+        return UniformDistribution(a=self.a, b=self.b)

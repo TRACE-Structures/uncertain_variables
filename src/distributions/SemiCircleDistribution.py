@@ -430,3 +430,13 @@ class SemiCircleDistribution(Distribution):
 
         report = f"Converted from {from_unit} to {to_unit}."
         return report
+
+    def copy(self):
+        """ Create a deep copy of the SemiCircleDistribution.
+
+            Returns
+            -------
+            SemiCircleDistribution
+                A new SemiCircleDistribution instance with the same attributes as the current SemiCircleDistribution."""
+
+        return SemiCircleDistribution(radius=self.radius, loc=self.loc)
