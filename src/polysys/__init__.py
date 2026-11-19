@@ -8,6 +8,7 @@ from .JacobiPolynomials import *
 from .LaguerrePolynomials import *
 from .LegendrePolynomials import *
 from .Monomials import *
+from .OrthonormalPolynomials import OrthonormalPolynomials
 
 def syschar_to_polysys(syschar):
     """ Convert a system characteristic string to the corresponding polynomial system.
@@ -19,22 +20,22 @@ def syschar_to_polysys(syschar):
 
         Returns
         -------
-        polysys : PolynomialSystem
-            Corresponding polynomial system."""
+        polysys : type or PolynomialSystem
+            Uppercase codes and ``m`` return classes; lowercase codes return
+            orthonormal instances. Jacobi's ``J`` class requires parameters."""
     
     poly_dict = {'H': HermitePolynomials,
-                'h': HermitePolynomials.normalized(),
+                'h': HermitePolynomials(orthonormal=True),
                 'P': LegendrePolynomials,
-                'p': LegendrePolynomials.normalized(),
+                'p': LegendrePolynomials(orthonormal=True),
                 'T': ChebyshevTPolynomials,
-                't': ChebyshevTPolynomials.normalized(),
+                't': ChebyshevTPolynomials(orthonormal=True),
                 'U': ChebyshevUPolynomials,
-                'u': ChebyshevUPolynomials.normalized(),
+                'u': ChebyshevUPolynomials(orthonormal=True),
                 'L': LaguerrePolynomials,
-                'l': LaguerrePolynomials.normalized(),
+                'l': LaguerrePolynomials(orthonormal=True),
                 'J': JacobiPolynomials,
-                #'j': JacobiPolynomials.normalized(),
-                'm': Monomials
+                'm': MonomialPolynomials
                 }
     
     polysys = poly_dict[syschar]

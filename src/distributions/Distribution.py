@@ -24,6 +24,7 @@ from abc import ABC, abstractmethod
 
 class Distribution(ABC):
     """ Abstract class for probability distributions."""
+    
     @abstractmethod
     def get_dist_type(self):
         """ Abstract method to return the type of the distribution.

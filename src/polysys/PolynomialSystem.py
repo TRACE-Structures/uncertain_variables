@@ -1,157 +1,172 @@
-import numpy as np
 from abc import ABC, abstractmethod
 
+import numpy as np
+from collections.abc import Callable
+from numpy.typing import ArrayLike, NDArray, any
+
+from ..distributions.Distribution import Distribution
+
+
+from collections.abc import Callable
+from typing import Any
+
+def _probability_sqnorm(
+    generator: Callable,
+    deg: int,
+    weight_mass: float,
+    *args: Any,
+) -> NDArray[np.floating]:
+    """
+    Convert SciPy's weight-integral norms to probability-weighted norms.
+
+    Parameters
+    ----------
+    generator : Callable
+        Function that generates the polynomial of a given degree.
+    deg : int
+        Maximum polynomial degree to evaluate.
+    weight_mass : float
+        Integral of the weight function over the domain.
+    *args : Any
+        Additional arguments to pass to the generator function.
+
+    Returns
+    -------
+    norms : NDArray[np.floating]
+        Array of probability-weighted squared norms for degrees up to `deg`.
+    """
+    if not callable(generator):
+        raise TypeError("Generator must be callable.")
+    if not isinstance(deg, (int, np.integer)):
+        raise TypeError("Degree must be an integer.")
+    if deg < 0:
+        raise ValueError("Degree must be non-negative.")
+    if weight_mass <= 0:
+        raise ValueError("Weight mass must be positive.")
+
+    norms = np.array([generator(n, *args).normcoef for n in range(1, deg + 1)])
+    return np.concatenate(([1.0], norms**2 / weight_mass))
+
+
 class PolynomialSystem(ABC):
-    ''' Abstract base class for polynomial systems.'''
-    
-    def evaluate(self, deg, xi):
-        '''Evaluate polynomial system up to degree `deg` at points `xi`.
+    """
+    Abstract base class for univariate polynomial systems.
+    """
+    def __init__(self, orthonormal: bool = False):
+        """
+        Initialize the polynomial system.
 
-            Parameters
-            ----------
-            deg: int
-                Highest polynomial degree to evaluate.
-            xi: array_like
-                Points at which the polynomials are evaluated.
+        Parameters
+        ----------
+        orthonormal : bool, optional
+            If True, use orthonormal polynomials. Default is False.
+        """
+        self.orthonormal = orthonormal
 
-            Returns
-            -------
-            y_alpha_j: numpy.ndarray
-                Matrix of shape (len(xi), deg+1) containing evaluated polynomials.'''
+    @abstractmethod
+    def gpc_distribution(self) -> Distribution:
+        """
+        Return the probability distribution associated with
+        the polynomial system.
+        """
+        ...
 
-        k = np.size(xi)
-        p = np.zeros([k, deg+2])
-        p[:,0] = 0
-        p[:,1] = 1
-        r = self.recur_coeff(deg+1)
-        for d in range(deg):
-           p[:, d+2] = (r[d,0] + xi * r[d,1]) * p[:, d+1] - r[d,2] * p[:,d]
-        y_alpha_j = p[:,1:]
-        return y_alpha_j
+    def evaluate(
+        self, 
+        deg: int, 
+        x: ArrayLike, 
+        derivative: bool = False,
+    ) -> NDArray[np.floating]:
+        """
+        Evaluate the polynomial system up to degree `deg` at points `x`.
 
-    def sqnorm(self, n):
-        """ Return the squared norm of the polynomials of degree `n`.
-
-            Parameters
-            ----------
-            n : array_like
-                Degrees for which the squared norms are computed.
-
-            Returns
-            -------
-            nrm2 : numpy.ndarray
-                Array of squared norms corresponding to degrees in `n`."""
-        
-        deg = max(n.flatten()) + 1
-        r = self.recur_coeff(deg)
-        nrm2 = self.sqnorm_by_rc(r)
-        nrm2 = np.reshape([nrm2[n+1], len(n)])
-        return nrm2
-
-    def sqnorm_by_rc(self, rc):
-        """ Return the squared norm using recurrence coefficients `rc`.
-
-            Parameters
-            ----------
-            rc : array_like
-                Recurrence coefficients of shape (deg, 3).
-
-            Returns
-            -------
-            nrm2 : numpy.ndarray
-                Array of squared norms for polynomials up to degree `deg`."""
-        
-        b = rc[:, 1]
-        h = b[0] / b[1:]
-        c = rc[1:, 2]
-        nrm2 = np.concatenate(np.ones([1]),  h.flatten * np.cumprod(c.flatten()))
-        return nrm2
-
-    def normalized(self):
-        '''Return normalized version of this polynomial system.
+        Parameters
+        ----------
+        deg : int
+            Maximum polynomial degree to evaluate.
+        x : ArrayLike
+            One-dimensional array of real-valued evaluation points.
+        derivative : bool, default=False
+            If True, evaluate the derivative of the polynomials. Default is False.
 
         Returns
         -------
-        polysys: NormalizedPolynomials
-            Wrapped normalized polynomial system.'''
-
-        from .NormalizedPolynomials import NormalizedPolynomials
-        polysys = NormalizedPolynomials(self)
-        return polysys
+        y : NDArray[np.floating]
+            Matrix of shape (n_points, deg+1) containing evaluated polynomials
+            or first derivatives. Column k corresponds to degree k.
+        """
+        if not isinstance(deg, (int, np.integer)):
+            raise TypeError("Degree must be an integer.")
+        if deg < 0:
+            raise ValueError("Degree must be non-negative.")
+        if not isinstance(derivative, bool):
+            raise TypeError("Derivative flag must be a boolean.")
+        
+        x = np.asarray(x)
+        if x.ndim != 1:
+            raise ValueError("Input points x must be one-dimensional.")
+        if x.dtype.kind not in "iuf":
+            raise TypeError("Input points x must be real numbers.")
+        return self._evaluate(int(deg), x.astype(float, copy=False), derivative)
 
     @abstractmethod
-    def weighting_dist(self):
-        ''' Abstract method to return the weighting distribution of the polynomial system.
-            Subclasses must implement this method.'''
-        
-        pass
+    def _evaluate(
+        self,
+        deg: int,
+        x: NDArray[np.floating],
+        derivative: bool = False,
+    ) -> NDArray[np.floating]:
+        """
+        Abstract method to evaluate the polynomial system up to degree `deg` at points `x`.
+        Subclasses must implement this method.
+        """
+        ...
+
+    def sqnorm(self, deg: int) -> NDArray[np.float64]:
+        """
+        Return the squared norm of the polynomial system up to degree `deg`.
+
+        Parameters
+        ----------
+        deg : int
+            Highest polynomial degree to evaluate.
+
+        Returns
+        -------
+        y : NDArray[np.floating64]
+            Squared norms under the probability distribution returned by
+            `gpc_distribution`, in degree order, with shape (deg+1,).
+        """
+        if not isinstance(deg, (int, np.integer)):
+            raise TypeError("Degree must be an integer.")
+        if deg < 0:
+            raise ValueError("Degree must be non-negative.")
+
+        return self._sqnorm(int(deg))
 
     @abstractmethod
-    def recur_coeff(self, deg):
-        ''' Abstract method to return the recurrence coefficients of the polynomial system.
-            Subclasses must implement this method.'''
-        
-        pass
+    def _sqnorm(self, deg: int) -> NDArray[np.float64]:
+        """
+        Abstract method to return the squared norm of the polynomial systemup to degree `deg`.
+        Subclasses must implement this method.
+        """
+        ...
 
+    def normalize(self) -> "PolynomialSystem":
+        """
+        Return the orthonormal version of the polynomial system.
 
-# class NormalizedPolynomials(PolynomialSystem):
-#     """ Wrapper class for normalized polynomial systems.
+        Returns
+        -------
+        normalized_system : PolynomialSystem
+            A new instance of the polynomial system with orthonormal polynomials.
+        """
+        return self._normalize()
 
-#         Attributes
-#         ----------
-#         base_polysys : PolynomialSystem
-#             The base polynomial system to be normalized.
-
-#         Methods
-#         -------
-#         __init__(base_polysys)
-#             Initialize the normalized polynomial system with a base polynomial system.
-
-#         recur_coeff(deg)
-#             Return the recurrence coefficients for the normalized polynomial system.
-
-#         weighting_dist()
-#             Return the weighting distribution of the base polynomial system."""
-    
-#     def __init__(self, base_polysys):
-#         """ Initialize the normalized polynomial system with a base polynomial system.
-
-#             Parameters
-#             ----------
-#             base_polysys : PolynomialSystem
-#                 The base polynomial system to be normalized."""
-        
-#         self.base_polysys = base_polysys
-
-#     def recur_coeff(self, deg):
-#         """_summary_
-
-#             Parameters
-#             ----------
-#             deg : int
-#                 Degree up to which recurrence coefficients are computed.
-
-#             Returns
-#             -------
-#             r : numpy.ndarray
-#                 Recurrence coefficients for the normalized polynomial system."""
-        
-#         r = self.base_polysys.recur_coeff(deg)
-#         n = np.array(range(deg))
-#         z = np.concatenate((np.zeros([1]), np.sqrt(self.base_polysys.sqnorm(np.arange(0,deg+1)))), axis=0)
-#         r = np.array([r[:, 0]*z[n + 1] / z[n + 2],
-#             r[:, 1] * z[n + 1] / z[n + 2],
-#             r[:, 2] * z[n] / z[n + 2]])
-#         r = r.transpose()
-#         return r
-
-#     def weighting_dist(self):
-#         """ Return the weighting distribution of the base polynomial system.
-
-#             Returns
-#             -------
-#             dist : Distribution
-#                 Weighting distribution of the base polynomial system."""
-        
-#         dist = self.base_polysys.weighting_dist()
-#         return dist
+    @abstractmethod
+    def _normalize(self) -> "PolynomialSystem":
+        """
+        Abstract method to return an orthonormal version of the polynomial system.
+        Subclasses must implement this method.
+        """
+        ...

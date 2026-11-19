@@ -577,3 +577,12 @@ class Variable:
 
         new_var = Variable(name=self.name, dist=self.dist.copy(), unit=self.unit)
         return new_var
+
+    def rename(self, new_name):
+        """ Rename the variable.
+
+            Parameters
+            ----------
+            new_name : str
+                New name for the variable."""
+        self.name = new_name    
