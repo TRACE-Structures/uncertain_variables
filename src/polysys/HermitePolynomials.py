@@ -44,17 +44,22 @@ class HermitePolynomials(PolynomialSystem):
             Highest polynomial degree to evaluate.
         x : array_like
             Points at which the polynomials are evaluated.
-        derivative : bool, optional
-            If True, evaluate the derivative of the polynomials. Default is False.
+        derivative : bool | int, default=False
+            If True, evaluate the derivative of the polynomials.
+            If an integer n, evaluate the n-th derivative of the polynomials. Default is False.
 
         Returns
         -------
         y : numpy.ndarray
-            Matrix of shape (len(x), deg+1) containing evaluated Hermite polynomials or their derivatives.
+            Matrix of shape (n_points, deg+1) containing evaluated Hermite polynomials or their derivatives.
         """
         x = np.asarray(x)
         if derivative:
-            y = np.column_stack([np.polyder(self.generator(d))(x) for d in range(deg+1)])
+            if isinstance(derivative, bool):
+                n = 1 if derivative else 0
+            else:
+                n = derivative
+            y = np.column_stack([np.polyder(self.generator(d), m=n)(x) for d in range(deg+1)])
         else:
             y = np.column_stack([self.generator(d)(x) for d in range(deg+1)])
         if self.orthonormal:
@@ -81,6 +86,12 @@ class HermitePolynomials(PolynomialSystem):
             y = _probability_sqnorm(self.generator, deg, np.sqrt(2 * np.pi))
         return y
 
+    def _orthonormalize(self):
+        """
+        Return an orthonormal version of the Hermite polynomial system.
+        """
+        return HermitePolynomials(orthonormal=True)
+    
 # import numpy as np
 # from .PolynomialSystem import PolynomialSystem
 # from .NormalizedPolynomials import NormalizedPolynomials

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from src.variable import Variable
+from .variable import Variable
 
 # from scipy.stats.qmc import Halton
 # from scipy.stats.qmc import LatinHypercube as LHS

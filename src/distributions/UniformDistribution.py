@@ -1,7 +1,7 @@
 import pint
 import numpy as np
 
-from src.distributions.Distribution import Distribution
+from .Distribution import Distribution
 from scipy.stats import uniform
 
 from scipy.stats.qmc import Halton

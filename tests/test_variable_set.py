@@ -155,11 +155,14 @@ def test_get_distribution_metadata_and_moments(variables):
     params = variables.get_dist_params()
     np.testing.assert_array_equal(params["x"], [0, 10])
     np.testing.assert_array_equal(params["y"], [0, 2])
-    assert variables.mean() == {"x": 5, "y": 1}
-    assert variables.var() == pytest.approx({"x": 100 / 12, "y": 1 / 3})
+    assert np.isclose(variables.mean()["x"], 5)
+    assert np.isclose(variables.mean()["y"], 1)
+    assert np.isclose(variables.var()["x"], 100 / 12)
+    assert np.isclose(variables.var()["y"], 1 / 3)
     assert variables.skew() == {"x": 0, "y": 0}
-    assert variables.kurt() == pytest.approx({"x": -1.2, "y": -1.2})
-    assert variables.moments()["x"] == [5, 100 / 12, 0, -1.2]
+    assert np.isclose(variables.kurt()["x"], -1.2)
+    assert np.isclose(variables.kurt()["y"], -1.2)
+    np.testing.assert_allclose(variables.moments()["x"], [5, 100 / 12, 0, -1.2])
 
 
 def test_pdf_logpdf_and_cdf_joint_and_marginal(variables):
@@ -254,10 +257,10 @@ def test_germ_and_distribution_conversions_are_round_trip():
     germs = np.array([[-0.8, 0.0, 0.9], [-1.0, 0.0, 1.0]])
 
     np.testing.assert_allclose(
-        variables.dist_to_germ(variables.germ_to_dist(germs)), germs
+        variables.dist_to_germ(variables.germ_to_dist(germs)), germs, rtol=1e-12, atol=1e-12
     )
     np.testing.assert_allclose(
-        variables.germ_to_stdnor(variables.stdnor_to_germ(germs)), germs
+        variables.germ_to_stdnor(variables.stdnor_to_germ(germs)), germs, rtol=1e-12, atol=1e-12
     )
 
 

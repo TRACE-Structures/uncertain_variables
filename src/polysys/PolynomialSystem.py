@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-from collections.abc import Callable
-from numpy.typing import ArrayLike, NDArray, any
+from numpy.typing import ArrayLike, NDArray
+from typing import Callable, Any
 
 from ..distributions.Distribution import Distribution
 
-
-from collections.abc import Callable
-from typing import Any
 
 def _probability_sqnorm(
     generator: Callable,
@@ -75,7 +72,7 @@ class PolynomialSystem(ABC):
         self, 
         deg: int, 
         x: ArrayLike, 
-        derivative: bool = False,
+        derivative: bool | int = False,
     ) -> NDArray[np.floating]:
         """
         Evaluate the polynomial system up to degree `deg` at points `x`.
@@ -86,8 +83,9 @@ class PolynomialSystem(ABC):
             Maximum polynomial degree to evaluate.
         x : ArrayLike
             One-dimensional array of real-valued evaluation points.
-        derivative : bool, default=False
-            If True, evaluate the derivative of the polynomials. Default is False.
+        derivative : bool | int, default=False
+            If True, evaluate the derivative of the polynomials.
+            If an integer n, evaluate the n-th derivative of the polynomials. Default is False.
 
         Returns
         -------
@@ -99,8 +97,8 @@ class PolynomialSystem(ABC):
             raise TypeError("Degree must be an integer.")
         if deg < 0:
             raise ValueError("Degree must be non-negative.")
-        if not isinstance(derivative, bool):
-            raise TypeError("Derivative flag must be a boolean.")
+        if not isinstance(derivative, (bool, int)):
+            raise TypeError("Derivative flag must be a boolean or an integer.")
         
         x = np.asarray(x)
         if x.ndim != 1:
@@ -114,7 +112,7 @@ class PolynomialSystem(ABC):
         self,
         deg: int,
         x: NDArray[np.floating],
-        derivative: bool = False,
+        derivative: bool | int = False,
     ) -> NDArray[np.floating]:
         """
         Abstract method to evaluate the polynomial system up to degree `deg` at points `x`.
@@ -142,7 +140,7 @@ class PolynomialSystem(ABC):
         if deg < 0:
             raise ValueError("Degree must be non-negative.")
 
-        return self._sqnorm(int(deg))
+        return self._sqnorm(deg)
 
     @abstractmethod
     def _sqnorm(self, deg: int) -> NDArray[np.float64]:
@@ -152,7 +150,7 @@ class PolynomialSystem(ABC):
         """
         ...
 
-    def normalize(self) -> "PolynomialSystem":
+    def orthonormalize(self) -> "PolynomialSystem":
         """
         Return the orthonormal version of the polynomial system.
 
@@ -161,10 +159,10 @@ class PolynomialSystem(ABC):
         normalized_system : PolynomialSystem
             A new instance of the polynomial system with orthonormal polynomials.
         """
-        return self._normalize()
+        return self._orthonormalize()
 
     @abstractmethod
-    def _normalize(self) -> "PolynomialSystem":
+    def _orthonormalize(self) -> "PolynomialSystem":
         """
         Abstract method to return an orthonormal version of the polynomial system.
         Subclasses must implement this method.

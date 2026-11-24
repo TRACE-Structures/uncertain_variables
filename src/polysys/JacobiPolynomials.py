@@ -3,7 +3,8 @@ import numpy as np
 from .PolynomialSystem import PolynomialSystem, _probability_sqnorm
 from ..distributions import BetaDistribution
 
-from scipy.special import beta as beta_function, jacobi
+from scipy.special import jacobi
+from scipy.special import beta as beta_function 
 
 class JacobiPolynomials(PolynomialSystem):
     """ 
@@ -59,17 +60,22 @@ class JacobiPolynomials(PolynomialSystem):
             Highest polynomial degree to evaluate.
         x : array_like
             Points at which the polynomials are evaluated.
-        derivative : bool, optional
-            If True, evaluate the derivative of the polynomials. Default is False.
+        derivative : bool | int, default=False
+            If True, evaluate the derivative of the polynomials.
+            If an integer n, evaluate the n-th derivative of the polynomials. Default is False.
 
         Returns
         -------
         y : numpy.ndarray
-            Matrix of shape (len(x), deg+1) containing evaluated Jacobi polynomials or their derivatives.
+            Matrix of shape (n_points, deg+1) containing evaluated Jacobi polynomials or their derivatives.
         """
         x = np.asarray(x)
         if derivative:
-            y = np.column_stack([np.polyder(self.generator(d, self.alpha, self.beta))(x) for d in range(deg+1)])
+            if isinstance(derivative, bool):
+                n = 1 if derivative else 0
+            else:
+                n = derivative
+            y = np.column_stack([np.polyder(self.generator(d, self.alpha, self.beta), m=n)(x) for d in range(deg+1)])
         else:
             y = np.column_stack([self.generator(d, self.alpha, self.beta)(x) for d in range(deg+1)])
         if self.orthonormal:
@@ -98,6 +104,12 @@ class JacobiPolynomials(PolynomialSystem):
             y = _probability_sqnorm(self.generator, deg, mass, self.alpha, self.beta)
         return y
 
+    def _orthonormalize(self):
+        """
+        Return an orthonormal version of the Jacobi polynomial system.
+        """
+        return JacobiPolynomials(self.alpha, self.beta, orthonormal=True)
+    
 # import numpy as np
 # from .PolynomialSystem import PolynomialSystem
 # from .NormalizedPolynomials import NormalizedPolynomials

@@ -8,7 +8,6 @@ from .JacobiPolynomials import *
 from .LaguerrePolynomials import *
 from .LegendrePolynomials import *
 from .Monomials import *
-from .OrthonormalPolynomials import OrthonormalPolynomials
 
 def syschar_to_polysys(syschar):
     """ Convert a system characteristic string to the corresponding polynomial system.

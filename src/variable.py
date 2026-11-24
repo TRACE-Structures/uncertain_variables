@@ -3,7 +3,7 @@
 # import pint
 import numpy as np
 
-from src.distributions.Distribution import Distribution
+from .distributions.Distribution import Distribution
 # from src.polysys import syschar_to_polysys
 
 class Variable:

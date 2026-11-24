@@ -1,8 +1,8 @@
 import pint
 import numpy as np
 
-from src.distributions.Distribution import Distribution
-from src.distributions.UniformDistribution import UniformDistribution
+from .Distribution import Distribution
+from .UniformDistribution import UniformDistribution
 from scipy.stats import semicircular
 
 class SemiCircleDistribution(Distribution):
