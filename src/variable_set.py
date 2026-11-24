@@ -1,13 +1,10 @@
 """ Represent a set of simulation variables with associated probability distributions and units. """
 
 import numpy as np
+from collections.abc import Sequence
 
 from .variable import Variable
 
-# from scipy.stats.qmc import Halton
-# from scipy.stats.qmc import LatinHypercube as LHS
-# from scipy.stats.qmc import Sobol
-# from SALib.sample import saltelli
 from SALib.sample import sobol 
 
 class VariableSet():
@@ -15,28 +12,18 @@ class VariableSet():
         
         Attributes
         ----------
-        normalized : bool
-            Flag indicating whether the variables are normalized.
-
         variables : dict
             Dictionary of variable names and their corresponding Variable objects."""
         
-    def __init__(self, variables=None, normalized=True):
+    def __init__(self, variables=None):
         """ Initialize an empty VariableSet.
 
             Parameters
             ----------
             variables : list of Variable, optional
                 List of Variable objects to initialize the VariableSet with. Default is None.
+        """
 
-            normalized : bool, optional
-                Flag indicating whether the variables are normalized. Default is True."""
-        
-
-        if not isinstance(normalized, bool):
-            raise TypeError("normalized must be a boolean")
-        
-        self.normalized = normalized
         self.variables = {}
         if variables is not None:
             for variable in variables:
@@ -50,7 +37,7 @@ class VariableSet():
             repr_string : str
                 String representation of the VariableSet object."""
 
-        repr_str = f"VariableSet(normalized={self.normalized}, variables={list(self.get_variable_names())})"
+        repr_str = f"VariableSet(variables={list(self.get_variable_names())})"
         return repr_str
 
     def __eq__(self, other):
@@ -68,7 +55,7 @@ class VariableSet():
 
         if not isinstance(other, VariableSet):
             return False
-        return self.normalized == other.normalized and self.variables == other.variables
+        return self.variables == other.variables
 
     def __len__(self):
         """ Returns the number of variables in the VariableSet.
@@ -214,12 +201,11 @@ class VariableSet():
             VariableSet
                 A new VariableSet instance with copies of all variables in the current VariableSet."""
 
-        new_vs = VariableSet(normalized=self.normalized)
+        new_vs = VariableSet()
         for var in self.variables.values():
             new_vs.add(variable=var.copy())
         return new_vs
 
-    # def variable_names(self):
     def get_variable_names(self):
         """ Get the names of all variables in the VariableSet.
         
@@ -609,35 +595,39 @@ class VariableSet():
             Returns
             -------
             bounds : dict
-                Dictionary where keys are variable names and values are arrays of shape (2,) containing the lower and upper bounds for each variable in the VariableSet."""
+                Dictionary where keys are variable names and values are arrays of shape (2,) 
+                containing the lower and upper bounds for each variable in the VariableSet."""
 
         bounds = {name: dist.get_bounds() for name, dist in self.variables.items()}
         return bounds
 
-    def get_gpc_polysys(self):
+    def get_gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for all variables in the VariableSet.
-            
+
+            Parameters
+            ----------
+            orthonormal : bool or sequence of bool
+                Flag indicating whether to return the orthonormal polynomial system. If a list, 
+                it should have the same length as the number of variables, specifying the flag 
+                for each variable individually. 
             Returns
             -------
             polysys : dict
                 Dictionary where keys are variable names and values are the GPC polynomial systems for each variable."""
+        if isinstance(orthonormal, bool):
+            orthonormal = [orthonormal] * len(self)
+        elif not isinstance(orthonormal, Sequence):
+            raise TypeError("orthonormal must be a bool or a sequence of bool")
+        if len(orthonormal) != len(self):
+            raise TypeError("Length of orthonormal list must match the number of variables")
+        if not all(isinstance(flag, bool) for flag in orthonormal):
+            raise TypeError("All elements of orthonormal list must be bool")
 
-        polysys = {name: dist.get_gpc_polysys() for name, dist in self.variables.items()}
-        return polysys
-    
-    def get_gpc_syschars(self):
-        """ Return the GPC polynomial system characteristic string for all variables in the VariableSet.
-            
-            Returns
-            -------
-            syschars : dict
-                Dictionary where keys are variable names and values are the GPC polynomial system characteristic strings for each variable."""
-        
-        syschars = {
-            name: variable.get_gpc_syschar(self.normalized)
-            for name, variable in self.variables.items()
+        polysys = {
+            name: dist.get_gpc_polysys(orthonormal=orth) 
+            for (name, dist), orth in zip(self.variables.items(), orthonormal)
         }
-        return syschars
+        return polysys
 
     def stdnor_to_germ(self, x):
         """ Convert from standard normal space to germ space for all variables in the VariableSet.
@@ -763,13 +753,12 @@ class VariableSet():
             new_variable_set: VariableSet object
                 New VariableSet containing only the variables that satisfy the condition."""
 
-        new_variable_set = VariableSet(normalized=self.normalized)
         new_variables = {}
         for name, variable in self.variables.items():
             if condition(variable):
                 new_variables[name] = variable
-        new_variable_set.variables = new_variables
-        return new_variable_set
+                
+        return VariableSet(variables=new_variables)
 
     def select(self, variables, by="name"):
         """ Create a new VariableSet containing only the specified variables.
@@ -786,7 +775,6 @@ class VariableSet():
             new_variable_set: VariableSet object
                 New VariableSet containing only the specified variables."""
 
-        new_variable_set = VariableSet(normalized=self.normalized)
         new_variables = {}
         if by == "name":
             for name in variables:
@@ -803,8 +791,7 @@ class VariableSet():
         else:
             raise ValueError("by must be either 'name' or 'index'")
 
-        new_variable_set.variables = new_variables
-        return new_variable_set
+        return VariableSet(variables=new_variables)
 
     def without(self, variables, by="name"):
         """ Create a new VariableSet excluding the specified variables.
@@ -821,7 +808,6 @@ class VariableSet():
             new_variable_set: VariableSet object
                 New VariableSet excluding the specified variables."""
 
-        new_variable_set = VariableSet(normalized=self.normalized)
         new_variables = {}
         if by == "name":
             for name, variable in self.variables.items():
@@ -840,53 +826,4 @@ class VariableSet():
         else:
             raise ValueError("by must be either 'name' or 'index'")
 
-        new_variable_set.variables = new_variables
-        return new_variable_set
-    
-    # def filter(self, variable_names):
-    #     """ Create a new VariableSet containing only the specified variables.
-            
-    #         Parameters
-    #         ----------  
-    #         variable_names: list
-    #             List of variable names to include in the new VariableSet.
-                
-    #         Returns
-    #         -------
-    #         new_variable_set: VariableSet object
-    #             New VariableSet containing only the specified variables."""
-        
-    #     new_variable_set = VariableSet(normalized=self.normalized)
-    #     new_variables = {}
-    #     # To avoid confusion, use a list of original names to map indices
-    #     original_names = list(self.variables.keys())
-    #     for name in variable_names:
-    #         if name not in self.variables:
-    #             raise KeyError(f"Variable {name} not found in VariableSet")
-    #         idx = original_names.index(name)
-    #         new_variables[name] = self.variables[name]
-    #     new_variable_set.variables = new_variables
-    #     return new_variable_set
-
-    # def diminished_variable_set(self, indices):
-    #     """ Create a new VariableSet by selecting a subset of variables based on provided indices.
-            
-    #         Parameters
-    #         ----------
-    #         indices: list or array_like
-    #             List of indices of variables to include in the new VariableSet.
-                
-    #         Returns
-    #         -------
-    #         new_variable_set: VariableSet object
-    #             New VariableSet containing only the selected variables."""
-        
-    #     assert self.num_variables() >= len(indices)
-
-    #     diminished_variable_names = np.array(self.variable_names())[indices]
-    #     new_variable_set = VariableSet(normalized=self.normalized)
-    #     new_variables = {}
-    #     for i in range(len(indices)):
-    #         new_variables[diminished_variable_names[i]] = self.variables[diminished_variable_names[i]]
-    #     new_variable_set.variables = new_variables
-    #     return new_variable_set
+        return VariableSet(variables=new_variables)

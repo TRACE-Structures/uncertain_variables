@@ -3,6 +3,8 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
+from ..polysys import HermitePolynomials
+
 from scipy.stats import norm
 
 
@@ -33,8 +35,6 @@ class NormalDistribution(Distribution):
 
             sigma : float, default: 1
                 Standard deviation of the normal distribution."""
-
-        # assert sigma > 0
         
         if not (isinstance(mu, (int, float, np.number))):
             raise ValueError("Mean mu must be a number.")  
@@ -379,42 +379,8 @@ class NormalDistribution(Distribution):
         
         germ_dist = NormalDistribution(0, 1)
         return germ_dist
-
-    # def base2dist(self, y):
-    #     """ Convert from base (germ) space to normal distribution space.
-
-    #         Parameters
-    #         ----------
-    #         y : array_like
-    #             Points in base (germ) space.
-
-    #         Returns
-    #         -------
-    #         x : array_like
-    #             Points in normal distribution space."""
-
-    #     y = np.asarray(y)
-    #     x = self.mu + y * self.sigma
-    #     return x
     
-    # def dist2base(self, x):
-    #     """ Convert from normal distribution space to base (germ) space.
-
-    #         Parameters
-    #         ----------
-    #         x : array_like
-    #             Points in normal distribution space.
-
-    #         Returns
-    #         -------
-    #         y : array_like
-    #             Points in base (germ) space."""
-
-    #     x = np.asarray(x)
-    #     y = (x - self.mu) / self.sigma
-    #     return y
-
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for the normal distribution.
         
             Returns
@@ -422,48 +388,11 @@ class NormalDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the normal distribution."""
         
-        # from polysys import HermitePolynomials
-
-        # if self.mu == 0 and self.sigma == 1:
-        #     polysys = HermitePolynomials()
-        # else:
-        #     polysys = Distribution.orth_polysys(self)
-        # return polysys
-
-        from ..polysys import HermitePolynomials
-
         if self.mu == 0 and self.sigma == 1:
-            return HermitePolynomials()
+            return HermitePolynomials(orthonormal=orthonormal)
 
         else:
             raise Exception(f"No polynomial system for this distribution ({self})")
-
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the normal distribution.
-        
-            Parameters
-            ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system characteristic string.
-                
-            Returns
-            -------
-            polysys_char : str
-                GPC polynomial system characteristic string for the normal distribution."""
-        
-        # if self.mu == 0 and self.sigma == 1:
-        #     if normalized:
-        #         polysys_char = "h"
-        #     else:
-        #         polysys_char = "H"
-        # else:
-        #     polysys_char = []
-        # return polysys_char
-
-        if self.mu == 0 and self.sigma == 1:
-            return "h" if normalized else "H"
-
-        raise Exception(f"No polynomial system for this distribution ({self})")
 
     def convert_to(self, from_unit, to_unit):
         """ Convert the distribution parameters to a different unit.

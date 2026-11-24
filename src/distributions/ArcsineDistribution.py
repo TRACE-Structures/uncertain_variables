@@ -3,6 +3,7 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
+from ..polysys import ChebyshevTPolynomials
 from scipy.stats import arcsine
 
 class ArcsineDistribution(Distribution):
@@ -120,7 +121,6 @@ class ArcsineDistribution(Distribution):
             -------
             y : array_like
                 Cumulative distribution function values at x."""
-
         y = arcsine.cdf(x, scale=self.scale, loc=self.loc)
         return y
 
@@ -136,53 +136,52 @@ class ArcsineDistribution(Distribution):
             -------
             x : array_like
                 PPF values evaluated at y."""
-
         x = arcsine.ppf(y, scale=self.scale, loc=self.loc)
         return x
 
     def mean(self):
-        """ Return the mean of the arcsine distribution.
+        """
+        Return the mean of the arcsine distribution.
 
-            Returns
-            -------
-            mean : float
-                Mean of the arcsine distribution."""
-        
-        mean = arcsine.mean(scale=self.scale, loc=self.loc)
-        return mean
+        Returns
+        -------
+        mean : float
+        Mean of the arcsine distribution.
+        """
+        return arcsine.mean(scale=self.scale, loc=self.loc)
 
     def var(self):
-        """ Return the variance of the arcsine distribution.
+        """ 
+        Return the variance of the arcsine distribution.
 
-            Returns
-            -------
-            var : float
-                Variance of the arcsine distribution."""
-        
-        var = arcsine.var(scale=self.scale, loc=self.loc)
-        return var
+        Returns
+        -------
+        var : float
+            Variance of the arcsine distribution.
+        """
+        return arcsine.var(scale=self.scale, loc=self.loc)
 
     def skew(self):
-        """ Return the skewness of the arcsine distribution.
+        """
+        Return the skewness of the arcsine distribution.
 
-            Returns
-            -------
-            skew : float
-                Skewness of the arcsine distribution."""
-        
-        skew = arcsine.stats(scale=self.scale, loc=self.loc, moments='s')
-        return skew
+        Returns
+        -------
+        skew : float
+            Skewness of the arcsine distribution.
+        """
+        return arcsine.stats(scale=self.scale, loc=self.loc, moments='s')
 
     def kurt(self):
-        """ Return the kurtosis of the arcsine distribution.
+        """
+        Return the kurtosis of the arcsine distribution.
 
-            Returns
-            -------
-            kurt : float
-                Kurtosis of the arcsine distribution."""
-        
-        kurt = arcsine.stats(scale=self.scale, loc=self.loc, moments='k')
-        return kurt
+        Returns
+        -------
+        kurt : float
+            Kurtosis of the arcsine distribution.
+        """
+        return arcsine.stats(scale=self.scale, loc=self.loc, moments='k')
 
     def sample(self, n, method="MC", seed=None):
         """Return n samples from the arcsine distribution.
@@ -240,8 +239,7 @@ class ArcsineDistribution(Distribution):
         new_loc = scale * self.loc + shift
         new_scale = self.scale * scale
 
-        new_dist = ArcsineDistribution(scale=new_scale, loc=new_loc)
-        return new_dist
+        return ArcsineDistribution(scale=new_scale, loc=new_loc)
 
     def get_shift(self):
         """ Return the shift of the arcsine distribution from the (0, 1) base form.
@@ -251,8 +249,7 @@ class ArcsineDistribution(Distribution):
             shift : float
                 Shift of the arcsine distribution."""
 
-        shift = self.loc
-        return shift
+        return self.loc
 
     def get_scale(self):
         """ Return the scale of the arcsine distribution, i.e., the width of the distribution.
@@ -261,9 +258,7 @@ class ArcsineDistribution(Distribution):
             -------
             scale : float
                 Scale of the arcsine distribution."""
-
-        scale = self.scale
-        return scale
+        return self.scale
 
     def fix_moments(self, mean=0.5, var=0.125):
         """ Fix the arcsine distribution to have specified mean and variance.
@@ -280,7 +275,6 @@ class ArcsineDistribution(Distribution):
             -------
             new_dist : ArcsineDistribution
                 Translated and scaled arcsine distribution with specified moments."""
-
         if not (isinstance(mean, (int, float, np.number))):
             raise ValueError("Mean must be a numeric value.")
         if not (isinstance(var, (int, float, np.number)) and var > 0):
@@ -300,43 +294,20 @@ class ArcsineDistribution(Distribution):
             Returns
             -------
             germ_dist : ArcsineDistribution
-                GPC germ distribution."""
-                    
-        germ_dist = ArcsineDistribution(scale=2, loc=-1)
-        return germ_dist
+                GPC germ distribution."""          
+        return ArcsineDistribution(scale=2, loc=-1)
     
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for the arcsine distribution.
         
             Returns
             -------
             polysys : PolynomialSystem object
-                GPC polynomial system for the arcsine distribution."""
-
-        from ..polysys import ChebyshevTPolynomials
-    
+                GPC polynomial system for the arcsine distribution."""    
         if self.scale == 2 and self.loc == -1:
-            return ChebyshevTPolynomials()
+            return ChebyshevTPolynomials(orthonormal=orthonormal)
         else:
             raise Exception(f"No polynomial system for this distribution ({self})") 
-
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the arcsine distribution.
-
-            Parameters
-            ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system characteristic string.
-
-            Returns
-            -------
-            polysys_char : str
-                GPC polynomial system characteristic string for the arcsine distribution."""
-        
-        if self.scale == 2 and self.loc == -1:
-            return "t" if normalized else "T"
-
-        raise Exception(f"No polynomial system for this distribution ({self})")
 
     def convert_to(self, from_unit, to_unit):
         """ Convert the distribution parameters to a different unit.

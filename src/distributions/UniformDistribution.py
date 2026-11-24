@@ -2,6 +2,8 @@ import pint
 import numpy as np
 
 from .Distribution import Distribution
+from ..polysys import LegendrePolynomials
+
 from scipy.stats import uniform
 
 from scipy.stats.qmc import Halton
@@ -115,43 +117,9 @@ class UniformDistribution(Distribution):
             -------
             y : array_like
                 Probability density function values at x."""    
-        
-        # a = self.a
-        # b = self.b
-        # y = 1 / (b - a) * np.ones(np.size(x))
-        # y[x < a] = 0
-        # y[x > b] = 0
-        # y = unwrap_if_scalar(y)
-        # return y
 
         y = uniform.pdf(x, loc=self.loc, scale=self.scale)
         return y
-
-    # def logpdf(self, x):
-    #     """ Return the log of the probability density function of the uniform distribution, evaluated at x.
-        
-    #         Parameters
-    #         ----------
-    #         x : array_like
-    #             Points at which to evaluate the logpdf.
-                
-    #         Returns
-    #         -------
-    #         y : array_like
-    #             Log probability density function values at x."""    
-        
-    #     a = self.a
-    #     b = self.b
-    #     pdf = self.pdf(x)
-    #     pdf = np.array(pdf)  # OR
-    #     pdf = pdf.reshape(x.shape)
-    #     y = np.zeros(x.shape)
-    #     for i in range(len(x)):
-    #         if pdf[i] == 0:
-    #             y[i] = -np.inf
-    #         else:
-    #             y[i] = np.log(pdf[i])
-    #     return y
 
     def cdf(self, x):
         """ Return the cumulative distribution function of the uniform distribution, evaluated at x.
@@ -166,12 +134,6 @@ class UniformDistribution(Distribution):
             y : array_like
                 Cumulative distribution function values at x."""        
         
-        # a = self.a
-        # b = self.b
-        # y = (x - a) / (b - a)
-        # y = np.clip(y, 0, 1)
-        # return y
-
         y = uniform.cdf(x, loc=self.loc, scale=self.scale)
         return y
 
@@ -187,15 +149,6 @@ class UniformDistribution(Distribution):
             -------
             x : array_like
                 PPF values evaluated at y."""    
-
-        # a = self.a
-        # b = self.b
-        # y = np.array(y)
-        # x = np.full(np.size(y), np.nan)
-        # ind = (y >= 0) & (y <= 1)
-        # x[ind] = a + (b - a) * y[ind]
-        # x = unwrap_if_scalar(x)
-        # return x
 
         x = uniform.ppf(y, loc=self.loc, scale=self.scale)
         return x
@@ -389,116 +342,17 @@ class UniformDistribution(Distribution):
         germ_dist = UniformDistribution(-1, 1)
         return germ_dist
 
-    # def base2dist(self, y):
-    #     """ Convert from base (germ) space to uniform distribution space.
-
-    #         Parameters
-    #         ----------
-    #         y : array_like
-    #             Points in base (germ) space.
-
-    #         Returns
-    #         -------
-    #         x : array_like
-    #             Points in distribution space."""
-
-        
-    #     y = np.asarray(y)
-    #     x = self.mean() + y * (self.b - self.a) / 2
-    #     return x
-
-    # def dist2base(self, x):
-    #     """ Convert from uniform distribution space to base (germ) space.
-
-    #         Parameters
-    #         ----------
-    #         x : array_like
-    #             Points in distribution space.
-
-    #         Returns
-    #         -------
-    #         y : array_like
-    #             Points in base (germ) space."""
-        
-    #     x = np.asarray(x)
-    #     y = (x - self.mean()) * 2 / (self.b - self.a)
-    #     return y
-
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for the uniform distribution.
 
             Returns
             -------
             polysys : PolynomialSystem object
                 GPC polynomial system for the uniform distribution."""
-        
-        # from polysys import LegendrePolynomials
-
-        # if self.a == -1 and self.b == 1:
-        #     polysys = LegendrePolynomials()
-        # else:
-        #     polysys = Distribution.orth_polysys(self)
-        # return polysys
-
-        from ..polysys import LegendrePolynomials
-
         if self.a == -1 and self.b == 1:
-            return LegendrePolynomials()
+            return LegendrePolynomials(orthonormal=orthonormal)
         else: 
             raise Exception(f"No polynomial system for this distribution ({self})") 
-
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the uniform distribution.
-
-            Parameters
-            ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system characteristic string.
-
-            Returns
-            -------
-            polysys_char : str
-                GPC polynomial system characteristic string for the uniform distribution."""
-        
-        # if self.a == -1 and self.b == 1:
-        #     if normalized:
-        #         polysys_char = "p"
-        #     else:
-        #         polysys_char = "P"
-        # else:
-        #     polysys_char = []
-        # return polysys_char
-
-        if self.a == -1 and self.b == 1:
-            return "p" if normalized else "P"
-
-        raise Exception(f"No polynomial system for this distribution ({self})")
-
-    # def get_bounds(self, delta=0):
-    #     """ Return the bounds of the uniform distribution.
-
-    #         Parameters
-    #         ----------
-    #         delta : int, optional
-    #             Expansion factor for the bounds (default is 0).
-
-    #         Returns
-    #         -------
-    #         bounds : numpy.ndarray
-    #             Array containing the lower and upper bounds of the uniform distribution."""
-        
-    #     if not isinstance(delta, (int, float, np.number)):
-    #         raise ValueError("delta must be a numeric value")
-        
-    #     a = self.a
-    #     b = self.b
-    #     ab = b - a
-
-    #     # The modified function contracts the bounds by delta instead of expanding them
-    #     # bounds = np.array([a - ab * delta, b + ab * delta])
-        
-    #     bounds = np.array([a + ab * delta, b - ab * delta])
-    #     return bounds
 
     def convert_to(self, from_unit, to_unit):
         """ Convert the distribution parameters to a different unit.

@@ -3,6 +3,8 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
+from ..polysys import LaguerrePolynomials
+
 from scipy.stats import expon
 
 class ExponentialDistribution(Distribution):
@@ -351,88 +353,17 @@ class ExponentialDistribution(Distribution):
         germ_dist = ExponentialDistribution(1)
         return germ_dist
 
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for the exponential distribution.
 
             Returns
             -------
             polysys : PolynomialSystem object
                 GPC polynomial system for the exponential distribution."""
-            
-        # if self.lambda_:
-        #     from polysys import LaguerrePolynomials
-
-        #     polysys = LaguerrePolynomials()
-        # else:
-        #     Distribution.orth_polysys()
-        # return polysys
-
-        from ..polysys import LaguerrePolynomials
-
         if self.lambda_ == 1:
-            return LaguerrePolynomials()
+            return LaguerrePolynomials(orthonormal=orthonormal)
         else:
             raise Exception(f"No polynomial system for this distribution ({self})")
-
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the exponential distribution.
-
-            Parameters
-            ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system characteristic string.
-
-            Returns
-            -------
-            polysys_char : str
-                GPC polynomial system characteristic string for the exponential distribution."""
-
-        # if self.a == -1 and self.b == 1:
-        #     if normalized:
-        #         polysys_char = 'L'
-        #     else:
-        #         polysys_char = 'l'
-        # else:
-        #     polysys_char = []
-        # return polysys_char
-
-        if self.lambda_ == 1:
-            return "l" if normalized else "L"
-
-        raise Exception(f"No polynomial system for this distribution ({self})")
-
-    # def base2dist(self, y):
-    #     """ Convert from base (germ) space to exponential distribution space.
-
-    #         Parameters
-    #         ----------
-    #         y : array_like
-    #             Points in base (germ) space.
-
-    #         Returns
-    #         -------
-    #         x : array_like
-    #             Points in exponential distribution space."""
-
-    #     y = np.asarray(y)
-    #     x = y / self.lambda_
-    #     return x
-
-    # def dist2base(self, x):
-    #     """ Convert from exponential distribution space to base (germ) space.
-
-    #         Parameters
-    #         ----------
-    #         x : array_like
-    #             Points in exponential distribution space.
-            
-    #         Returns
-    #         -------
-    #         y : array_like
-    #             Points in base (germ) space."""
-        
-    #     y = x * self.lambda_
-    #     return y
 
     def convert_to(self, from_unit, to_unit):
         """ Convert the distribution parameters to a different unit.

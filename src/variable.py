@@ -1,10 +1,8 @@
 """ Represent random variables for uncertainty quantification."""
 
-# import pint
 import numpy as np
 
 from .distributions.Distribution import Distribution
-# from src.polysys import syschar_to_polysys
 
 class Variable:
     """ Represent a named variable with a distribution and an optional unit.
@@ -39,13 +37,6 @@ class Variable:
             TypeError
                 If ``dist`` is not a Distribution.
         """
-        
-        # self.name = name
-        # self.dist = dist_or_num if hasattr(dist_or_num, 'pdf') else None
-        # self.fixed_val = dist_or_num if not hasattr(dist_or_num, 'pdf') else None
-        # self.is_fixed = self.fixed_val is not None
-        # self.unit = unit
-
         if not isinstance(name, str):
             raise TypeError("name must be a string")
         if not isinstance(dist, Distribution):
@@ -97,7 +88,6 @@ class Variable:
 
         var_type = self.dist.get_dist_type()
         return var_type
-
 
     def get_dist_params(self):
         """ Return the parameters of the variable's distribution.
@@ -228,9 +218,6 @@ class Variable:
 
         moments = self.dist.moments()
         return moments
-
-    # def sample(self, n):
-    #     return self.dist.sample(n)
 
     def sample(self, n, method="MC", seed=None): 
         """ Generate random samples from the variable's distribution using the specified sampling method.
@@ -398,37 +385,21 @@ class Variable:
         dist_germ = self.dist.gpc_dist()
         return dist_germ
 
-    def get_gpc_polysys(self):
+    def get_gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system of the variable's distribution.
 
             Parameters
             ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system.
+            orthonormal : bool
+                Flag indicating whether to return the orthonormal polynomial system.
 
             Returns
             -------
             polysys : object
                 GPC polynomial system of the variable's distribution."""
         
-        polysys = self.dist.gpc_polysys()
+        polysys = self.dist.gpc_polysys(orthonormal=orthonormal)
         return polysys
-
-    def get_gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string of the variable's distribution.
-
-            Parameters
-            ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system characteristic string.
-
-            Returns
-            -------
-            syschar : str
-                GPC polynomial system characteristic string of the variable's distribution if not fixed, otherwise None."""
-        
-        syschar = self.dist.gpc_syschar(normalized)
-        return syschar
 
     def stdnor_to_germ(self, x):
         """ Convert from standard normal space to germ space of the variable's distribution.

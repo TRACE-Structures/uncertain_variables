@@ -1,26 +1,5 @@
 import numpy as np
 from abc import ABC, abstractmethod
-# from scipy.stats.qmc import Halton
-# from scipy.stats.qmc import LatinHypercube as LHS
-# from scipy.stats.qmc import Sobol
-
-
-# def unwrap_if_scalar(arr):
-#     """ Return the item if the array has only one element, else return the array.
-
-#         Parameters
-#         ----------
-#         arr : array_like
-#             Input array.
-
-#         Returns
-#         -------
-#         output : scalar or array_like
-#             Unwrapped item if arr has one element, else arr itself."""
-    
-#     output = arr.item() if arr.size == 1 else arr
-#     return output
-
 
 class Distribution(ABC):
     """ Abstract class for probability distributions."""
@@ -207,34 +186,6 @@ class Distribution(ABC):
         bounds = np.array([self.ppf(delta), self.ppf(1 - delta)])
         return bounds
     
-
-    # def fix_moments(self, mean, var):
-    #     """ Fix the distribution to have specified mean and variance.
-        
-    #         Parameters
-    #         ----------
-    #         mean : float
-    #             Desired mean of the distribution.
-                
-    #         var : float
-    #             Desired variance of the distribution.
-                
-    #         Returns
-    #         -------
-    #         new_dist : TranslatedDistribution
-    #             Translated and scaled distribution with specified moments."""   
-
-    #     if not (isinstance(mean, (int, float))):
-    #         raise ValueError("Mean must be a numeric value.")
-    #     if not (isinstance(var, (int, float)) and var > 0):
-    #         raise ValueError("Variance must be a positive numeric value.")
-        
-    #     old_mean, old_var = self.mean(), self.var()
-    #     self.shift = mean - old_mean
-    #     self.scale = np.sqrt(var / old_var)
-    #     new_dist = self.translate(self.shift, self.scale)
-    #     return new_dist
-
     @abstractmethod
     def fix_moments(self, mean, var):
         """ Fix the distribution to have specified mean and variance.
@@ -332,18 +283,6 @@ class Distribution(ABC):
         x = NormalDistribution().ppf(self.cdf(y))
         return x
 
-    # def get_germ_dist(self):
-    #     """ Return the GPC germ distribution.
-            
-    #         Returns
-    #         -------
-    #         germ_dist : Distribution object
-    #             GPC germ distribution."""
-        
-    #     from src.distributions.NormalDistribution import NormalDistribution
-    #     germ_dist = NormalDistribution(0, 1)
-    #     return germ_dist
-
     @abstractmethod
     def gpc_dist(self):
         """ Return the GPC germ distribution.
@@ -383,26 +322,9 @@ class Distribution(ABC):
         y = self.gpc_dist().ppf(self.cdf(x))
         return y
 
-    # def orth_polysys(self):
-    #     """ Return the GPC polynomial system.
-
-    #         Raises
-    #         ------
-    #         Exception
-    #             If no polynomial system is defined for this distribution."""
-        
-    #     raise Exception(f"No polynomial system for this distribution ({self})")
-
     @abstractmethod
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal):
         """ Return the GPC polynomial system.
-            Subclasses must implement this method."""
-
-        pass
-
-    @abstractmethod
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the distribution.
             Subclasses must implement this method."""
 
         pass

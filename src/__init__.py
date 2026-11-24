@@ -1,14 +1,14 @@
-__version__ = "1.0.2"
+"""
+Variable sets and distributions for uncertainty quantification.
 
-from .polysys import *
+Variable():
+    Represent a named variable with a distribution and an optional unit.
+
+class VariableSet():
+    VariableSet class for managing a set of simulation variables.
+"""
+
 from .distributions import *
+from .polysys import *
 from .variable_set import *
 from .variable import *
-
-
-def generate_stndrn_variable_set(sigmas):
-    Q = VariableSet()
-    for i in range(len(sigmas)):
-        s = Variable('pn_' + str(i+1), NormalDistribution(0, sigmas[i]))
-        Q.add(s)
-    return Q

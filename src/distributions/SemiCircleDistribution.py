@@ -3,6 +3,8 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
+from ..polysys.ChebyshevUPolynomials import ChebyshevUPolynomials
+
 from scipy.stats import semicircular
 
 class SemiCircleDistribution(Distribution):
@@ -230,12 +232,6 @@ class SemiCircleDistribution(Distribution):
             -------
             samples : array_like
                 Generated samples from the Wigner semicircle distribution."""
-
-        # from .UniformDistribution import UniformDistribution
-        # xi = UniformDistribution(0, 1).sample(n, method, seed=seed, **params)
-        # samples = self.ppf(xi)
-        # return samples
-
         if not isinstance(n, (int, np.integer)) or n <= 0:
             raise ValueError("Number of samples must be a positive integer.")
         if seed is not None and not isinstance(seed, (int, np.integer)):
@@ -335,72 +331,18 @@ class SemiCircleDistribution(Distribution):
         germ_dist = SemiCircleDistribution(radius=1)
         return germ_dist
 
-    # def base2dist(self, y):
-    #     """ Convert from base (germ) space to Wigner semicircle distribution space.
-        
-    #         Parameters
-    #         ----------
-    #         y : array_like
-    #             Points in base (germ) space.
-
-    #         Returns
-    #         -------
-    #         x : array_like
-    #             Points in Wigner semicircle distribution space."""
-        
-    #     y = np.asarray(y)
-    #     x = y / self.radius
-    #     return x
-
-    # def dist2base(self, x):
-    #     """ Convert from Wigner semicircle distribution space to base (germ) space.
-  
-    #           Parameters
-    #           ----------
-    #           x : array_like
-    #               Points in Wigner semicircle distribution space.
-              
-    #           Returns
-    #           -------
-    #           y : array_like
-    #               Points in base (germ) space."""
-        
-    #     x = np.asarray(x)
-    #     y = x * self.radius
-    #     return y
-
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for the Wigner semicircle distribution.
                 
             Returns
             -------
             polysys : PolynomialSystem object
                 GPC polynomial system for the Wigner semicircle distribution."""
-
-        from ..polysys.ChebyshevUPolynomials import ChebyshevUPolynomials
-
+        
         if self.radius == 1 and self.loc == 0:
-            return ChebyshevUPolynomials()
+            return ChebyshevUPolynomials(orthonormal=orthonormal)
         else:  
             raise Exception(f"No polynomial system for this distribution ({self})")
-
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the Wigner semicircle distribution.
-        
-            Parameters
-            ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system characteristic string.
-                
-            Returns
-            -------
-            polysys_char : str
-                GPC polynomial system characteristic string for the Wigner semicircle distribution."""
-
-        if self.radius == 1 and self.loc == 0:
-            return "u" if normalized else "U"
-
-        raise Exception(f"No polynomial system for this distribution ({self})")
 
     def convert_to(self, from_unit, to_unit):
         """ Convert the distribution parameters to a different unit.

@@ -130,41 +130,9 @@ class LogNormalDistribution(Distribution):
             -------
             y : array_like
                 Probability density function values at x."""
-        
-        # x = np.asarray(x)
-        # y = np.zeros(x.shape)
-        # mu = self.mu
-        # sigma = self.sigma
-        # ind = x > 0
-        # root = (np.log(x[ind]) - mu) / sigma
-        # y_exp = root**2
-        # y_exp = -1 / 2 * y_exp
-        # y[ind] = np.exp(y_exp) / (x[ind] * sigma * np.sqrt(2 * np.pi))
-        # return y
 
         y = lognorm.pdf(x, s=self.sigma, scale=self.scale, loc=self.loc)
         return y
-
-    # def logpdf(self, x):
-    #     ''' Return the log of the probability density function of the log-normal distribution, evaluated at x.
-        
-    #         Parameters
-    #         ----------
-    #         x : array_like
-    #             Points at which to evaluate the logpdf.
-                
-    #         Returns
-    #         -------
-    #         y : array_like
-    #             Log probability density function values at x.'''
-        
-    #     y = np.zeros(x.shape)
-    #     ind = x > 0
-    #     mu = self.mu
-    #     sigma = self.sigma
-    #     root = (np.log(x[ind]) - mu) / sigma
-    #     y = -1 / 2 * (root**2) - x[ind] * sigma * np.sqrt(2 * np.pi)
-    #     return y
 
     def cdf(self, x):
         """ Return the cumulative distribution function of the log-normal distribution, evaluated at x.
@@ -178,15 +146,6 @@ class LogNormalDistribution(Distribution):
             -------
             y : array_like
                 Cumulative distribution function values at x."""
-        
-        # x = np.array(x)
-        # y = np.zeros(x.shape)
-        # ind = x > 0
-        # mu = self.mu
-        # sigma = self.sigma
-        # y[ind] = 1 / 2 * (1 + sc.erf((np.log(x[ind]) - mu) / (sigma * np.sqrt(2))))
-        # y = unwrap_if_scalar(y)
-        # return y
 
         y = lognorm.cdf(x, s=self.sigma, scale=self.scale, loc=self.loc)
         return y
@@ -413,78 +372,7 @@ class LogNormalDistribution(Distribution):
 
         raise Exception(f"No polynomial system for this distribution ({self})")
 
-    # def base2dist(self, y):
-    #     """ Convert from base (germ) space to log-normal distribution space.
-        
-    #         Parameters
-    #         ----------
-    #         y : array_like
-    #             Points in base (germ) space.
-                
-    #         Returns
-    #         -------
-    #         x : array_like
-    #             Points in log-normal distribution space."""
-
-    #     y = np.asarray(y)
-    #     x = np.exp(y * self.sigma + self.mu)
-    #     return x
-
-    # def dist2base(self, x):
-    #     """ Convert from log-normal distribution space to base (germ) space.
-        
-    #         Parameters
-    #         ----------
-    #         x : array_like
-    #             Points in log-normal distribution space.
-                
-    #         Returns
-    #         -------
-    #         y : array_like
-    #             Points in base (germ) space."""
-
-    #     x = np.asarray(x)
-    #     # ignore RuntimeWarning in case x == 0
-    #     with np.errstate(divide="ignore", invalid="ignore"): 
-    #         y = (np.log(x) - self.mu) / self.sigma
-    #     return y
-
-    # def stdnor2base(self, y):  # same as base2dist??
-    #     """ Convert from standard normal space to log-normal distribution space.
-        
-    #         Parameters
-    #         ----------
-    #         y : array_like
-    #             Points in standard normal space.
-                
-    #         Returns
-    #         -------
-    #         x : array_like
-    #             Points in log-normal distribution space."""
-        
-    #     y = np.asarray(y)
-    #     x = np.exp(y * self.sigma + self.mu)
-    #     return x
-
-    # def base2stdnor(self, x):  # same as dist2base?
-    #     """ Convert from log-normal distribution space to standard normal space.
-        
-    #         Parameters
-    #         ----------
-    #         x : array_like
-    #             Points in log-normal distribution space.
-                
-    #         Returns
-    #         -------
-    #         y : array_like
-    #             Points in standard normal space."""
-
-    #     x = np.asarray(x)
-    #     with np.errstate(divide="ignore", invalid="ignore"): 
-    #         y = (np.log(x) - self.mu) / self.sigma
-    #     return y
-
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for the log-normal distribution.
         
             Raises
@@ -492,19 +380,6 @@ class LogNormalDistribution(Distribution):
             Exception
                 No orthogonal polynomial system exists for the log-normal
                 distribution, so it cannot be used as a GPC base distribution."""
-
-        raise Exception(f"No polynomial system for this distribution ({self})")
-
-
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the log-normal distribution.
-            
-            Raises
-            ------
-            Exception
-                No orthogonal polynomial system exists for the log-normal
-                distribution, so it cannot be used as a GPC base distribution."""
-
         raise Exception(f"No polynomial system for this distribution ({self})")
 
     def convert_to(self, from_unit, to_unit):

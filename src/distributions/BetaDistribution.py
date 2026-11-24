@@ -3,6 +3,8 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
+from ..polysys import JacobiPolynomials
+
 from scipy.stats import beta
 
 class BetaDistribution(Distribution):
@@ -464,52 +466,17 @@ class BetaDistribution(Distribution):
     #     y = x
     #     return y
 
-    def gpc_polysys(self):
+    def gpc_polysys(self, orthonormal=True):
         """ Return the GPC polynomial system for the beta distribution.
 
             Returns
             -------
             polysys : PolynomialSystem object
                 GPC polynomial system for the beta distribution."""
-        
-        # from polysys import JacobiPolynomials
-
-        # polysys = JacobiPolynomials(self.b - 1, self.a - 1)
-        # return polysys
-
-        from ..polysys import JacobiPolynomials
-
         if self.scale == 2 and self.loc == -1:
-            return JacobiPolynomials(self.b - 1, self.a - 1)
+            return JacobiPolynomials(self.b - 1, self.a - 1, orthonormal=orthonormal)
         else:
             raise Exception(f"No polynomial system for this distribution ({self})") 
-
-    def gpc_syschar(self, normalized):
-        """ Return the GPC polynomial system characteristic string for the beta distribution.
-
-            Parameters
-            ----------
-            normalized : bool
-                Flag indicating whether to return the normalized polynomial system characteristic string.
-
-            Returns
-            -------
-            polysys_char : str
-                GPC polynomial system characteristic string for the beta distribution."""
-        
-        # if self.a == -1 and self.b == 1:
-        #     if normalized:
-        #         polysys_char = "J"
-        #     else:
-        #         polysys_char = "j"
-        # else:
-        #     polysys_char = []
-        # return polysys_char
-
-        if self.scale == 2 and self.loc == -1:
-            return "j" if normalized else "J"
-
-        raise Exception(f"No polynomial system for this distribution ({self})")
 
     def convert_to(self, from_unit, to_unit):
         """ Convert the distribution parameters to a different unit.
