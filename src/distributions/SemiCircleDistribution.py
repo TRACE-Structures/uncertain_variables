@@ -3,7 +3,6 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
-from ..polysys.ChebyshevUPolynomials import ChebyshevUPolynomials
 
 from scipy.stats import semicircular
 
@@ -340,6 +339,8 @@ class SemiCircleDistribution(Distribution):
                 GPC polynomial system for the Wigner semicircle distribution."""
         
         if self.radius == 1 and self.loc == 0:
+            from ..polysys.ChebyshevUPolynomials import ChebyshevUPolynomials
+
             return ChebyshevUPolynomials(orthonormal=orthonormal)
         else:  
             raise Exception(f"No polynomial system for this distribution ({self})")

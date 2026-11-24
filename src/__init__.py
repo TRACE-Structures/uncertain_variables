@@ -10,5 +10,5 @@ class VariableSet():
 
 from .distributions import *
 from .polysys import *
-from .variable_set import *
-from .variable import *
+from .variable_set import VariableSet
+from .variable import Variable

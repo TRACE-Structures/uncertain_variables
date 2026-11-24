@@ -1,13 +1,13 @@
 ''' This module implements various polynomial systems used in polynomial chaos expansions.'''
 
-from .PolynomialSystem import *
-from .ChebyshevTPolynomials import *
-from .ChebyshevUPolynomials import *
-from .HermitePolynomials import *
-from .JacobiPolynomials import *
-from .LaguerrePolynomials import *
-from .LegendrePolynomials import *
-from .Monomials import *
+from .PolynomialSystem import PolynomialSystem
+from .ChebyshevTPolynomials import ChebyshevTPolynomials
+from .ChebyshevUPolynomials import ChebyshevUPolynomials
+from .HermitePolynomials import HermitePolynomials
+from .JacobiPolynomials import JacobiPolynomials
+from .LaguerrePolynomials import LaguerrePolynomials
+from .LegendrePolynomials import LegendrePolynomials
+from .Monomials import MonomialPolynomials
 
 def syschar_to_polysys(syschar):
     """ Convert a system characteristic string to the corresponding polynomial system.

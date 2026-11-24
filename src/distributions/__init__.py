@@ -26,11 +26,11 @@ UniformDistribution(Distribution):
     Continuous uniform distribution on a finite interval.
 """
 
-from .Distribution import *
-from .ArcsineDistribution import *
-from .NormalDistribution import *
-from .BetaDistribution import *
-from .ExponentialDistribution import *
-from .LogNormalDistribution import *
-from .SemiCircleDistribution import *
-from .UniformDistribution import *
+from .Distribution import Distribution
+from .ArcsineDistribution import ArcsineDistribution
+from .NormalDistribution import NormalDistribution
+from .BetaDistribution import BetaDistribution
+from .ExponentialDistribution import ExponentialDistribution
+from .LogNormalDistribution import LogNormalDistribution
+from .SemiCircleDistribution import SemiCircleDistribution
+from .UniformDistribution import UniformDistribution

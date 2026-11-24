@@ -3,7 +3,6 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
-from ..polysys import HermitePolynomials
 
 from scipy.stats import norm
 
@@ -389,6 +388,8 @@ class NormalDistribution(Distribution):
                 GPC polynomial system for the normal distribution."""
         
         if self.mu == 0 and self.sigma == 1:
+            from ..polysys import HermitePolynomials
+
             return HermitePolynomials(orthonormal=orthonormal)
 
         else:

@@ -3,7 +3,6 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
-from ..polysys import JacobiPolynomials
 
 from scipy.stats import beta
 
@@ -474,6 +473,8 @@ class BetaDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the beta distribution."""
         if self.scale == 2 and self.loc == -1:
+            from ..polysys import JacobiPolynomials
+
             return JacobiPolynomials(self.b - 1, self.a - 1, orthonormal=orthonormal)
         else:
             raise Exception(f"No polynomial system for this distribution ({self})") 

@@ -3,7 +3,6 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
-from ..polysys import LaguerrePolynomials
 
 from scipy.stats import expon
 
@@ -361,6 +360,8 @@ class ExponentialDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the exponential distribution."""
         if self.lambda_ == 1:
+            from ..polysys import LaguerrePolynomials
+
             return LaguerrePolynomials(orthonormal=orthonormal)
         else:
             raise Exception(f"No polynomial system for this distribution ({self})")

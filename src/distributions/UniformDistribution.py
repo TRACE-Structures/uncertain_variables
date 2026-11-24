@@ -2,7 +2,6 @@ import pint
 import numpy as np
 
 from .Distribution import Distribution
-from ..polysys import LegendrePolynomials
 
 from scipy.stats import uniform
 
@@ -350,6 +349,8 @@ class UniformDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the uniform distribution."""
         if self.a == -1 and self.b == 1:
+            from ..polysys import LegendrePolynomials
+
             return LegendrePolynomials(orthonormal=orthonormal)
         else: 
             raise Exception(f"No polynomial system for this distribution ({self})") 

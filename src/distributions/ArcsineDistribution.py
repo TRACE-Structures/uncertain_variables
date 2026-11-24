@@ -3,7 +3,6 @@ import numpy as np
 
 from .Distribution import Distribution
 from .UniformDistribution import UniformDistribution
-from ..polysys import ChebyshevTPolynomials
 from scipy.stats import arcsine
 
 class ArcsineDistribution(Distribution):
@@ -305,6 +304,8 @@ class ArcsineDistribution(Distribution):
             polysys : PolynomialSystem object
                 GPC polynomial system for the arcsine distribution."""    
         if self.scale == 2 and self.loc == -1:
+            from ..polysys import ChebyshevTPolynomials
+
             return ChebyshevTPolynomials(orthonormal=orthonormal)
         else:
             raise Exception(f"No polynomial system for this distribution ({self})") 
