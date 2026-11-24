@@ -1,35 +1,36 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from typing import Callable, Any
 
 from ..distributions.Distribution import Distribution
 
 
 def _probability_sqnorm(
-    generator: Callable,
-    deg: int,
-    weight_mass: float,
+    generator: Callable[..., Any],
+    deg: int | np.integer,
+    weight_mass: float | np.floating,
     *args: Any,
-) -> NDArray[np.floating]:
+) -> NDArray[np.float64]:
     """
     Convert SciPy's weight-integral norms to probability-weighted norms.
 
     Parameters
     ----------
-    generator : Callable
+    generator : Callable[..., Any]
         Function that generates the polynomial of a given degree.
-    deg : int
+    deg : int | np.integer
         Maximum polynomial degree to evaluate.
-    weight_mass : float
+    weight_mass : float | np.floating
         Integral of the weight function over the domain.
     *args : Any
         Additional arguments to pass to the generator function.
 
     Returns
     -------
-    norms : NDArray[np.floating]
+    norms : NDArray[np.float64]
         Array of probability-weighted squared norms for degrees up to `deg`.
     """
     if not callable(generator):
@@ -38,8 +39,8 @@ def _probability_sqnorm(
         raise TypeError("Degree must be an integer.")
     if deg < 0:
         raise ValueError("Degree must be non-negative.")
-    if weight_mass <= 0:
-        raise ValueError("Weight mass must be positive.")
+    if not np.isfinite(weight_mass) or weight_mass <= 0:
+        raise ValueError("Weight mass must be positive and finite.")
 
     norms = np.array([generator(n, *args).normcoef for n in range(1, deg + 1)])
     return np.concatenate(([1.0], norms**2 / weight_mass))
@@ -49,15 +50,20 @@ class PolynomialSystem(ABC):
     """
     Abstract base class for univariate polynomial systems.
     """
-    def __init__(self, orthonormal: bool = False):
+    generator: Callable[..., Any]
+    
+    def __init__(self, orthonormal: bool | np.bool_ = False) -> None:
         """
         Initialize the polynomial system.
 
         Parameters
         ----------
-        orthonormal : bool, optional
+        orthonormal : bool, default is False
             If True, use orthonormal polynomials. Default is False.
         """
+        if not isinstance(orthonormal, (bool, np.bool_)):
+            raise TypeError("Orthonormal must be a boolean.")
+        
         self.orthonormal = orthonormal
 
     @abstractmethod
@@ -68,70 +74,111 @@ class PolynomialSystem(ABC):
         """
         ...
 
+    @abstractmethod
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
+        """
+        Return squared norms of the non-normalized polynomial system.
+        """
+        ...
+
     def evaluate(
         self, 
-        deg: int, 
+        deg: int | np.integer, 
         x: ArrayLike, 
-        derivative: bool | int = False,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray[np.float64]:
         """
         Evaluate the polynomial system up to degree `deg` at points `x`.
 
         Parameters
         ----------
-        deg : int
+        deg : int | np.integer
             Maximum polynomial degree to evaluate.
         x : ArrayLike
             One-dimensional array of real-valued evaluation points.
-        derivative : bool | int, default=False
-            If True, evaluate the derivative of the polynomials.
-            If an integer n, evaluate the n-th derivative of the polynomials. Default is False.
 
         Returns
         -------
-        y : NDArray[np.floating]
-            Matrix of shape (n_points, deg+1) containing evaluated polynomials
-            or first derivatives. Column k corresponds to degree k.
+        y : NDArray[np.float64]
+            Matrix of shape (n_points, deg+1) containing evaluated polynomials.
+            Column k corresponds to degree k.
         """
         if not isinstance(deg, (int, np.integer)):
             raise TypeError("Degree must be an integer.")
         if deg < 0:
             raise ValueError("Degree must be non-negative.")
-        if not isinstance(derivative, (bool, int)):
-            raise TypeError("Derivative flag must be a boolean or an integer.")
-        
+
         x = np.asarray(x)
         if x.ndim != 1:
             raise ValueError("Input points x must be one-dimensional.")
         if x.dtype.kind not in "iuf":
             raise TypeError("Input points x must be real numbers.")
-        return self._evaluate(int(deg), x.astype(float, copy=False), derivative)
 
-    @abstractmethod
-    def _evaluate(
+        x = x.astype(np.float64, copy=False)
+        y = np.column_stack([self.generator(d)(x) for d in range(deg+1)])
+        if self.orthonormal:
+            y /= np.sqrt(self._raw_sqnorm(deg))
+        return y
+
+    def evaluate_derivative(
         self,
-        deg: int,
-        x: NDArray[np.floating],
-        derivative: bool | int = False,
-    ) -> NDArray[np.floating]:
+        deg: int | np.integer,
+        order: int | np.integer,
+        x: ArrayLike,
+    ) -> NDArray[np.float64]:
         """
-        Abstract method to evaluate the polynomial system up to degree `deg` at points `x`.
-        Subclasses must implement this method.
-        """
-        ...
-
-    def sqnorm(self, deg: int) -> NDArray[np.float64]:
-        """
-        Return the squared norm of the polynomial system up to degree `deg`.
+        Evaluate the `order`-th derivative of the polynomial system up to degree `deg` at points `x`.
 
         Parameters
         ----------
-        deg : int
+        deg : int | np.integer
+            Maximum polynomial degree to evaluate.
+        order : int | np.integer
+            Order of the derivative to evaluate.
+        x : ArrayLike
+            One-dimensional array of real-valued evaluation points.
+
+        Returns
+        -------
+        y : NDArray[np.float64]
+            Matrix of shape (n_points, deg+1) containing evaluated derivatives of the polynomials.
+            Column k corresponds to degree k.
+        """
+        if not isinstance(deg, (int, np.integer)):
+            raise TypeError("Degree must be an integer.")
+        if deg < 0:
+            raise ValueError("Degree must be non-negative.")
+        
+        if not isinstance(order, (int, np.integer)):
+            raise TypeError("Order must be an integer.")
+        if order < 0:
+            raise ValueError("Order must be non-negative.")
+
+        x = np.asarray(x)
+        if x.ndim != 1:
+            raise ValueError("Input points x must be one-dimensional.")
+        if x.dtype.kind not in "iuf":
+            raise TypeError("Input points x must be real numbers.")
+
+        x = x.astype(np.float64, copy=False)
+        y = np.column_stack([self.generator(d).der(m=order)(x) for d in range(deg+1)])
+        if self.orthonormal:
+            y /= np.sqrt(self._raw_sqnorm(deg))
+        return y
+
+    def sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+        """
+        Return the squared norm of the polynomial system up to degree `deg`.
+
+        If the polynomial system is orthonormal, this will return an array of ones.
+
+        Parameters
+        ----------
+        deg : int | np.integer
             Highest polynomial degree to evaluate.
 
         Returns
         -------
-        y : NDArray[np.floating64]
+        y : NDArray[np.float64]
             Squared norms under the probability distribution returned by
             `gpc_distribution`, in degree order, with shape (deg+1,).
         """
@@ -140,15 +187,9 @@ class PolynomialSystem(ABC):
         if deg < 0:
             raise ValueError("Degree must be non-negative.")
 
-        return self._sqnorm(deg)
-
-    @abstractmethod
-    def _sqnorm(self, deg: int) -> NDArray[np.float64]:
-        """
-        Abstract method to return the squared norm of the polynomial systemup to degree `deg`.
-        Subclasses must implement this method.
-        """
-        ...
+        if self.orthonormal:
+            return np.ones(deg + 1)
+        return self._raw_sqnorm(deg)
 
     def orthonormalize(self) -> "PolynomialSystem":
         """
@@ -156,7 +197,7 @@ class PolynomialSystem(ABC):
 
         Returns
         -------
-        normalized_system : PolynomialSystem
+        orthonormal_polysys : PolynomialSystem
             A new instance of the polynomial system with orthonormal polynomials.
         """
         return self._orthonormalize()

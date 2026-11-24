@@ -1,28 +1,30 @@
 import numpy as np
-
-from .PolynomialSystem import PolynomialSystem, _probability_sqnorm
-from ..distributions import NormalDistribution
+from numpy.typing import NDArray
 
 from scipy.special import hermitenorm as hermite
+
+from ..distributions import NormalDistribution
+from .PolynomialSystem import PolynomialSystem, _probability_sqnorm
 
 
 class HermitePolynomials(PolynomialSystem):
     """ 
     Implementation of Hermite polynomial system.
+
+    Parameters
+    ----------
+    orthonormal : bool, default is False
+        If True, use orthonormal polynomials. Default is False.
     """
-    def __init__(self, orthonormal=False):
+
+    def __init__(self, orthonormal: bool = False) -> None:
         """ 
         Initialize Hermite polynomial system.
-
-        Parameters
-        ----------
-        orthonormal : bool, optional
-            If True, use orthonormal polynomials. Default is False.
         """
+        super().__init__(orthonormal=orthonormal)
         self.generator = hermite
-        self.orthonormal = orthonormal
 
-    def gpc_distribution(self):
+    def gpc_distribution(self) -> NormalDistribution:
         """
         Return the generalized polynomial chaos distribution associated with Hermite polynomials.
 
@@ -31,134 +33,27 @@ class HermitePolynomials(PolynomialSystem):
         gpc_dist : NormalDistribution
             Standard normal distribution.
         """
-        gpc_dist = NormalDistribution(0, 1)
-        return gpc_dist
+        return NormalDistribution(0, 1)
 
-    def _evaluate(self, deg, x, derivative=False):
+    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
         """
-        Evaluate the Hermite polynomial system up to degree `deg` at points `x`.
+        Return the raw squared norms of the Hermite polynomials up to degree `deg`.
 
         Parameters
         ----------
-        deg : int
-            Highest polynomial degree to evaluate.
-        x : array_like
-            Points at which the polynomials are evaluated.
-        derivative : bool | int, default=False
-            If True, evaluate the derivative of the polynomials.
-            If an integer n, evaluate the n-th derivative of the polynomials. Default is False.
+        deg : int | np.integer
+            Maximum polynomial degree to evaluate.
 
         Returns
         -------
-        y : numpy.ndarray
-            Matrix of shape (n_points, deg+1) containing evaluated Hermite polynomials or their derivatives.
-        """
-        x = np.asarray(x)
-        if derivative:
-            if isinstance(derivative, bool):
-                n = 1 if derivative else 0
-            else:
-                n = derivative
-            y = np.column_stack([np.polyder(self.generator(d), m=n)(x) for d in range(deg+1)])
-        else:
-            y = np.column_stack([self.generator(d)(x) for d in range(deg+1)])
-        if self.orthonormal:
-            y /= np.sqrt(_probability_sqnorm(self.generator, deg, np.sqrt(2 * np.pi)))
-        return y
-
-    def _sqnorm(self, deg):
-        """
-        Return the squared norm of the Hermite polynomial of degree `deg`.
-
-        Parameters
-        ----------
-        deg : int
-            Degree of the polynomial.
-
-        Returns
-        -------
-        y : numpy.ndarray
+        y : NDArray[np.float64]
             Probability-weighted squared norms for degrees 0 through `deg`.
         """
-        if self.orthonormal:
-            y = np.ones(deg+1)
-        else:
-            y = _probability_sqnorm(self.generator, deg, np.sqrt(2 * np.pi))
-        return y
+        return _probability_sqnorm(self.generator, deg, np.sqrt(2 * np.pi))
 
-    def _orthonormalize(self):
+    def _orthonormalize(self) -> "HermitePolynomials":
         """
         Return an orthonormal version of the Hermite polynomial system.
         """
         return HermitePolynomials(orthonormal=True)
     
-# import numpy as np
-# from .PolynomialSystem import PolynomialSystem
-# from .NormalizedPolynomials import NormalizedPolynomials
-# from ..distributions import NormalDistribution
-# import scipy.special as sp
-
-# class HermitePolynomials(PolynomialSystem):
-#     """ Implementation of Hermite polynomial system."""
-    
-#     @classmethod
-#     def normalized(self):
-#         """ Return normalized version of Hermite polynomial system.
-
-#             Returns
-#             -------
-#             polysys: NormalizedPolynomials
-#                 Wrapped normalized Hermite polynomial system."""
-
-#         polysys = NormalizedPolynomials(self)
-#         return polysys
-
-#     @staticmethod
-#     def recur_coeff(deg):
-#         """ Return the recurrence coefficients for Hermite polynomials.
-
-#             Parameters
-#             ----------
-#             deg :  int
-#                 Degree up to which recurrence coefficients are computed.
-
-#             Returns
-#             -------
-#             r : numpy.ndarray
-#                 Recurrence coefficients for Hermite polynomials."""
-        
-#         n = np.arange(deg)
-#         one = np.ones_like(n)
-#         zero = np.zeros_like(n)
-#         r = np.column_stack((zero, one, n))
-
-#         return r
-
-#     @staticmethod
-#     def sqnorm(n):
-#         """ Return the squared norm of Hermite polynomials of degree `n`.
-
-#             Parameters
-#             ----------
-#             n : array_like
-#                 Degrees for which the squared norms are computed.
-
-#             Returns
-#             -------
-#             nrm2 : numpy.ndarray
-#                 Array of squared norms corresponding to degrees in `n`."""
-        
-#         nrm2 = sp.factorial(n)
-#         return nrm2
-
-#     @staticmethod
-#     def weighting_dist():
-#         """ Return the weighting distribution for Hermite polynomials.
-
-#             Returns
-#             -------
-#             dist : NormalDistribution
-#                 Weighting distribution for Hermite polynomials."""
-        
-#         dist = NormalDistribution(0,1)
-#         return dist

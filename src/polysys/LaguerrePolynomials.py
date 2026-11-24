@@ -1,28 +1,30 @@
 import numpy as np
-
-from .PolynomialSystem import PolynomialSystem, _probability_sqnorm
-from ..distributions import ExponentialDistribution
+from numpy.typing import NDArray
 
 from scipy.special import laguerre
+
+from ..distributions import ExponentialDistribution
+from .PolynomialSystem import PolynomialSystem, _probability_sqnorm
 
 
 class LaguerrePolynomials(PolynomialSystem):
     """ 
     Implementation of Laguerre polynomial system.
+
+    Parameters
+    ----------
+    orthonormal : bool, default is False
+        If True, use orthonormal polynomials. Default is False.
     """
-    def __init__(self, orthonormal=False):
+
+    def __init__(self, orthonormal: bool = False) -> None:
         """
         Initialize the Laguerre polynomial system.
-
-        Parameters
-        ----------
-        orthonormal : bool, optional
-            If True, use orthonormal polynomials. Default is False.
         """
+        super().__init__(orthonormal=orthonormal)
         self.generator = laguerre
-        self.orthonormal = orthonormal
 
-    def gpc_distribution(self):
+    def gpc_distribution(self) -> ExponentialDistribution:
         """
         Return the generalized polynomial chaos distribution associated with Laguerre polynomials.
 
@@ -33,98 +35,25 @@ class LaguerrePolynomials(PolynomialSystem):
         """
         gpc_dist = ExponentialDistribution(1)
         return gpc_dist
-
-    def _evaluate(self, deg, x, derivative=False):
+    
+    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
         """
-        Evaluate the Laguerre polynomial system up to degree `deg` at points `x`.
+        Return the raw squared norms of the Laguerre polynomials up to degree `deg`.
 
         Parameters
         ----------
-        deg : int
-            Highest polynomial degree to evaluate.
-        x : array_like
-            Points at which the polynomials are evaluated.
-        derivative : bool | int, default=False
-            If True, evaluate the derivative of the polynomials.
-            If an integer n, evaluate the n-th derivative of the polynomials. Default is False.
+        deg : int | np.integer
+            Maximum polynomial degree to evaluate.
 
         Returns
         -------
-        y : numpy.ndarray
-            Matrix of shape (n_points, deg+1) containing evaluated Laguerre polynomials or their derivatives.
-        """
-        x = np.asarray(x)
-        if derivative:
-            if isinstance(derivative, bool):
-                n = 1 if derivative else 0
-            else:
-                n = derivative
-            y = np.column_stack([np.polyder(self.generator(d), m=n)(x) for d in range(deg+1)])
-        else:
-            y = np.column_stack([self.generator(d)(x) for d in range(deg+1)])
-        if self.orthonormal:
-            y /= np.sqrt(_probability_sqnorm(self.generator, deg, 1))
-        return y
-
-    def _sqnorm(self, deg):
-        """
-        Return the squared norm of the Laguerre polynomial of degree `deg`.
-
-        Parameters
-        ----------
-        deg : int
-            Degree of the polynomial.
-
-        Returns
-        -------
-        y : numpy.ndarray
+        y : NDArray[np.float64]
             Probability-weighted squared norms for degrees 0 through `deg`.
         """
-        if self.orthonormal:
-            y = np.ones(deg+1)
-        else:
-            y = _probability_sqnorm(self.generator, deg, 1)
-        return y    
-
-    def _orthonormalize(self):
+        return _probability_sqnorm(self.generator, deg, 1)
+    
+    def _orthonormalize(self) -> "LaguerrePolynomials":
         """
         Return an orthonormal version of the Laguerre polynomial system.
         """
         return LaguerrePolynomials(orthonormal=True)
-
-
-# import numpy as np
-# from .PolynomialSystem import PolynomialSystem
-# from ..distributions import ExponentialDistribution
-
-# class LaguerrePolynomials(PolynomialSystem):
-#     @classmethod
-#     def normalized(self):
-#         """ Return normalized version of Laguerre polynomial system.
-        
-#             Returns
-#             -------
-#             polysys: NormalizedPolynomials
-#                 Wrapped normalized Laguerre polynomial system."""
-
-#         return self
-
-#     @staticmethod
-#     def recur_coeff(deg):
-
-#         n = np.arange(deg)
-#         r = np.column_stack(((2*n + 1)/(n+1), -1/(n + 1), n/(n + 1)))
-
-#         return r
-
-#     @staticmethod
-#     def sqnorm(self, n):
-
-#         nrm2 = np.ones_like(n)
-#         return nrm2
-
-#     @staticmethod
-#     def weighting_dist():
-
-#         dist = ExponentialDistribution(1)
-#         return dist
