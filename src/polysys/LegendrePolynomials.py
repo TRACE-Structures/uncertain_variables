@@ -21,7 +21,10 @@ class LegendrePolynomials(PolynomialSystem):
         """
         Initialize the Legendre polynomial system.
         """
-        super().__init__(orthonormal=orthonormal)
+        if not isinstance(orthonormal, (bool, np.bool_)):
+            raise TypeError("Parameter 'orthonormal' must be a boolean.")
+        
+        super().__init__(orthonormal=bool(orthonormal))
         self.generator = legendre
 
     def gpc_distribution(self) -> UniformDistribution:
@@ -35,13 +38,13 @@ class LegendrePolynomials(PolynomialSystem):
         """
         return UniformDistribution(-1, 1)
     
-    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
         """
         Return the raw squared norms of the Legendre polynomials up to degree `deg`.
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
 
         Returns
@@ -51,9 +54,14 @@ class LegendrePolynomials(PolynomialSystem):
         """
         return _probability_sqnorm(self.generator, deg, 2)
     
-    def _orthonormalize(self) -> "LegendrePolynomials":
+    def orthonormalize(self) -> "LegendrePolynomials":
         """
         Return an orthonormal version of the Legendre polynomial system.
+
+        Returns
+        -------
+        orthonormal_polysys : LegendrePolynomials
+            A new instance of the Legendre polynomial system with orthonormal polynomials.
         """
         return LegendrePolynomials(orthonormal=True)
     

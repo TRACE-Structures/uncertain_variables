@@ -21,7 +21,10 @@ class HermitePolynomials(PolynomialSystem):
         """ 
         Initialize Hermite polynomial system.
         """
-        super().__init__(orthonormal=orthonormal)
+        if not isinstance(orthonormal, (bool, np.bool_)):
+            raise TypeError("Parameter 'orthonormal' must be a boolean.")
+        
+        super().__init__(orthonormal=bool(orthonormal))
         self.generator = hermite
 
     def gpc_distribution(self) -> NormalDistribution:
@@ -35,13 +38,13 @@ class HermitePolynomials(PolynomialSystem):
         """
         return NormalDistribution(0, 1)
 
-    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
         """
         Return the raw squared norms of the Hermite polynomials up to degree `deg`.
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
 
         Returns
@@ -51,9 +54,14 @@ class HermitePolynomials(PolynomialSystem):
         """
         return _probability_sqnorm(self.generator, deg, np.sqrt(2 * np.pi))
 
-    def _orthonormalize(self) -> "HermitePolynomials":
+    def orthonormalize(self) -> "HermitePolynomials":
         """
         Return an orthonormal version of the Hermite polynomial system.
+
+        Returns
+        -------
+        orthonormal_polysys : HermitePolynomials
+            A new instance of the Hermite polynomial system with orthonormal polynomials.
         """
         return HermitePolynomials(orthonormal=True)
     

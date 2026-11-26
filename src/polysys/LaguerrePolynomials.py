@@ -21,7 +21,10 @@ class LaguerrePolynomials(PolynomialSystem):
         """
         Initialize the Laguerre polynomial system.
         """
-        super().__init__(orthonormal=orthonormal)
+        if not isinstance(orthonormal, (bool, np.bool_)):
+            raise TypeError("Parameter 'orthonormal' must be a boolean.")
+        
+        super().__init__(orthonormal=bool(orthonormal))
         self.generator = laguerre
 
     def gpc_distribution(self) -> ExponentialDistribution:
@@ -36,13 +39,13 @@ class LaguerrePolynomials(PolynomialSystem):
         gpc_dist = ExponentialDistribution(1)
         return gpc_dist
     
-    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
         """
         Return the raw squared norms of the Laguerre polynomials up to degree `deg`.
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
 
         Returns
@@ -52,8 +55,13 @@ class LaguerrePolynomials(PolynomialSystem):
         """
         return _probability_sqnorm(self.generator, deg, 1)
     
-    def _orthonormalize(self) -> "LaguerrePolynomials":
+    def orthonormalize(self) -> "LaguerrePolynomials":
         """
         Return an orthonormal version of the Laguerre polynomial system.
+
+        Returns
+        -------
+        orthonormal_polysys : LaguerrePolynomials
+            A new instance of the Laguerre polynomial system with orthonormal polynomials.
         """
         return LaguerrePolynomials(orthonormal=True)

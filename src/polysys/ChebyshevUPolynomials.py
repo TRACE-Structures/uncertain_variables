@@ -21,7 +21,10 @@ class ChebyshevUPolynomials(PolynomialSystem):
         """ 
         Initialize Chebyshev polynomials of the second kind.
         """
-        super().__init__(orthonormal=orthonormal)
+        if not isinstance(orthonormal, (bool, np.bool_)):
+            raise TypeError("Parameter 'orthonormal' must be a boolean.")
+        
+        super().__init__(orthonormal=bool(orthonormal))
         self.generator = chebyu
 
     def gpc_distribution(self) -> SemiCircleDistribution:
@@ -35,13 +38,13 @@ class ChebyshevUPolynomials(PolynomialSystem):
         """
         return SemiCircleDistribution(1)
 
-    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
         """
         Return the raw squared norms of the second kind Chebyshev polynomials up to degree `deg`.
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
 
         Returns
@@ -51,8 +54,13 @@ class ChebyshevUPolynomials(PolynomialSystem):
         """
         return _probability_sqnorm(self.generator, deg, np.pi / 2)
 
-    def _orthonormalize(self) -> "ChebyshevUPolynomials":
+    def orthonormalize(self) -> "ChebyshevUPolynomials":
         """
         Return an orthonormal version of the second kind Chebyshev polynomial system.
+
+        Returns
+        -------
+        orthonormal_polysys : ChebyshevUPolynomials
+            A new instance of the second kind Chebyshev polynomial system with orthonormal polynomials.
         """
         return ChebyshevUPolynomials(orthonormal=True)

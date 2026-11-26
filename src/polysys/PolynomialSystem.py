@@ -10,8 +10,8 @@ from ..distributions.Distribution import Distribution
 
 def _probability_sqnorm(
     generator: Callable[..., Any],
-    deg: int | np.integer,
-    weight_mass: float | np.floating,
+    deg: int,
+    weight_mass: float,
     *args: Any,
 ) -> NDArray[np.float64]:
     """
@@ -21,9 +21,9 @@ def _probability_sqnorm(
     ----------
     generator : Callable[..., Any]
         Function that generates the polynomial of a given degree.
-    deg : int | np.integer
+    deg : int
         Maximum polynomial degree to evaluate.
-    weight_mass : float | np.floating
+    weight_mass : float
         Integral of the weight function over the domain.
     *args : Any
         Additional arguments to pass to the generator function.
@@ -33,15 +33,6 @@ def _probability_sqnorm(
     norms : NDArray[np.float64]
         Array of probability-weighted squared norms for degrees up to `deg`.
     """
-    if not callable(generator):
-        raise TypeError("Generator must be callable.")
-    if not isinstance(deg, (int, np.integer)):
-        raise TypeError("Degree must be an integer.")
-    if deg < 0:
-        raise ValueError("Degree must be non-negative.")
-    if not np.isfinite(weight_mass) or weight_mass <= 0:
-        raise ValueError("Weight mass must be positive and finite.")
-
     norms = np.array([generator(n, *args).normcoef for n in range(1, deg + 1)])
     return np.concatenate(([1.0], norms**2 / weight_mass))
 
@@ -52,7 +43,7 @@ class PolynomialSystem(ABC):
     """
     generator: Callable[..., Any]
     
-    def __init__(self, orthonormal: bool | np.bool_ = False) -> None:
+    def __init__(self, orthonormal: bool = False) -> None:
         """
         Initialize the polynomial system.
 
@@ -64,26 +55,11 @@ class PolynomialSystem(ABC):
         if not isinstance(orthonormal, (bool, np.bool_)):
             raise TypeError("Orthonormal must be a boolean.")
         
-        self.orthonormal = orthonormal
-
-    @abstractmethod
-    def gpc_distribution(self) -> Distribution:
-        """
-        Return the probability distribution associated with
-        the polynomial system.
-        """
-        ...
-
-    @abstractmethod
-    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
-        """
-        Return squared norms of the non-normalized polynomial system.
-        """
-        ...
+        self.orthonormal = bool(orthonormal)
 
     def evaluate(
         self, 
-        deg: int | np.integer, 
+        deg: int, 
         x: ArrayLike, 
     ) -> NDArray[np.float64]:
         """
@@ -91,7 +67,7 @@ class PolynomialSystem(ABC):
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
         x : ArrayLike
             One-dimensional array of real-valued evaluation points.
@@ -107,22 +83,26 @@ class PolynomialSystem(ABC):
         if deg < 0:
             raise ValueError("Degree must be non-negative.")
 
-        x = np.asarray(x)
+        if np.isscalar(x):
+            x = [x]
+        x = np.array(x)
+
         if x.ndim != 1:
             raise ValueError("Input points x must be one-dimensional.")
         if x.dtype.kind not in "iuf":
             raise TypeError("Input points x must be real numbers.")
-
         x = x.astype(np.float64, copy=False)
+
         y = np.column_stack([self.generator(d)(x) for d in range(deg+1)])
         if self.orthonormal:
             y /= np.sqrt(self._raw_sqnorm(deg))
+
         return y
 
     def evaluate_derivative(
         self,
-        deg: int | np.integer,
-        order: int | np.integer,
+        deg: int,
+        order: int,
         x: ArrayLike,
     ) -> NDArray[np.float64]:
         """
@@ -130,9 +110,9 @@ class PolynomialSystem(ABC):
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
-        order : int | np.integer
+        order : int
             Order of the derivative to evaluate.
         x : ArrayLike
             One-dimensional array of real-valued evaluation points.
@@ -153,19 +133,24 @@ class PolynomialSystem(ABC):
         if order < 0:
             raise ValueError("Order must be non-negative.")
 
-        x = np.asarray(x)
+        if np.isscalar(x):
+            x = np.array([x])
+        else:
+            x = np.asarray(x)
+
         if x.ndim != 1:
             raise ValueError("Input points x must be one-dimensional.")
         if x.dtype.kind not in "iuf":
             raise TypeError("Input points x must be real numbers.")
-
         x = x.astype(np.float64, copy=False)
-        y = np.column_stack([self.generator(d).der(m=order)(x) for d in range(deg+1)])
+
+        y = np.column_stack([self.generator(d).deriv(m=order)(x) for d in range(deg+1)])
         if self.orthonormal:
             y /= np.sqrt(self._raw_sqnorm(deg))
+
         return y
 
-    def sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+    def sqnorm(self, deg: int) -> NDArray[np.float64]:
         """
         Return the squared norm of the polynomial system up to degree `deg`.
 
@@ -173,7 +158,7 @@ class PolynomialSystem(ABC):
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Highest polynomial degree to evaluate.
 
         Returns
@@ -191,19 +176,23 @@ class PolynomialSystem(ABC):
             return np.ones(deg + 1)
         return self._raw_sqnorm(deg)
 
-    def orthonormalize(self) -> "PolynomialSystem":
+    @abstractmethod
+    def gpc_distribution(self) -> Distribution:
         """
-        Return the orthonormal version of the polynomial system.
-
-        Returns
-        -------
-        orthonormal_polysys : PolynomialSystem
-            A new instance of the polynomial system with orthonormal polynomials.
+        Return the probability distribution associated with
+        the polynomial system.
         """
-        return self._orthonormalize()
+        ...
 
     @abstractmethod
-    def _orthonormalize(self) -> "PolynomialSystem":
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
+        """
+        Return squared norms of the non-normalized polynomial system.
+        """
+        ...
+
+    @abstractmethod
+    def orthonormalize(self) -> "PolynomialSystem":
         """
         Abstract method to return an orthonormal version of the polynomial system.
         Subclasses must implement this method.

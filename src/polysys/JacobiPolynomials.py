@@ -14,9 +14,9 @@ class JacobiPolynomials(PolynomialSystem):
 
     Parameters
     ----------
-    alpha : float | np.floating
+    alpha : float
         First parameter of Jacobi polynomials.
-    beta : float | np.floating
+    beta : float
         Second parameter of Jacobi polynomials.
     orthonormal : bool, default is False
         If True, use orthonormal polynomials. Default is False.
@@ -24,19 +24,28 @@ class JacobiPolynomials(PolynomialSystem):
 
     def __init__(
         self, 
-        alpha: float | np.floating,
-        beta: float | np.floating, 
-        orthonormal: bool = False
+        alpha: float,
+        beta: float,
+        orthonormal: bool = False,
     ) -> None:
         """ 
         Initialize Jacobi polynomial system.
         """
-        if not np.isfinite(alpha) or not np.isfinite(beta):
-            raise ValueError("Alpha and beta must be finite numbers.")
+        if not isinstance(alpha, (int, float, np.integer, np.floating)):
+            raise TypeError("Alpha must be a real number.")
+        alpha = np.float64(alpha)
+
+        if not isinstance(beta, (int, float, np.integer, np.floating)):
+            raise TypeError("Beta must be a real number.")
+        beta = np.float64(beta)
+
         if alpha <= -1 or beta <= -1:
             raise ValueError("Alpha and beta must be greater than -1.")
         
-        super().__init__(orthonormal=orthonormal)
+        if not isinstance(orthonormal, (bool, np.bool_)):
+            raise TypeError("Parameter 'orthonormal' must be a boolean.")
+        
+        super().__init__(orthonormal=bool(orthonormal))
         self.alpha = alpha
         self.beta = beta
         self.generator = jacobi
@@ -52,13 +61,13 @@ class JacobiPolynomials(PolynomialSystem):
         """
         return BetaDistribution(self.beta+1, self.alpha+1, scale=2, loc=-1)
 
-    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
         """
         Return the raw squared norms of the Jacobi polynomials up to degree `deg`.
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
 
         Returns
@@ -72,9 +81,14 @@ class JacobiPolynomials(PolynomialSystem):
         )
         return _probability_sqnorm(self.generator, deg, mass, self.alpha, self.beta)
 
-    def _orthonormalize(self) -> "JacobiPolynomials":
+    def orthonormalize(self) -> "JacobiPolynomials":
         """
         Return an orthonormal version of the Jacobi polynomial system.
+
+        Returns
+        -------
+        orthonormal_polysys : JacobiPolynomials
+            A new instance of the Jacobi polynomial system with orthonormal polynomials.
         """
         return JacobiPolynomials(self.alpha, self.beta, orthonormal=True)
     

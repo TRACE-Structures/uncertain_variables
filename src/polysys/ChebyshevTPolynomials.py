@@ -21,7 +21,10 @@ class ChebyshevTPolynomials(PolynomialSystem):
         """
         Initialize Chebyshev polynomials of the first kind.
         """
-        super().__init__(orthonormal=orthonormal)
+        if not isinstance(orthonormal, (bool, np.bool_)):
+            raise TypeError("Parameter 'orthonormal' must be a boolean.")
+        
+        super().__init__(orthonormal=bool(orthonormal))
         self.generator = chebyt
 
     def gpc_distribution(self) -> ArcsineDistribution:
@@ -35,13 +38,13 @@ class ChebyshevTPolynomials(PolynomialSystem):
         """
         return ArcsineDistribution(scale=2, loc=-1)
 
-    def _raw_sqnorm(self, deg: int | np.integer) -> NDArray[np.float64]:
+    def _raw_sqnorm(self, deg: int) -> NDArray[np.float64]:
         """
         Return the raw squared norms of the Chebyshev polynomials of the first kind up to degree `deg`.
 
         Parameters
         ----------
-        deg : int | np.integer
+        deg : int
             Maximum polynomial degree to evaluate.
 
         Returns
@@ -51,8 +54,13 @@ class ChebyshevTPolynomials(PolynomialSystem):
         """
         return _probability_sqnorm(self.generator, deg, np.pi)
 
-    def _orthonormalize(self) -> "ChebyshevTPolynomials":
+    def orthonormalize(self) -> "ChebyshevTPolynomials":
         """
         Return an orthonormal version of the first kind Chebyshev polynomial system.
+
+        Returns
+        -------
+        orthonormal_polysys : ChebyshevTPolynomials
+            A new instance of the first kind Chebyshev polynomial system with orthonormal polynomials.
         """
         return ChebyshevTPolynomials(orthonormal=True)
